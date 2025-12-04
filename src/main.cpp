@@ -16,6 +16,7 @@ int main() {
     bool flip;
     float rotation;
     Cooldown attackCD (1.0f);
+    Cooldown dashCD (5.0f);
     /*
     GetMonitorWidth(0);
     GetMonitorHeight(0);
@@ -131,7 +132,7 @@ int main() {
                 ball.pos.x=ball.pos.x-ball.speed;
             }
         }
-        if (IsKeyPressed(KEY_Q)) {
+        if (IsKeyPressed(KEY_Q) && dashCD.Ready()) {
             if (faceseast==true)
                 ball.pos.x = ball.pos.x+ball.texture.width/8 + 500;
             if (ball.pos.x > wallright.x)
@@ -148,7 +149,8 @@ int main() {
                 ball.pos.y = ball.pos.y + ball.texture.height/2 + 500;
             if (ball.pos.y > walldown.y)
                 ball.pos.y=walldown.y - ball.texture.height/2;
-        }
+            dashCD.Trigger();
+        } dashCD.Update(GetFrameTime());
         if (faceseast==true) {shot.pos = {ball.pos.x+ball.texture.width, ball.pos.y};}
         if (facessouth==true) {shot.pos = {ball.pos.x, ball.pos.y+ball.texture.height};}
         if (faceswest==true) {shot.pos = {ball.pos.x-ball.texture.width-ball.speed, ball.pos.y};}
@@ -186,10 +188,14 @@ int main() {
              DrawTextureRec(ball.texture, ball.size, ball.pos, WHITE);  // Draw part of the texture
 
 
+             if (dashCD.Ready())
+                 DrawText("Ready", 150,20,24,BLUE);
+             else DrawText(TextFormat("Cooldown %.2f",dashCD.Remaining()), 150,20,24,BLUE);
 
              if (attackCD.Ready())
                  DrawText("Ready", 20,20,24,GREEN);
              else DrawText(TextFormat("Cooldown %.2f",attackCD.Remaining()), 20,20,24,GREEN);
+
              //DrawTextureV(ball.texture, ball.pos, WHITE);
              DrawText("Hello, world!", GetScreenWidth()/2, GetScreenHeight()/2, 30, LIGHTGRAY);
              if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
@@ -225,7 +231,8 @@ int main() {
     // De-initialization here
     // ...
     // ...
-    UnloadTexture(myTexture);
+    UnloadTexture(ball.texture);
+    UnloadTexture(shot.texture);
 
     // Close window and OpenGL context
     CloseWindow();

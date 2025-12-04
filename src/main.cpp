@@ -8,6 +8,7 @@
 #include"cooldown.h"
 #include <vector>
 #include"Sprite.h"
+#include "boss.h"
 int main() {
     bool facessouth;
     bool facesnorth;
@@ -32,6 +33,8 @@ int main() {
 #ifdef GAME_START_FULLSCREEN
     ToggleFullscreen();
 #endif
+    Enemy golem;
+    golem.Init();
     std::vector<Sprite> balls;
     Sprite ball;
     // Your own initialization code here
@@ -174,10 +177,10 @@ int main() {
         // This is where YOUR logic code should go
         // ...
         // ...
-
+        golem.Update(GetFrameTime());
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
-        // For the letterbox we draw on canvas instad
+        // For the letterbox we draw on canvas instead
         BeginTextureMode(canvas);
         { //Within this block is where we draw our app to the canvas and YOUR code goes.
             ClearBackground(WHITE);
@@ -197,18 +200,21 @@ int main() {
              else DrawText(TextFormat("Cooldown %.2f",attackCD.Remaining()), 20,20,24,GREEN);
 
              //DrawTextureV(ball.texture, ball.pos, WHITE);
-             DrawText("Hello, world!", GetScreenWidth()/2, GetScreenHeight()/2, 30, LIGHTGRAY);
+
              if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
 
                  DrawTexturePro(shot.texture, srcH, dstH ,{(float)shot.texture.width /2,(float)shot.texture.height/2}, rotation, WHITE );
                  attackCD.Trigger();
 
              } attackCD.Update(GetFrameTime());
+             golem.Draw();
+
         }
         EndTextureMode();
         //The following lines put the canvas in the middle of the window and have the negative as black
         ClearBackground(BLACK); // If you want something else than a black void in the background
                                 // then you can add stuff here.
+
 
         renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height, // Calculates how big or small the canvas has to be rendered.
                                GetScreenWidth()  / (float) canvas.texture.width); // Priority is given to the smaller side.
@@ -233,6 +239,7 @@ int main() {
     // ...
     UnloadTexture(ball.texture);
     UnloadTexture(shot.texture);
+    golem.Unload();
 
     // Close window and OpenGL context
     CloseWindow();

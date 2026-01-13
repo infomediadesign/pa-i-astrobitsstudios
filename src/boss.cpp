@@ -25,7 +25,7 @@
 
     void Enemy::Update(float dt)
     {
-        pos.x += 100*dt;
+
     }
     void Enemy::Draw() {
         DrawTextureV(texture,pos,WHITE);

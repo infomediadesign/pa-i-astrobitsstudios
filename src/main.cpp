@@ -53,7 +53,7 @@ int main() {
     Rectangle srcH = {0,0,(float)shot.texture.width,(float)shot.texture.height};
     Rectangle wallleft = {0,0,(float) 1,(float)GetScreenHeight()};
     Rectangle wallright = { .x= (float) GetScreenWidth(), .y= 1, .width= (float) 1, (float)GetScreenHeight() };
-    Rectangle wallup = {0,0,(float) GetScreenWidth(),(float) 1};
+    Rectangle wallup = {0,40,(float) GetScreenWidth(),(float) 1};
     Rectangle walldown = {0,(float) GetScreenHeight(),(float) GetScreenWidth(),(float) 1};
     // Your own initialization code here
     // ...
@@ -62,6 +62,7 @@ int main() {
     RenderTexture2D canvas = LoadRenderTexture(Game::ScreenWidth, Game::ScreenHeight);
     float renderScale{}; // this and the line below are relevant to drawing later.
     Rectangle renderRec{};
+
 
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
@@ -246,3 +247,6 @@ int main() {
 
     return EXIT_SUCCESS;
 }
+
+
+

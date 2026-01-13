@@ -8,7 +8,7 @@
 #include"cooldown.h"
 #include <vector>
 #include"Sprite.h"
-#include "boss/gegner1/boss.h"
+#include "boss/golem/boss.h"
 #include "player/movement/controller.h"
 
 int main() {

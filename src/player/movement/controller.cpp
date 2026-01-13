@@ -46,14 +46,14 @@ void controller::Init()
     frames=0;
     frameCount=0;
     frameSpeed = 8;
-    size={0.0f,0.0f, (float)texture.width,(float)texture.height};
+    size={0.0f,0.0f, (float)texture.width/8,(float)texture.height/2};
 }
 void controller::Draw()
 {
     if (IsKeyDown(KEY_A))
     {
         size ={size.x,0.0f, (float)-texture.width/8,(float)texture.height/2};
-    }else size ={size.x,0.0f, (float)texture.width/8,(float)texture.height/2};
+    }else if (IsKeyDown(KEY_D)) size ={size.x,0.0f, (float)texture.width/8,(float)texture.height/2};
 
     DrawTextureRec(texture, size, pos, WHITE);
 }

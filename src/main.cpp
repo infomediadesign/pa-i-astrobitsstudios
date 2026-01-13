@@ -9,6 +9,8 @@
 #include <vector>
 #include"Sprite.h"
 #include "boss.h"
+#include "player/movement/controller.h"
+
 int main() {
     bool facessouth;
     bool facesnorth;
@@ -34,7 +36,9 @@ int main() {
     ToggleFullscreen();
 #endif
     Enemy golem;
+    controller player;
     golem.Init();
+    player.Init();
     std::vector<Sprite> balls;
     Sprite ball;
     // Your own initialization code here
@@ -67,94 +71,21 @@ int main() {
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-         ball.frameCount++;
-        if (ball.frameCount >=(60/ball.frameSpeed)) {
-            ball.frameCount =0;
-            ball.frames++;
-            if (ball.frames>8) ball.frames=0;
-            ball.size.x = (float) ball.frames*(float)ball.texture.width/8;
-        }
-        /*
-        if (IsKeyDown(KEY_RIGHT)) ball.frameSpeed ++;
-        else if (IsKeyDown(KEY_LEFT)) ball.frameSpeed --;
-        if (ball.frameSpeed>MAX_FRAME_SPEED) ball.frameSpeed = MAX_FRAME_SPEED;
-        else if (ball.frameSpeed<MIN_FRAME_SPEED) ball.frameSpeed = MIN_FRAME_SPEED;
-        */
+       player.Animate(GetFrameTime());
 
-        Rectangle player = {ball.pos.x, ball.pos.y, (float)ball.texture.width/9, (float)ball.texture.height/2};
+
+       /* Rectangle player = {ball.pos.x, ball.pos.y, (float)ball.texture.width/9, (float)ball.texture.height/2};
 
 
         bool collision1 = CheckCollisionRecs( player,  wallleft);
         bool collision2 = CheckCollisionRecs( player,  wallright);
         bool collision3 = CheckCollisionRecs( player,  wallup);
         bool collision4 = CheckCollisionRecs( player,  walldown);
-
-        if (IsKeyDown(KEY_W)) {
-            ball.pos.y -= ball.speed;
-            faceswest=false;
-            faceseast=false;
-            facessouth=false;
-            facesnorth=true;
-            rotation=270;
-            if (collision3 == true) {
-                ball.pos.y=ball.pos.y+ball.speed;
-            }
-        }
-        if (IsKeyDown(KEY_S)) {
-            ball.pos.y += ball.speed;
-            faceswest=false;
-            faceseast=false;
-            facesnorth=false;
-            facessouth=true;
-            rotation=90;
-            if (collision4 == true) {
-                ball.pos.y=ball.pos.y-ball.speed;
-            }
-        }
-        if (IsKeyDown(KEY_A)) {
-            ball.pos.x -= ball.speed;
-            faceseast=false;
-            facesnorth=false;
-            facessouth=false;
-            faceswest=true;
-            flip=true;
-            rotation=180;
-            if (collision1 == true) {
-                ball.pos.x=ball.pos.x+ball.speed;
-            }
-
-        }
-        if (IsKeyDown(KEY_D)) {
-            ball.pos.x += ball.speed;
-            faceswest=false;
-            facesnorth=false;
-            facessouth=false;
-            faceseast=true;
-            flip=false;
-            rotation=0;
-            if (collision2 == true) {
-                ball.pos.x=ball.pos.x-ball.speed;
-            }
-        }
-        if (IsKeyPressed(KEY_Q) && dashCD.Ready()) {
-            if (faceseast==true)
-                ball.pos.x = ball.pos.x+ball.texture.width/8 + 500;
-            if (ball.pos.x > wallright.x)
-                ball.pos.x=wallright.x - ball.texture.width/8;
-            if (faceswest==true)
-                ball.pos.x = ball.pos.x-ball.texture.width/8 - 500;
-            if (ball.pos.x < wallleft.x)
-                ball.pos.x=wallleft.x;
-            if (facesnorth==true)
-                ball.pos.y =  ball.pos.y - ball.texture.height - 500;
-            if (ball.pos.y < wallup.y)
-                ball.pos.y=wallup.y;
-            if (facessouth==true)
-                ball.pos.y = ball.pos.y + ball.texture.height/2 + 500;
-            if (ball.pos.y > walldown.y)
-                ball.pos.y=walldown.y - ball.texture.height/2;
-            dashCD.Trigger();
-        } dashCD.Update(GetFrameTime());
+*/
+        player.Update(GetFrameTime());
+        player.Dash(renderScale);
+        dashCD.Trigger();
+        dashCD.Update(GetFrameTime());
         if (faceseast==true) {shot.pos = {ball.pos.x+ball.texture.width, ball.pos.y};}
         if (facessouth==true) {shot.pos = {ball.pos.x, ball.pos.y+ball.texture.height};}
         if (faceswest==true) {shot.pos = {ball.pos.x-ball.texture.width-ball.speed, ball.pos.y};}
@@ -185,12 +116,8 @@ int main() {
         BeginTextureMode(canvas);
         { //Within this block is where we draw our app to the canvas and YOUR code goes.
             ClearBackground(WHITE);
-             if (flip==true) {
-                 ball.size ={ball.size.x,0.0f, (float)-ball.texture.width/8,(float)ball.texture.height/2};
-             }else ball.size ={ball.size.x,0.0f, (float)ball.texture.width/8,(float)ball.texture.height/2};
 
-             DrawTextureRec(ball.texture, ball.size, ball.pos, WHITE);  // Draw part of the texture
-
+             player.Draw();
 
              if (dashCD.Ready())
                  DrawText("Ready", 150,20,24,BLUE);
@@ -241,6 +168,7 @@ int main() {
     UnloadTexture(ball.texture);
     UnloadTexture(shot.texture);
     golem.Unload();
+    player.Unload();
 
     // Close window and OpenGL context
     CloseWindow();

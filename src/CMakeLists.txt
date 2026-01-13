@@ -10,7 +10,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(${PROJECT_NAME} main.cpp
         boss.cpp
-        boss.h)
+        boss.h
+        player/movement/controller.cpp
+        player/movement/controller.h
+
+)
 
 # Add config.h.in file
 configure_file(config.h.in config.h)

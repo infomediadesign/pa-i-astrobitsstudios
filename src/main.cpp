@@ -8,16 +8,11 @@
 #include"cooldown.h"
 #include <vector>
 #include"Sprite.h"
-#include "boss.h"
+#include "boss/gegner1/boss.h"
 #include "player/movement/controller.h"
 
 int main() {
-    bool facessouth;
-    bool facesnorth;
-    bool faceswest;
-    bool faceseast=true;
-    bool flip;
-    float rotation;
+
     Cooldown attackCD (1.0f);
     Cooldown dashCD (5.0f);
     /*
@@ -39,16 +34,6 @@ int main() {
     controller player;
     golem.Init();
     player.Init();
-    std::vector<Sprite> balls;
-    Sprite ball;
-    // Your own initialization code here
-    ball.texture = LoadTexture("assets/graphics/player.png");
-    ball.pos = {10, 100};
-    ball.speed = 7;
-    ball.frames=0;
-    ball.frameCount=0;
-    ball.frameSpeed = 8;
-    ball.size={0.0f,0.0f, (float)ball.texture.width,(float)ball.texture.height};
 
     Sprite shot;
     shot.texture = LoadTexture("assets/graphics/shot.png");
@@ -86,11 +71,11 @@ int main() {
         player.Dash(renderScale);
         dashCD.Trigger();
         dashCD.Update(GetFrameTime());
-        if (faceseast==true) {shot.pos = {ball.pos.x+ball.texture.width, ball.pos.y};}
+       /* if (faceseast==true) {shot.pos = {ball.pos.x+ball.texture.width, ball.pos.y};}
         if (facessouth==true) {shot.pos = {ball.pos.x, ball.pos.y+ball.texture.height};}
         if (faceswest==true) {shot.pos = {ball.pos.x-ball.texture.width-ball.speed, ball.pos.y};}
         if (facesnorth==true) {shot.pos = {ball.pos.x, ball.pos.y-ball.texture.height-ball.speed};}
-
+        */
 
         Rectangle dstH = {shot.pos.x+shot.texture.width / 2.0f,shot.pos.y+shot.texture.height/2.0f,(float)shot.texture.width,(float)shot.texture.height};
 
@@ -131,7 +116,7 @@ int main() {
 
              if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
 
-                 DrawTexturePro(shot.texture, srcH, dstH ,{(float)shot.texture.width /2,(float)shot.texture.height/2}, rotation, WHITE );
+                // DrawTexturePro(shot.texture, srcH, dstH ,{(float)shot.texture.width /2,(float)shot.texture.height/2}, rotation, WHITE );
                  attackCD.Trigger();
 
              } attackCD.Update(GetFrameTime());
@@ -165,7 +150,6 @@ int main() {
     // De-initialization here
     // ...
     // ...
-    UnloadTexture(ball.texture);
     UnloadTexture(shot.texture);
     golem.Unload();
     player.Unload();

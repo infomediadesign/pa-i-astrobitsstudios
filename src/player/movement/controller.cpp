@@ -4,40 +4,52 @@
 
 #include "config.h"
 //
-
+#include <vector>
 #include "controller.h"
 
+#include "../../enviroment/walls.h"
 
 
-void controller::Update(float dt)
+void controller::Update(float dt, const std::vector<Wall>& walls)
 {
-    if (IsKeyDown(KEY_W)) {
-        pos.y -= speed;
-        /*  if (collision3 == true) {
-             ball.pos.y=ball.pos.y+ball.speed;
-          }
-          */
-    }
-    if (IsKeyDown(KEY_S)) {
-        pos.y += speed;
-        /* if (collision4 == true) {
-            ball.pos.y=ball.pos.y-ball.speed;
-         }*/
-    }
-    if (IsKeyDown(KEY_A)) {
-       pos.x -= speed;
-        /* if (collision1 == true) {
-             ball.pos.x=ball.pos.x+ball.speed;
-         }*/
+    Vector2 velocity = {0, 0};
 
-    }
-    if (IsKeyDown(KEY_D)) {
-        pos.x += speed;
-        /* if (collision2 == true) {
-             ball.pos.x=ball.pos.x-ball.speed;
-         }*/
-    }
+    if (IsKeyDown(KEY_W)) velocity.y -= speed;
+    if (IsKeyDown(KEY_S)) velocity.y += speed;
+    if (IsKeyDown(KEY_A)) velocity.x -= speed;
+    if (IsKeyDown(KEY_D)) velocity.x += speed;
+
+    // --- X ACHSE ---
+    Rectangle nextX = {
+        pos.x + velocity.x,
+        pos.y,
+        (float)texture.width / 9,
+        (float)texture.height / 2
+    };
+
+    if (!Collides(nextX, walls))
+        pos.x += velocity.x;
+
+    // --- Y ACHSE ---
+    Rectangle nextY = {
+        pos.x,
+        pos.y + velocity.y,
+        (float)texture.width / 9,
+        (float)texture.height / 2
+    };
+
+    if (!Collides(nextY, walls))
+        pos.y += velocity.y;
+
+    // Collisionbox nach Bewegung aktualisieren
+    plcollision = {
+        pos.x,
+        pos.y,
+        (float)texture.width / 9,
+        (float)texture.height / 2
+    };
 }
+
 void controller::Init()
 {
     texture =LoadTexture("assets/graphics/player.png");
@@ -47,6 +59,7 @@ void controller::Init()
     frameCount=0;
     frameSpeed = 8;
     size={0.0f,0.0f, (float)texture.width/8,(float)texture.height/2};
+
 }
 void controller::Draw()
 {
@@ -72,23 +85,57 @@ void controller::Unload()
 {
     UnloadTexture(texture);
 }
-void controller::Dash(float dt) {
-    if (IsKeyPressed(KEY_Q) ) {
-        if (IsKeyDown(KEY_D))
-            pos.x = pos.x+texture.width/8 + 500;
-        //if (pos.x > wallright.x)
-          //  pos.x=wallright.x - texture.width/8;
-        if (IsKeyDown(KEY_A))
-            pos.x = pos.x-texture.width/8 - 500;
-       // if (pos.x < wallleft.x)
-         //   pos.x=wallleft.x;
-        if (IsKeyDown(KEY_W))
-            pos.y =  pos.y - texture.height - 500;
-        //if (pos.y < wallup.y)
-          //  pos.y=wallup.y;
-        if (IsKeyDown(KEY_S))
-            pos.y = pos.y + texture.height/2 + 500;
-       // if (pos.y > walldown.y)
-         //   pos.y=walldown.y - texture.height/2;
+void controller::Dash(const std::vector<Wall>& walls)
+{
+    if (!IsKeyPressed(KEY_Q))
+        return;
+
+    Rectangle testBox = plcollision;
+    Vector2 dashDir = {0, 0};
+
+    if (IsKeyDown(KEY_D)) dashDir = {1, 0};
+    if (IsKeyDown(KEY_A)) dashDir = {-1, 0};
+    if (IsKeyDown(KEY_W)) dashDir = {0, -1};
+    if (IsKeyDown(KEY_S)) dashDir = {0, 1};
+
+    float dashDistance = 350;
+    float step = 10;
+
+    for (float i = 0; i < dashDistance; i += step)
+    {
+        testBox.x += dashDir.x * step;
+        testBox.y += dashDir.y * step;
+
+        bool hit = false;
+        for (const Wall& w : walls)
+        {
+            if (CheckCollisionRecs(testBox, w.hitbox))
+            {
+                hit = true;
+                break;
+            }
+        }
+
+        if (hit)
+            break;
+
+        pos.x += dashDir.x * step;
+        pos.y += dashDir.y * step;
     }
+    plcollision.x = pos.x;
+    plcollision.y = pos.y;
+}
+
+bool controller::Collides(const Rectangle& box, const std::vector<Wall>& walls)
+{
+    for (const Wall& w : walls)
+    {
+        if (CheckCollisionRecs(box, w.hitbox))
+            return true;
+    }
+    return false;
+}
+
+Rectangle controller::GetCollision() {
+    return plcollision;
 }

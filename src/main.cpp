@@ -10,17 +10,8 @@
 #include"Sprite.h"
 #include "boss/golem/boss.h"
 #include "player/movement/controller.h"
-static void DrawHealthBar(int hp, int maxHp, int x, int y, int w, int h)
-{
-    if (hp < 0) hp = 0;
-    if (hp > maxHp) hp = maxHp;
+#include "enviroment/walls.h"
 
-    DrawRectangle(x, y, w, h, DARKGRAY);
-    float ratio = (maxHp > 0) ? (float)hp / (float)maxHp : 0.0f;
-    DrawRectangle(x, y, (int)(w * ratio), h, GREEN);
-    DrawRectangleLines(x, y, w, h, BLACK);
-    DrawText(TextFormat("HP: %d/%d", hp, maxHp), x, y + h + 6, 18, BLACK);
-}
 int main() {
 
     Cooldown attackCD (1.0f);
@@ -44,24 +35,20 @@ int main() {
     controller player;
     golem.Init();
     player.Init();
-    // ===== Player HP (simple) =====
-    int maxHP = 100;
-    int hp = 100;
-
-    float invincibleTimer = 0.0f;
-    const float invincibleDuration = 0.6f;
-
-    int bossDamage = 15;
 
     Sprite shot;
     shot.texture = LoadTexture("assets/graphics/shot.png");
-
-
     Rectangle srcH = {0,0,(float)shot.texture.width,(float)shot.texture.height};
-    Rectangle wallleft = {0,0,(float) 1,(float)GetScreenHeight()};
-    Rectangle wallright = {  (float) GetScreenWidth(),  0,  (float) 1, (float)GetScreenHeight() };
-    Rectangle wallup = {0,40,(float) GetScreenWidth(),(float) 1};
-    Rectangle walldown = {0,(float) GetScreenHeight(),(float) GetScreenWidth(),(float) 1};
+    std::vector<Wall> walls={
+         { 0,0,1,(float)GetScreenHeight()},
+         { (float) GetScreenWidth()-1,  0,   1, (float)GetScreenHeight() },
+        { { 0,40,(float) GetScreenWidth(), 1 } },
+       { { 0,(float) GetScreenHeight(),(float) GetScreenWidth(),(float) 1 } },
+
+    };
+
+
+
     // Your own initialization code here
     // ...
     // ...
@@ -74,38 +61,19 @@ int main() {
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
-        float dt = GetFrameTime();
+       player.Animate(GetFrameTime());
+        player.Update(GetFrameTime(), walls);
+        player.Dash(walls);
 
-        player.Animate(dt);
 
-        // 更新无敌时间
-        if (invincibleTimer > 0.0f) invincibleTimer -= dt;
 
-        player.Update(dt);
-        player.Dash(renderScale);
+
+
+
 
         dashCD.Trigger();
-        dashCD.Update(dt);
-        player.Animate(GetFrameTime());
+        dashCD.Update(GetFrameTime());
 
-
-       /* Rectangle player = {ball.pos.x, ball.pos.y, (float)ball.texture.width/9, (float)ball.texture.height/2};
-
-
-        bool collision1 = CheckCollisionRecs( player,  wallleft);
-        bool collision2 = CheckCollisionRecs( player,  wallright);
-        bool collision3 = CheckCollisionRecs( player,  wallup);
-        bool collision4 = CheckCollisionRecs( player,  walldown);
-*/
-        //player.Update(GetFrameTime());
-        //player.Dash(renderScale);
-        //dashCD.Trigger();
-        //dashCD.Update(GetFrameTime());
-       /* if (faceseast==true) {shot.pos = {ball.pos.x+ball.texture.width, ball.pos.y};}
-        if (facessouth==true) {shot.pos = {ball.pos.x, ball.pos.y+ball.texture.height};}
-        if (faceswest==true) {shot.pos = {ball.pos.x-ball.texture.width-ball.speed, ball.pos.y};}
-        if (facesnorth==true) {shot.pos = {ball.pos.x, ball.pos.y-ball.texture.height-ball.speed};}
-        */
 
         Rectangle dstH = {shot.pos.x+shot.texture.width / 2.0f,shot.pos.y+shot.texture.height/2.0f,(float)shot.texture.width,(float)shot.texture.height};
 
@@ -125,18 +93,6 @@ int main() {
         // ...
         // ...
         golem.Update(GetFrameTime());
-        Rectangle playerRect = player.GetHitbox();
-        Rectangle bossRect   = golem.GetHitbox();
-
-        bool isHit = CheckCollisionRecs(playerRect, bossRect);
-
-        if (isHit && invincibleTimer <= 0.0f)
-        {
-            hp -= bossDamage;
-            if (hp < 0) hp = 0;
-            invincibleTimer = invincibleDuration;
-        }
-
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
         // For the letterbox we draw on canvas instead
@@ -145,7 +101,6 @@ int main() {
             ClearBackground(WHITE);
 
              player.Draw();
-            DrawHealthBar(hp, maxHP, 20, 20, 260, 20);
 
              if (dashCD.Ready())
                  DrawText("Ready", 150,20,24,BLUE);
@@ -164,8 +119,6 @@ int main() {
 
              } attackCD.Update(GetFrameTime());
              golem.Draw();
-            DrawHealthBar(hp, maxHP, 20, 20, 260, 20);
-
 
         }
         EndTextureMode();

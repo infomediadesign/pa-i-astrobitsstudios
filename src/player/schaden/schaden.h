@@ -5,8 +5,7 @@
 
 struct Player
 {
-    // Position and size
-    Rectangle rect;
+
 
     // Health
     int hp;
@@ -17,7 +16,7 @@ struct Player
     float invincibleDuration;
 
     // Basic functions
-    void Init(float x, float y);
+    void Init();
     void Update(float deltaTime);
     void TakeDamage(int damage);
 

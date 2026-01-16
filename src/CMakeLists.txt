@@ -17,6 +17,7 @@ add_executable(${PROJECT_NAME} main.cpp
         boss/golem/boss.h
         enviroment/walls.h
         enviroment/walls.cpp
+        player/schaden/schden.cpp
 
 )
 

@@ -11,10 +11,11 @@
 #include "boss/golem/boss.h"
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
+#include "player/combat/plattack.h"
 
 int main() {
 
-    Cooldown attackCD (1.0f);
+    Cooldown attackCD (0.5f);
     Cooldown dashCD (5.0f);
     /*
     GetMonitorWidth(0);
@@ -31,14 +32,14 @@ int main() {
 #ifdef GAME_START_FULLSCREEN
     ToggleFullscreen();
 #endif
+
     Enemy golem;
     controller player;
+    plattack melee = plattack();
+    melee.Init();
     golem.Init();
     player.Init();
 
-    Sprite shot;
-    shot.texture = LoadTexture("assets/graphics/shot.png");
-    Rectangle srcH = {0,0,(float)shot.texture.width,(float)shot.texture.height};
     std::vector<Wall> walls={
          { 0,0,1,(float)GetScreenHeight()},
          { (float) GetScreenWidth()-1,  0,   1, (float)GetScreenHeight() },
@@ -52,7 +53,6 @@ int main() {
     // Your own initialization code here
     // ...
     // ...
-    Texture2D myTexture = LoadTexture("assets/graphics/testimage.png");
     RenderTexture2D canvas = LoadRenderTexture(Game::ScreenWidth, Game::ScreenHeight);
     float renderScale{}; // this and the line below are relevant to drawing later.
     Rectangle renderRec{};
@@ -61,21 +61,20 @@ int main() {
     // Main game loop
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
+        float dt = GetFrameTime();
+        attackCD.Update(dt);
        player.Animate(GetFrameTime());
         player.Update(GetFrameTime(), walls);
         player.Dash(walls);
 
 
 
-
-
-
-
         dashCD.Trigger();
         dashCD.Update(GetFrameTime());
+        melee.Update(dt,player.GetPos(),player.GetSize());
 
 
-        Rectangle dstH = {shot.pos.x+shot.texture.width / 2.0f,shot.pos.y+shot.texture.height/2.0f,(float)shot.texture.width,(float)shot.texture.height};
+
 
 
 
@@ -110,15 +109,18 @@ int main() {
                  DrawText("Ready", 20,20,24,GREEN);
              else DrawText(TextFormat("Cooldown %.2f",attackCD.Remaining()), 20,20,24,GREEN);
 
-             //DrawTextureV(ball.texture, ball.pos, WHITE);
 
-             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
+              attackCD.Update(GetFrameTime());
+              golem.Draw();
 
-                // DrawTexturePro(shot.texture, srcH, dstH ,{(float)shot.texture.width /2,(float)shot.texture.height/2}, rotation, WHITE );
-                 attackCD.Trigger();
+           if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+           {
+               melee.Start(player.GetPos(),player.GetSize());
+               attackCD.Trigger();
+           }
 
-             } attackCD.Update(GetFrameTime());
-             golem.Draw();
+           if (melee.active)
+           melee.Draw();
 
         }
         EndTextureMode();
@@ -148,7 +150,7 @@ int main() {
     // De-initialization here
     // ...
     // ...
-    UnloadTexture(shot.texture);
+    melee.Unload();
     golem.Unload();
     player.Unload();
 

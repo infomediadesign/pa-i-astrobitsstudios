@@ -12,17 +12,20 @@ struct plattack{
     Vector2 pos;
     float damage;
     int frames;
-    Rectangle player;
-    Rectangle size;
     int frameSpeed;
     int frameCount;
-
+    int rotation;
+    Rectangle dstH;
+    Rectangle srcH;
+    bool active = false;
+    float lifeTime = 0.0f;
     void Init();
     void Draw();
     void Animate(float dt);
     void Unload();
-    void Update(float dt);
+    void Update(float dt, Vector2 playerPos, Rectangle playerSize);
     void Damage();
+    void Start(Vector2 playerPos,Rectangle playerSize);
 };
 
 

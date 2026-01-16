@@ -139,3 +139,10 @@ bool controller::Collides(const Rectangle& box, const std::vector<Wall>& walls)
 Rectangle controller::GetCollision() {
     return plcollision;
 }
+Vector2 controller::GetPos() const {
+    return pos;
+}
+
+Rectangle controller::GetSize() const {
+    return size;
+}

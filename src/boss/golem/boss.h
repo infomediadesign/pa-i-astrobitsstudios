@@ -15,6 +15,14 @@ struct Enemy {
         void Draw();
         void Unload();
     };
-
+Rectangle GetHitbox() const
+{
+    return Rectangle{
+            pos.x,
+            pos.y,
+            (float)texture.width,
+            (float)texture.height
+    };
+}
 
 

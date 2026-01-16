@@ -15,7 +15,15 @@ struct controller
     Rectangle size;
     int frameSpeed;
     int frameCount;
-
+    Rectangle GetHitbox() const
+    {
+        return Rectangle{
+                pos.x,
+                pos.y,
+                size.width,
+                size.height
+        };
+    }
 
     void Update(float dt);
 

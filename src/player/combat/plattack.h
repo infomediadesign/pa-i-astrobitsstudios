@@ -2,12 +2,27 @@
 // Created by Ben on 13.01.2026.
 //
 
-#ifndef RAYLIBSTARTER_PLATTACK_H
-#define RAYLIBSTARTER_PLATTACK_H
+#pragma once
+#include "raylib.h"
 
 
-class plattack {
+
+struct plattack{
+    Texture2D texture;
+    Vector2 pos;
+    float damage;
+    int frames;
+    Rectangle player;
+    Rectangle size;
+    int frameSpeed;
+    int frameCount;
+
+    void Init();
+    void Draw();
+    void Animate(float dt);
+    void Unload();
+    void Update(float dt);
+    void Damage();
 };
 
 
-#endif //RAYLIBSTARTER_PLATTACK_H

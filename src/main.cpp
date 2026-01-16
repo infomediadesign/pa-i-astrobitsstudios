@@ -10,6 +10,7 @@
 #include"Sprite.h"
 #include "boss/golem/boss.h"
 #include "player/movement/controller.h"
+#include "enviroment/walls.h"
 
 int main() {
 
@@ -37,13 +38,17 @@ int main() {
 
     Sprite shot;
     shot.texture = LoadTexture("assets/graphics/shot.png");
-
-
     Rectangle srcH = {0,0,(float)shot.texture.width,(float)shot.texture.height};
-    Rectangle wallleft = {0,0,(float) 1,(float)GetScreenHeight()};
-    Rectangle wallright = {  (float) GetScreenWidth(),  0,  (float) 1, (float)GetScreenHeight() };
-    Rectangle wallup = {0,40,(float) GetScreenWidth(),(float) 1};
-    Rectangle walldown = {0,(float) GetScreenHeight(),(float) GetScreenWidth(),(float) 1};
+    std::vector<Wall> walls={
+         { 0,0,1,(float)GetScreenHeight()},
+         { (float) GetScreenWidth()-1,  0,   1, (float)GetScreenHeight() },
+        { { 0,40,(float) GetScreenWidth(), 1 } },
+       { { 0,(float) GetScreenHeight(),(float) GetScreenWidth(),(float) 1 } },
+
+    };
+
+
+
     // Your own initialization code here
     // ...
     // ...
@@ -57,25 +62,18 @@ int main() {
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
        player.Animate(GetFrameTime());
+        player.Update(GetFrameTime(), walls);
+        player.Dash(walls);
 
 
-       /* Rectangle player = {ball.pos.x, ball.pos.y, (float)ball.texture.width/9, (float)ball.texture.height/2};
 
 
-        bool collision1 = CheckCollisionRecs( player,  wallleft);
-        bool collision2 = CheckCollisionRecs( player,  wallright);
-        bool collision3 = CheckCollisionRecs( player,  wallup);
-        bool collision4 = CheckCollisionRecs( player,  walldown);
-*/
-        player.Update(GetFrameTime());
-        player.Dash(renderScale);
+
+
+
         dashCD.Trigger();
         dashCD.Update(GetFrameTime());
-       /* if (faceseast==true) {shot.pos = {ball.pos.x+ball.texture.width, ball.pos.y};}
-        if (facessouth==true) {shot.pos = {ball.pos.x, ball.pos.y+ball.texture.height};}
-        if (faceswest==true) {shot.pos = {ball.pos.x-ball.texture.width-ball.speed, ball.pos.y};}
-        if (facesnorth==true) {shot.pos = {ball.pos.x, ball.pos.y-ball.texture.height-ball.speed};}
-        */
+
 
         Rectangle dstH = {shot.pos.x+shot.texture.width / 2.0f,shot.pos.y+shot.texture.height/2.0f,(float)shot.texture.width,(float)shot.texture.height};
 

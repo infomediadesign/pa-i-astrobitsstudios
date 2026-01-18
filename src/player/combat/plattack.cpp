@@ -53,11 +53,11 @@ void plattack::Update(float dt, Vector2 playerPos, Rectangle playerSize)
 void plattack::Start(Vector2 playerPos, Rectangle playerSize)
 {
      active = true;
-     lifeTime = 0.15f;
+     lifeTime = 0.1f;
      if (IsKeyDown(KEY_A)) rotation = 180;
+     else if (IsKeyDown(KEY_D))rotation = 0;
      else if (IsKeyDown(KEY_W)) rotation = 270;
      else if (IsKeyDown(KEY_S)) rotation = 90;
-     else if (IsKeyDown(KEY_D))rotation = 0; // Standard nach Rechts
      dstH.width = (float)texture.width;
      dstH.height = (float)texture.height;
      Update(0, playerPos, playerSize);

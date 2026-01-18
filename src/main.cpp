@@ -62,22 +62,32 @@ int main() {
     while (!WindowShouldClose()) // Detect window close button or ESC key
     {
         float dt = GetFrameTime();
-        attackCD.Update(dt);
-       player.Animate(GetFrameTime());
         player.Update(GetFrameTime(), walls);
-        player.Dash(walls);
+        golem.Update(GetFrameTime());
 
 
-
-        dashCD.Trigger();
+        attackCD.Update(dt);
         dashCD.Update(GetFrameTime());
+
+        player.Animate(GetFrameTime());
+
+        player.Dash(walls);
+        dashCD.Trigger();
+
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)&& attackCD.Ready())
+        {
+            melee.Start(player.GetPos(),player.GetSize());
+            attackCD.Trigger();
+        }
         melee.Update(dt,player.GetPos(),player.GetSize());
 
-
-
-
-
-
+        if (melee.active) {
+            if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
+                if (!golem.wasHit)
+                golem.TakeDamage(melee.damage);
+            }
+        }else golem.wasHit=false;
         if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER)) { //Fullscreen logic.
             if (IsWindowFullscreen()) {
                 ToggleFullscreen();
@@ -91,7 +101,7 @@ int main() {
         // This is where YOUR logic code should go
         // ...
         // ...
-        golem.Update(GetFrameTime());
+
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
         // For the letterbox we draw on canvas instead
@@ -100,7 +110,9 @@ int main() {
             ClearBackground(WHITE);
 
              player.Draw();
-
+             golem.Draw();
+            if (melee.active)
+                melee.Draw();
              if (dashCD.Ready())
                  DrawText("Ready", 150,20,24,BLUE);
              else DrawText(TextFormat("Cooldown %.2f",dashCD.Remaining()), 150,20,24,BLUE);
@@ -110,17 +122,7 @@ int main() {
              else DrawText(TextFormat("Cooldown %.2f",attackCD.Remaining()), 20,20,24,GREEN);
 
 
-              attackCD.Update(GetFrameTime());
-              golem.Draw();
 
-           if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-           {
-               melee.Start(player.GetPos(),player.GetSize());
-               attackCD.Trigger();
-           }
-
-           if (melee.active)
-           melee.Draw();
 
         }
         EndTextureMode();

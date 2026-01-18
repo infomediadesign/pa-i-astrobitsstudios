@@ -19,10 +19,11 @@
         texture  = LoadTexture("assets/graphics/testimage.png");
         pos = {Game::ScreenWidth/2, Game::ScreenHeight/2};
 
-health = 100.0f;
-maxHealth = 100.0f;
-hitTimer = 0.0f;
-active = true;
+        health = 100.0f;
+        maxHealth = 100.0f;
+        hitTimer = 0.0f;
+        active = true;
+        wasHit= false;
     }
 
     void Enemy::Update(float dt) {
@@ -53,7 +54,7 @@ active = true;
 void Enemy::TakeDamage(float amount) {
         health -= amount;
         hitTimer = 0.1f; // Kurz aufblitzen lassen
-
+        wasHit = true;
         if (health <= 0) {
             active = false; // Boss "stirbt"
         }

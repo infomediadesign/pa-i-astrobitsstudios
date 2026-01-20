@@ -18,6 +18,9 @@ add_executable(${PROJECT_NAME} main.cpp
         enviroment/walls.h
         enviroment/walls.cpp
         player/schaden/schden.cpp
+        Menu/MainMenu_UI.cpp
+        Menu/MainMenu_UI.h
+        Menu/Menu.hpp
 
 )
 

@@ -32,7 +32,7 @@ struct controller
     void Draw();
     void Animate(float dt);
     void Unload();
-    void Dash( const std::vector<Wall>&);
+    void Dash( const std::vector<Wall>&,float dt);
     Rectangle GetCollision();
     void Update(float dt, const std::vector<Wall>& walls);
     bool Collides(const Rectangle& box, const std::vector<Wall>& walls);

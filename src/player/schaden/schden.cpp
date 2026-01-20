@@ -13,6 +13,7 @@
     }
 
     void Player::Update(float dt) {
+
         // reduce invincibility timer
         if (invincibleTimer > 0.0f) {
             invincibleTimer -= dt;
@@ -32,12 +33,30 @@
         invincibleTimer = invincibleDuration;
     }
 
-    bool Player::IsDead() const {
+    bool Player::IsDead() const{
         return hp <= 0;
     }
+    void Player::Draw(Rectangle box) {
+        if (invincibleTimer > 0.0f) {
+            // blink: draw only on some frames
+            if (((int)(GetTime() * 10) % 2) == 0) {
+                DrawRectangleRec(box, BLUE);
+            }
+        } else {
+            // DrawRectangleRec(player.GetCollision(), BLUE);
+        }
+
+        // UI: health bar
+        DrawHealthBar(20, 40, 250, 20, hp, maxHp);
+
+        if (IsDead()) {
+            DrawText("You Died!", 380, 280, 40, MAROON);
+        }
 
 
-static void DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp) {
+    }
+
+ const void Player:: DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp) {
     // background
     DrawRectangle(x, y, width, height, DARKGRAY);
 
@@ -55,8 +74,8 @@ static void DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp
     // simple text
     DrawText(TextFormat("HP: %d / %d", hp, maxHp), x, y - 20, 16, WHITE);
 }
-
-/*int main() {
+/*
+int main() {
     InitWindow(900, 600, "Player Damage + HP Bar (Simple)");
     SetTargetFPS(60);
 

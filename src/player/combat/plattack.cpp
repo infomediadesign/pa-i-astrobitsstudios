@@ -66,7 +66,7 @@ void plattack::Start(Vector2 playerPos, Rectangle playerSize)
 
 void plattack::Draw() {
      if (!active) return;
-     Vector2 origin = { 0, (float)texture.height / 2.0f };
+     Vector2 origin = { 0, (float)texture.height /2.0f };
      DrawTexturePro(texture,srcH, dstH, origin,rotation, WHITE);
 }
 

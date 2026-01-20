@@ -6,7 +6,6 @@
 struct Player
 {
 
-
     // Health
     int hp;
     int maxHp;
@@ -17,11 +16,12 @@ struct Player
 
     // Basic functions
     void Init();
+    void Draw(Rectangle);
     void Update(float deltaTime);
     void TakeDamage(int damage);
-
+    const void  DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp);
     // State check
-    bool IsDead() const;
+    bool IsDead()const;
 };
 
 #endif

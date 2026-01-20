@@ -12,11 +12,12 @@
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
 #include "player/combat/plattack.h"
+#include "player/schaden/schaden.h"
 
 int main() {
 
     Cooldown attackCD (0.5f);
-    Cooldown dashCD (5.0f);
+    Cooldown dashCD (3.0f);
     /*
     GetMonitorWidth(0);
     GetMonitorHeight(0);
@@ -32,14 +33,14 @@ int main() {
 #ifdef GAME_START_FULLSCREEN
     ToggleFullscreen();
 #endif
-
+    Player hp;
     Enemy golem;
     controller player;
     plattack melee = plattack();
     melee.Init();
     golem.Init();
     player.Init();
-
+    hp.Init();
     std::vector<Wall> walls={
          { 0,0,1,(float)GetScreenHeight()},
          { (float) GetScreenWidth()-1,  0,   1, (float)GetScreenHeight() },
@@ -64,6 +65,7 @@ int main() {
         float dt = GetFrameTime();
         player.Update(GetFrameTime(), walls);
         golem.Update(GetFrameTime());
+        hp.Update(dt);
 
 
         attackCD.Update(dt);
@@ -71,9 +73,12 @@ int main() {
 
         player.Animate(GetFrameTime());
 
-        player.Dash(walls);
-        dashCD.Trigger();
-
+        if (dashCD.Ready()&&IsKeyPressed(KEY_LEFT_SHIFT)) {
+            player.Dash(walls,dt);
+            hp.invincibleTimer = hp.invincibleDuration;
+            hp.Update(dt);
+            dashCD.Trigger();
+        }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)&& attackCD.Ready())
         {
@@ -88,6 +93,8 @@ int main() {
                 golem.TakeDamage(melee.damage);
             }
         }else golem.wasHit=false;
+
+
         if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER)) { //Fullscreen logic.
             if (IsWindowFullscreen()) {
                 ToggleFullscreen();
@@ -121,8 +128,11 @@ int main() {
                  DrawText("Ready", 20,20,24,GREEN);
              else DrawText(TextFormat("Cooldown %.2f",attackCD.Remaining()), 20,20,24,GREEN);
 
-
-
+            if (CheckCollisionRecs(player.GetCollision(), golem.GetRect())&&golem.active) {
+                hp.TakeDamage(10);
+                DrawText("Hit", 400,100,24,BLACK);
+            }
+          hp.Draw(player.GetCollision());
 
         }
         EndTextureMode();

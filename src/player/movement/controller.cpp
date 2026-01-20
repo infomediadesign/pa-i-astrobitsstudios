@@ -85,9 +85,9 @@ void controller::Unload()
 {
     UnloadTexture(texture);
 }
-void controller::Dash(const std::vector<Wall>& walls)
+void controller::Dash(const std::vector<Wall>& walls,float dt)
 {
-    if (!IsKeyPressed(KEY_Q))
+    if (!IsKeyPressed(KEY_LEFT_SHIFT))
         return;
 
     Rectangle testBox = plcollision;

@@ -30,6 +30,13 @@ int main() {
 #ifdef GAME_START_FULLSCREEN
     ToggleFullscreen();
 #endif
+    enum GameState {
+        STATE_MENU = -1,
+        STATE_PLAYING = 0,
+        STATE_OPTIONS = 1,
+        STATE_EXIT = 2,
+    };
+
     MainMenu mainMenu;
     Options options;
     GameState currentState = STATE_MENU;
@@ -48,7 +55,6 @@ int main() {
         {{0, (float) GetScreenHeight(), (float) GetScreenWidth(), (float) 1}},
 
     };
-
 
     // Your own initialization code here
     // ...
@@ -140,7 +146,7 @@ int main() {
             if (currentState == STATE_OPTIONS) {
                 options.Draw();
             }
-            if (currentState == STATE_MENU) {
+            else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
             } else if (currentState == STATE_PLAYING) {
                 player.Draw();

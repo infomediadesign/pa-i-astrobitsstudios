@@ -75,9 +75,10 @@ int main() {
                     }
                     else if (mainMenu.GetChoice() == 2) {
                         currentState = EXIT;
-                    }else if (mainMenu.GetChoice()==1)
+                    }else if (mainMenu.GetChoice()==1) {
                         currentState = OPTIONS;
                         mainMenu.ResetChoice();
+                    }
                 }
         if (IsKeyPressed(KEY_ESCAPE)&& currentState == OPTIONS) {
             currentState = MENU;

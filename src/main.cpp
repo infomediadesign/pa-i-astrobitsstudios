@@ -14,27 +14,16 @@
 #include "player/combat/plattack.h"
 #include "player/schaden/schaden.h"
 #include "Menu/MainMenu_UI.h"
+#include "Menu/Options.h"
 
-enum GameState {
-    MENU = -1,
-    PLAYING = 0,
-    OPTIONS = 1,
-    EXIT = 2,
-};
 
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
-    /*
-    GetMonitorWidth(0);
-    GetMonitorHeight(0);
-    SetConfigFlags(FLAG_WINDOW_UNDECORATED);
-    InitWindow(GetScreenWidth(), GetScreenHeight(), "Borderless Fullscreen");
-    */
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h.in file
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(Game::ScreenWidth, Game::ScreenHeight, Game::PROJECT_NAME);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT| FLAG_WINDOW_UNDECORATED);
+    InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -42,8 +31,8 @@ int main() {
     ToggleFullscreen();
 #endif
     MainMenu mainMenu;
-    volatile GameState currentState = MENU;
-
+    Options options;
+    GameState currentState = MENU;
     Player hp;
     Enemy golem;
     controller player;
@@ -71,28 +60,30 @@ int main() {
 
     // Main game loop
     while (!WindowShouldClose() && currentState != EXIT) {
-        TraceLog(LOG_INFO, "Current State: %d", (int)currentState);
 
         float dt = GetFrameTime();
 
         // --- 1. LOGIK UPDATE ---
-        switch (currentState) {
-            case MENU: {
-                mainMenu.Update();
-                int choice = mainMenu.GetChoice();
-
-                if (choice == 0) {
-                    // Spiel Starten
-                    currentState = PLAYING;
-                    mainMenu.ResetChoice();
-                } else if (choice == 1) {
-                    // Beenden (Index 1, nicht 2!)
-                    currentState = EXIT;
+                if (currentState == MENU) {
+                    mainMenu.Update();
+                    if (mainMenu.GetChoice() == 0) {
+                        hp.Init();
+                        melee.Reset();
+                        player.Reset();
+                        currentState = PLAYING;
+                        mainMenu.ResetChoice();
+                    }
+                    else if (mainMenu.GetChoice() == 2) {
+                        currentState = EXIT;
+                    }else if (mainMenu.GetChoice()==1)
+                        currentState = OPTIONS;
+                        mainMenu.ResetChoice();
                 }
-            }
-                break;
+        if (IsKeyPressed(KEY_ESCAPE)&& currentState == OPTIONS) {
+            currentState = MENU;
+        }
 
-            case PLAYING: {
+          if (currentState == PLAYING) {
                 player.Update(dt, walls);
                 golem.Update(dt);
                 hp.Update(dt);
@@ -119,11 +110,8 @@ int main() {
                     }
                 } else golem.wasHit = false;
 
-                if (IsKeyPressed(KEY_ESCAPE)) currentState = MENU;
-            }
-                break;
+              if (IsKeyPressed(KEY_ESCAPE)) currentState = MENU;
 
-            default: break;
         }
 
 
@@ -138,10 +126,6 @@ int main() {
             }
         }
 
-        // Updates that are made by frame are coded here
-        // This is where YOUR logic code should go
-        // ...
-        // ...
 
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
@@ -152,6 +136,9 @@ int main() {
             ClearBackground(WHITE);
 
             //Logik-Weiche (Draw) ===
+            if (currentState == OPTIONS) {
+                options.Draw();
+            }
             if (currentState == MENU) {
                 mainMenu.Draw();
             } else if (currentState == PLAYING) {

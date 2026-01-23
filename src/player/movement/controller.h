@@ -36,6 +36,7 @@ struct controller
     Rectangle GetCollision();
     void Update(float dt, const std::vector<Wall>& walls);
     bool Collides(const Rectangle& box, const std::vector<Wall>& walls);
+    void Reset();
     Vector2 GetPos() const;
     Rectangle GetSize() const;
 

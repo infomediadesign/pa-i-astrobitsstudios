@@ -22,5 +22,6 @@ public:
 
     bool IsActive() const { return active; }
     void SetActive(bool state) { active = state; }
+
 };
 #endif //RAYLIBSTARTER_MENU_HPP

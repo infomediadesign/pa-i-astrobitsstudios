@@ -135,6 +135,15 @@ bool controller::Collides(const Rectangle& box, const std::vector<Wall>& walls)
     }
     return false;
 }
+void controller::Reset() {
+    pos = {10, 100};
+    speed = 7;
+    frames=0;
+    frameCount=0;
+    frameSpeed = 8;
+    size={0.0f,0.0f, (float)texture.width/8,(float)texture.height/2};
+
+}
 
 Rectangle controller::GetCollision() {
     return plcollision;

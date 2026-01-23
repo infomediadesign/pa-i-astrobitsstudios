@@ -26,6 +26,7 @@ struct plattack{
     void Update(float dt, Vector2 playerPos, Rectangle playerSize);
     void Damage();
     void Start(Vector2 playerPos,Rectangle playerSize);
+    void Reset();
 };
 
 

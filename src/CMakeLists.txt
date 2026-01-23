@@ -21,6 +21,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/MainMenu_UI.cpp
         Menu/MainMenu_UI.h
         Menu/Menu.hpp
+        Menu/Options.cpp
+        Menu/Options.h
 
 )
 

@@ -32,7 +32,7 @@ int main() {
 #endif
     MainMenu mainMenu;
     Options options;
-    GameState currentState = MENU;
+    GameState currentState = STATE_MENU;
     Player hp;
     Enemy golem;
     controller player;
@@ -59,32 +59,32 @@ int main() {
 
 
     // Main game loop
-    while (!WindowShouldClose() && currentState != EXIT) {
+    while (!WindowShouldClose() && currentState != STATE_EXIT) {
 
         float dt = GetFrameTime();
 
         // --- 1. LOGIK UPDATE ---
-                if (currentState == MENU) {
+                if (currentState == STATE_MENU) {
                     mainMenu.Update();
                     if (mainMenu.GetChoice() == 0) {
                         hp.Init();
                         melee.Reset();
                         player.Reset();
-                        currentState = PLAYING;
+                        currentState = STATE_PLAYING;
                         mainMenu.ResetChoice();
                     }
                     else if (mainMenu.GetChoice() == 2) {
-                        currentState = EXIT;
+                        currentState = STATE_EXIT;
                     }else if (mainMenu.GetChoice()==1) {
-                        currentState = OPTIONS;
+                        currentState = STATE_OPTIONS;
                         mainMenu.ResetChoice();
                     }
                 }
-        if (IsKeyPressed(KEY_ESCAPE)&& currentState == OPTIONS) {
-            currentState = MENU;
+        if (IsKeyPressed(KEY_ESCAPE)&& currentState == STATE_OPTIONS) {
+            currentState = STATE_MENU;
         }
 
-          if (currentState == PLAYING) {
+          if (currentState == STATE_PLAYING) {
                 player.Update(dt, walls);
                 golem.Update(dt);
                 hp.Update(dt);
@@ -111,7 +111,7 @@ int main() {
                     }
                 } else golem.wasHit = false;
 
-              if (IsKeyPressed(KEY_ESCAPE)) currentState = MENU;
+              if (IsKeyPressed(KEY_ESCAPE)) currentState = STATE_MENU;
 
         }
 
@@ -137,12 +137,12 @@ int main() {
             ClearBackground(WHITE);
 
             //Logik-Weiche (Draw) ===
-            if (currentState == OPTIONS) {
+            if (currentState == STATE_OPTIONS) {
                 options.Draw();
             }
-            if (currentState == MENU) {
+            if (currentState == STATE_MENU) {
                 mainMenu.Draw();
-            } else if (currentState == PLAYING) {
+            } else if (currentState == STATE_PLAYING) {
                 player.Draw();
                 golem.Draw();
                 if (melee.active)

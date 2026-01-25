@@ -2,11 +2,9 @@
 #define PLAYER_H
 
 #include "raylib.h"
-
-struct Player
-{
-    // Position and size
-    Rectangle rect;
+struct Player {
+    public:
+    int Gethealth() const { return hp; }
 
     // Health
     int hp;
@@ -17,12 +15,13 @@ struct Player
     float invincibleDuration;
 
     // Basic functions
-    void Init(float x, float y);
+    void Init();
+    void Draw(Rectangle);
     void Update(float deltaTime);
     void TakeDamage(int damage);
-
+    const void  DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp);
     // State check
-    bool IsDead() const;
+    bool IsDead()const;
 };
 
 #endif

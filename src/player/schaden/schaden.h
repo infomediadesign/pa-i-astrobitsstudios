@@ -2,9 +2,9 @@
 #define PLAYER_H
 
 #include "raylib.h"
-
-struct Player
-{
+struct Player {
+    public:
+    int Gethealth() const { return hp; }
 
     // Health
     int hp;

@@ -23,6 +23,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/Menu.hpp
         Menu/Options.cpp
         Menu/Options.h
+        Menu/Death_Screen.cpp
+        Menu/Death_Screen.h
 
 )
 

@@ -15,6 +15,7 @@
 #include "player/schaden/schaden.h"
 #include "Menu/MainMenu_UI.h"
 #include "Menu/Options.h"
+#include "Menu/Death_Screen.h"
 
 
 int main() {
@@ -35,11 +36,13 @@ int main() {
         STATE_PLAYING = 0,
         STATE_OPTIONS = 1,
         STATE_EXIT = 2,
+        STATE_DEATH = 3
     };
 
     MainMenu mainMenu;
     Options options;
     GameState currentState = STATE_MENU;
+    Death_Screen deathScreen;
     Player hp;
     Enemy golem;
     controller player;
@@ -70,7 +73,23 @@ int main() {
         float dt = GetFrameTime();
 
         // --- 1. LOGIK UPDATE ---
-                if (currentState == STATE_MENU) {
+        if (currentState == STATE_DEATH) {
+            deathScreen.Update(); // <--- DAS HIER MUSS AUFGERUFEN WERDEN!
+
+            if (deathScreen.GetChoice() == 0) { // Neustart
+                hp.Init();
+                player.Reset();
+                golem.Init();
+                melee.Reset();
+                currentState = STATE_PLAYING;
+                deathScreen.ResetChoice(); // Wichtig: Choice wieder auf -1 setzen
+            }
+            else if (deathScreen.GetChoice() == 1) { // Menü
+                currentState = STATE_MENU;
+                deathScreen.ResetChoice();
+            }
+        }
+        if (currentState == STATE_MENU) {
                     mainMenu.Update();
                     if (mainMenu.GetChoice() == 0) {
                         hp.Init();
@@ -117,6 +136,9 @@ int main() {
                     }
                 } else golem.wasHit = false;
 
+              if (hp.Gethealth() <= 0) {
+                  currentState = STATE_DEATH;
+              }
               if (IsKeyPressed(KEY_ESCAPE)) currentState = STATE_MENU;
 
         }
@@ -167,6 +189,16 @@ int main() {
                 }
                 hp.Draw(player.GetCollision());
             }
+
+            else if (currentState == STATE_DEATH) {
+                // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
+                player.Draw();
+                golem.Draw();
+
+                // Jetzt den roten Text drüber zeichnen
+                deathScreen.Draw();
+            }
+
             EndTextureMode();
             //The following lines put the canvas in the middle of the window and have the negative as black
             ClearBackground(BLACK); // If you want something else than a black void in the background

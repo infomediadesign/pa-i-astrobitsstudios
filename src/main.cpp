@@ -36,7 +36,8 @@ int main() {
         STATE_PLAYING = 0,
         STATE_OPTIONS = 1,
         STATE_EXIT = 2,
-        STATE_DEATH = 3
+        STATE_DEATH = 3,
+        STATE_PAUSE = 4
     };
 
     MainMenu mainMenu;
@@ -47,17 +48,17 @@ int main() {
     Player hp;
     Enemy golem;
     controller player;
-    plattack melee = plattack();
+    plattack melee;
     melee.Init();
     golem.Init();
     player.Init();
     hp.Init();
     std::vector<Wall> walls = {
-            {0, 0, 5, (float)Game::ScreenHeight},                               // Links
-            {(float)Game::ScreenWidth - 5, 0, 5, (float)Game::ScreenHeight},    // Rechts
-            {0, 40, (float)Game::ScreenWidth, 5},                               // Oben
-            {0, (float)Game::ScreenHeight - 5, (float)Game::ScreenWidth, 5}     // Unten
-        };
+        {0, 0, 5, (float)Game::ScreenHeight},                               // Links
+        {(float)Game::ScreenWidth - 5, 0, 5, (float)Game::ScreenHeight},    // Rechts
+        {0, 40, (float)Game::ScreenWidth, 5},                               // Oben
+        {0, (float)Game::ScreenHeight - 5, (float)Game::ScreenWidth, 5}     // Unten
+    };
 
     // Your own initialization code here
     // ...
@@ -80,7 +81,6 @@ int main() {
             if (deathScreen.GetChoice() == 0) { // Neustart
                 hp.Init();
                 player.Reset();
-                golem.Init();
                 melee.Reset();
                 currentState = STATE_PLAYING;
                 deathScreen.ResetChoice(); // Wichtig: Choice wieder auf -1 setzen
@@ -91,56 +91,55 @@ int main() {
             }
         }
         if (currentState == STATE_MENU) {
-                    mainMenu.Update();
-                    if (mainMenu.GetChoice() == 0) {
-                        hp.Init();
-                        melee.Reset();
-                        player.Reset();
-                        currentState = STATE_PLAYING;
-                        mainMenu.ResetChoice();
-                    }
-                    else if (mainMenu.GetChoice() == 2) {
-                        currentState = STATE_EXIT;
-                    }else if (mainMenu.GetChoice()==1) {
-                        currentState = STATE_OPTIONS;
-                        mainMenu.ResetChoice();
-                    }
-                }
+            mainMenu.Update();
+            if (mainMenu.GetChoice() == 0) {
+                hp.Init();
+                melee.Reset();
+                player.Reset();
+                currentState = STATE_PLAYING;
+                mainMenu.ResetChoice();
+            }
+            else if (mainMenu.GetChoice() == 2) {
+                currentState = STATE_EXIT;
+            }else if (mainMenu.GetChoice()==1) {
+                currentState = STATE_OPTIONS;
+                mainMenu.ResetChoice();
+            }
+        }
         if (IsKeyPressed(KEY_ESCAPE)&& currentState == STATE_OPTIONS) {
             currentState = STATE_MENU;
         }
 
-          if (currentState == STATE_PLAYING) {
-                player.Update(dt, walls);
-                golem.Update(dt);
+        if (currentState == STATE_PLAYING) {
+            player.Update(dt, walls);
+            golem.Update(dt);
+            hp.Update(dt);
+            attackCD.Update(dt);
+            dashCD.Update(dt);
+            player.Animate(dt);
+
+            if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
+                player.Dash(walls, dt);
+                hp.invincibleTimer = hp.invincibleDuration;
                 hp.Update(dt);
-                attackCD.Update(dt);
-                dashCD.Update(dt);
-                player.Animate(dt);
+                dashCD.Trigger();
+            }
 
-                if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
-                    player.Dash(walls, dt);
-                    hp.invincibleTimer = hp.invincibleDuration;
-                    hp.Update(dt);
-                    dashCD.Trigger();
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
+                melee.Start(player.GetPos(), player.GetSize());
+                attackCD.Trigger();
+            }
+            melee.Update(dt, player.GetPos(), player.GetSize());
+
+            if (melee.active) {
+                if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
+                    if (!golem.wasHit) golem.TakeDamage(melee.damage);
                 }
+            } else golem.wasHit = false;
 
-                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
-                    melee.Start(player.GetPos(), player.GetSize());
-                    attackCD.Trigger();
-                }
-                melee.Update(dt, player.GetPos(), player.GetSize());
-
-                if (melee.active) {
-                    if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
-                        if (!golem.wasHit) golem.TakeDamage(melee.damage);
-                    }
-                } else golem.wasHit = false;
-
-              if (hp.Gethealth() <= 0) {
-                  currentState = STATE_DEATH;
-              }
-              if (IsKeyPressed(KEY_ESCAPE)) currentState = STATE_MENU;
+            if (hp.Gethealth() <= 0) {
+                currentState = STATE_DEATH;
+            }
 
         }
 
@@ -154,47 +153,10 @@ int main() {
                 SetWindowSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
                 ToggleFullscreen();
             }
-            // ---------- Pause Menu Update ----------
-            pauseMenu.Update();
-
-            int c = pauseMenu.GetChoice();
-            if (c != -1) {
-                if (c == 0) {
-                    // Continue -> nothing needed
-                }
-                else if (c == 1) {
-                    // Restart
-                    golem.Unload();
-                    player.Unload();
-                    golem.Init();
-                    player.Init();
-                }
-                else if (c == 2) {
-                    // Quit
-                    break;
-                }
-                pauseMenu.ResetChoice();
-            }
-
-            // ---------- Gameplay Update ----------
-            if (!pauseMenu.IsActive()) {
-                player.Animate(dt);
-                player.Update(dt, walls);
-                player.Dash(walls);
-
-                dashCD.Trigger();
-                dashCD.Update(dt);
-
-                golem.Update(dt);
-
-                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
-                    attackCD.Trigger();
-                }
-                attackCD.Update(dt);
-            }
-
-            // ---------- Draw ----------
         }
+            // ---------- Pause Menu Update ----------
+
+        pauseMenu.Update();
 
 
         BeginDrawing();
@@ -211,6 +173,7 @@ int main() {
             } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
             } else if (currentState == STATE_PLAYING) {
+                pauseMenu.Draw();
                 player.Draw();
                 golem.Draw();
                 if (melee.active)
@@ -228,6 +191,7 @@ int main() {
                     DrawText("Hit", 400, 100, 24, BLACK);
                 }
                 hp.Draw(player.GetCollision());
+
             } else if (currentState == STATE_DEATH) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 player.Draw();
@@ -236,34 +200,34 @@ int main() {
                 // Jetzt den roten Text drüber zeichnen
                 deathScreen.Draw();
             }
-            pauseMenu.Draw();
+
         }
-            EndTextureMode();
-            //The following lines put the canvas in the middle of the window and have the negative as black
-            ClearBackground(BLACK); // If you want something else than a black void in the background
-            // then you can add stuff here.
+        EndTextureMode();
+        //The following lines put the canvas in the middle of the window and have the negative as black
+        ClearBackground(BLACK); // If you want something else than a black void in the background
+        // then you can add stuff here.
 
 
-            renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
-                                   // Calculates how big or small the canvas has to be rendered.
-                                   GetScreenWidth() / (float) canvas.texture.width);
-            // Priority is given to the smaller side.
-            renderScale = floorf(renderScale);
-            if (renderScale < 1) renderScale = 1; // Ensure that scale is at least 1.
-            renderRec.width = canvas.texture.width * renderScale;
-            renderRec.height = canvas.texture.height * renderScale;
-            renderRec.x = (GetScreenWidth() - renderRec.width) / 2.0f;
-            renderRec.y = (GetScreenHeight() - renderRec.height) / 2.0f;
-            DrawTexturePro(canvas.texture,
-                           Rectangle{0, 0, (float) canvas.texture.width, (float) -canvas.texture.height},
-                           renderRec,
-                           {}, 0, WHITE);
-            if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_S)) {
-                DrawText(TextFormat("Render scale: %.0f", renderScale), 10, 10, 20, LIGHTGRAY);
-            }
-            EndDrawing();
-        } // Main game loop end
-    }
+        renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
+                               // Calculates how big or small the canvas has to be rendered.
+                               GetScreenWidth() / (float) canvas.texture.width);
+        // Priority is given to the smaller side.
+        renderScale = floorf(renderScale);
+        if (renderScale < 1) renderScale = 1; // Ensure that scale is at least 1.
+        renderRec.width = canvas.texture.width * renderScale;
+        renderRec.height = canvas.texture.height * renderScale;
+        renderRec.x = (GetScreenWidth() - renderRec.width) / 2.0f;
+        renderRec.y = (GetScreenHeight() - renderRec.height) / 2.0f;
+        DrawTexturePro(canvas.texture,
+                       Rectangle{0, 0, (float) canvas.texture.width, (float) -canvas.texture.height},
+                       renderRec,
+                       {}, 0, WHITE);
+        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_S)) {
+            DrawText(TextFormat("Render scale: %.0f", renderScale), 10, 10, 20, LIGHTGRAY);
+        }
+        EndDrawing();
+
+}
         // De-initialization here
         // ...
         // ...
@@ -278,3 +242,4 @@ int main() {
         return EXIT_SUCCESS;
 
 }
+

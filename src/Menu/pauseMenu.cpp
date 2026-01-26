@@ -1,7 +1,7 @@
 #include "pauseMenu.h"
 
 // ---------------- Constructor ----------------
-pauseMenu::Pausenmenu()
+pauseMenu::pauseMenu()
 {
     // Menu options
     options = { "Continue", "Restart", "Quit" };

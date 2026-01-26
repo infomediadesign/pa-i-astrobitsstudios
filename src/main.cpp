@@ -16,7 +16,7 @@
 #include "Menu/MainMenu_UI.h"
 #include "Menu/Options.h"
 #include "Menu/Death_Screen.h"
-
+#include "Menu/pauseMenu.h"
 
 int main() {
     Cooldown attackCD(0.5f);
@@ -41,6 +41,7 @@ int main() {
 
     MainMenu mainMenu;
     Options options;
+    pauseMenu pauseMenu;
     GameState currentState = STATE_MENU;
     Death_Screen deathScreen;
     Player hp;
@@ -70,6 +71,7 @@ int main() {
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
 
         float dt = GetFrameTime();
+
 
         // --- 1. LOGIK UPDATE ---
         if (currentState == STATE_DEATH) {
@@ -152,6 +154,46 @@ int main() {
                 SetWindowSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
                 ToggleFullscreen();
             }
+            // ---------- Pause Menu Update ----------
+            pauseMenu.Update();
+
+            int c = pauseMenu.GetChoice();
+            if (c != -1) {
+                if (c == 0) {
+                    // Continue -> nothing needed
+                }
+                else if (c == 1) {
+                    // Restart
+                    golem.Unload();
+                    player.Unload();
+                    golem.Init();
+                    player.Init();
+                }
+                else if (c == 2) {
+                    // Quit
+                    break;
+                }
+                pauseMenu.ResetChoice();
+            }
+
+            // ---------- Gameplay Update ----------
+            if (!pauseMenu.IsActive()) {
+                player.Animate(dt);
+                player.Update(dt, walls);
+                player.Dash(walls);
+
+                dashCD.Trigger();
+                dashCD.Update(dt);
+
+                golem.Update(dt);
+
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
+                    attackCD.Trigger();
+                }
+                attackCD.Update(dt);
+            }
+
+            // ---------- Draw ----------
         }
 
 
@@ -166,8 +208,7 @@ int main() {
             //Logik-Weiche (Draw) ===
             if (currentState == STATE_OPTIONS) {
                 options.Draw();
-            }
-            else if (currentState == STATE_MENU) {
+            } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
             } else if (currentState == STATE_PLAYING) {
                 player.Draw();
@@ -175,21 +216,19 @@ int main() {
                 if (melee.active)
                     melee.Draw();
                 if (dashCD.Ready())
-                    DrawText("Ready", 150, 20, 24,BLUE);
-                else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 24,BLUE);
+                    DrawText("Ready", 150, 20, 24, BLUE);
+                else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 24, BLUE);
 
                 if (attackCD.Ready())
-                    DrawText("Ready", 20, 20, 24,GREEN);
-                else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 24,GREEN);
+                    DrawText("Ready", 20, 20, 24, GREEN);
+                else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 24, GREEN);
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);
-                    DrawText("Hit", 400, 100, 24,BLACK);
+                    DrawText("Hit", 400, 100, 24, BLACK);
                 }
                 hp.Draw(player.GetCollision());
-            }
-
-            else if (currentState == STATE_DEATH) {
+            } else if (currentState == STATE_DEATH) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 player.Draw();
                 golem.Draw();
@@ -197,7 +236,8 @@ int main() {
                 // Jetzt den roten Text drüber zeichnen
                 deathScreen.Draw();
             }
-
+            pauseMenu.Draw();
+        }
             EndTextureMode();
             //The following lines put the canvas in the middle of the window and have the negative as black
             ClearBackground(BLACK); // If you want something else than a black void in the background

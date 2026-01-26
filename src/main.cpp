@@ -70,7 +70,6 @@ int main() {
 
     // Main game loop
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
-
         float dt = GetFrameTime();
 
 
@@ -78,18 +77,25 @@ int main() {
         if (currentState == STATE_DEATH) {
             deathScreen.Update(); // <--- DAS HIER MUSS AUFGERUFEN WERDEN!
 
-            if (deathScreen.GetChoice() == 0) { // Neustart
+            if (deathScreen.GetChoice() == 0) {
+                // Erneut versuchen
+                // Alles zurücksetzen
                 hp.Init();
                 player.Reset();
+                //golem.Init();
                 melee.Reset();
-                currentState = STATE_PLAYING;
-                deathScreen.ResetChoice(); // Wichtig: Choice wieder auf -1 setzen
-            }
-            else if (deathScreen.GetChoice() == 1) { // Menü
-                currentState = STATE_MENU;
+
                 deathScreen.ResetChoice();
+                currentState = STATE_PLAYING;
+            }
+            else if (deathScreen.GetChoice() == 1) {
+                // Ins Hauptmenü
+                deathScreen.ResetChoice();
+                mainMenu.ResetChoice();
+                currentState = STATE_MENU;
             }
         }
+
         if (currentState == STATE_MENU) {
             mainMenu.Update();
             if (mainMenu.GetChoice() == 0) {
@@ -154,7 +160,7 @@ int main() {
                 ToggleFullscreen();
             }
         }
-            // ---------- Pause Menu Update ----------
+        // ---------- Pause Menu Update ----------
 
         pauseMenu.Update();
 

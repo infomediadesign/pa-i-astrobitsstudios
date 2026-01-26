@@ -6,8 +6,7 @@
 #include "raylib.h"
 
 
-
-struct plattack{
+struct plattack {
     Texture2D texture;
     Vector2 pos;
     float damage;
@@ -19,14 +18,20 @@ struct plattack{
     Rectangle srcH;
     bool active = false;
     float lifeTime = 0.0f;
+
     void Init();
+
     void Draw();
+
     void Animate(float dt);
+
     void Unload();
+
     void Update(float dt, Vector2 playerPos, Rectangle playerSize);
+
     void Damage();
-    void Start(Vector2 playerPos,Rectangle playerSize);
+
+    void Start(Vector2 playerPos, Rectangle playerSize);
+
     void Reset();
 };
-
-

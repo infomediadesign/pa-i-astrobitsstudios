@@ -12,10 +12,10 @@ void Death_Screen::Update() {
     // Dynamische Anpassung an die Anzahl der Optionen (hier 2)
     int numOptions = options.size();
 
-    if (IsKeyPressed(KEY_DOWN)) {
+    if (IsKeyPressed(KEY_S)) {
         selectedItem = (selectedItem + 1) % numOptions;
     }
-    if (IsKeyPressed(KEY_UP)) {
+    if (IsKeyPressed(KEY_W)) {
         selectedItem = (selectedItem - 1 + numOptions) % numOptions;
     }
 

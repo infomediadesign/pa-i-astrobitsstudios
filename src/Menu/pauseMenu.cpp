@@ -1,7 +1,7 @@
 #include "pauseMenu.h"
 
 // ---------------- Constructor ----------------
-pauseMenu::Pausenmenu()
+pauseMenu::pauseMenu()
 {
     // Menu options
     options = { "Continue", "Restart", "Quit" };
@@ -39,11 +39,11 @@ void pauseMenu::Update()
     if (!active) return;
 
     // navigation
-    if (IsKeyPressed(KEY_UP)) {
+    if (IsKeyPressed(KEY_W)) {
         MoveUp();
     }
 
-    if (IsKeyPressed(KEY_DOWN)) {
+    if (IsKeyPressed(KEY_S)) {
         MoveDown();
     }
 
@@ -68,7 +68,7 @@ void pauseMenu::Draw()
     // title
     const char* title = "PAUSED";
     int titleWidth = MeasureText(title, titleFontSize);
-    DrawText(title, (W - titleWidth) / 2, 140, titleFontSize, WHITE);
+    DrawText(title, (W - titleWidth) / 2, 140, titleFontSize,BLACK);
 
     // menu items
     int startY = 240;

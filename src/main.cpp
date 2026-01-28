@@ -54,10 +54,10 @@ int main() {
     player.Init();
     hp.Init();
     std::vector<Wall> walls = {
-        {0, 0, 5, (float)Game::ScreenHeight},                               // Links
-        {(float)Game::ScreenWidth - 5, 0, 5, (float)Game::ScreenHeight},    // Rechts
+        {0, 0, 1, (float)Game::ScreenHeight},                               // Links
+        {(float)Game::ScreenWidth - 5, 0, 1, (float)Game::ScreenHeight},    // Rechts
         {0, 40, (float)Game::ScreenWidth, 5},                               // Oben
-        {0, (float)Game::ScreenHeight - 5, (float)Game::ScreenWidth, 5}     // Unten
+        {0, (float)Game::ScreenHeight - 50, (float)Game::ScreenWidth, 1}     // Unten
     };
 
     // Your own initialization code here

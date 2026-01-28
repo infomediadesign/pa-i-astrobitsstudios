@@ -44,6 +44,7 @@ int main() {
     Options options;
     pauseMenu pauseMenu;
     GameState currentState = STATE_MENU;
+    GameState previousState = STATE_PLAYING;
     Death_Screen deathScreen;
     Player hp;
     Enemy golem;
@@ -74,95 +75,98 @@ int main() {
 
 
         // --- 1. LOGIK UPDATE ---
-        if (currentState == STATE_DEATH) {
-            deathScreen.Update(); // <--- DAS HIER MUSS AUFGERUFEN WERDEN!
+switch (currentState) {
+    case STATE_PAUSE:
+        pauseMenu.Update();
 
-            if (deathScreen.GetChoice() == 0) {
-                // Erneut versuchen
-                // Alles zurücksetzen
-                hp.Init();
-                player.Reset();
-                //golem.Init();
-                melee.Reset();
-
-                deathScreen.ResetChoice();
-                currentState = STATE_PLAYING;
-            }
-            else if (deathScreen.GetChoice() == 1) {
-                // Ins Hauptmenü
-                deathScreen.ResetChoice();
-                mainMenu.ResetChoice();
-                currentState = STATE_MENU;
-            }
+        // Zurück zum Spiel mit ESC oder Button 0
+        if (IsKeyPressed(KEY_ESCAPE) || pauseMenu.GetChoice() == 0) {
+            pauseMenu.ResetChoice();
+            currentState = STATE_PLAYING;
         }
-
-        if (currentState == STATE_MENU) {
-            mainMenu.Update();
-            if (mainMenu.GetChoice() == 0) {
-                hp.Init();
-                melee.Reset();
-                player.Reset();
-                currentState = STATE_PLAYING;
-                mainMenu.ResetChoice();
-            }
-            else if (mainMenu.GetChoice() == 2) {
-                currentState = STATE_EXIT;
-            }else if (mainMenu.GetChoice()==1) {
-                currentState = STATE_OPTIONS;
-                mainMenu.ResetChoice();
-            }
+        else if (pauseMenu.GetChoice() == 1) {
+            pauseMenu.ResetChoice();
+            previousState = STATE_PAUSE;
+            currentState = STATE_OPTIONS;
         }
-        if (IsKeyPressed(KEY_ESCAPE)&& currentState == STATE_OPTIONS) {
+        else if (pauseMenu.GetChoice() == 2) {
+            pauseMenu.ResetChoice();
             currentState = STATE_MENU;
         }
+        break;
 
-        if (currentState == STATE_PLAYING) {
-            player.Update(dt, walls);
-            golem.Update(dt);
-            hp.Update(dt);
-            attackCD.Update(dt);
-            dashCD.Update(dt);
-            player.Animate(dt);
+    case STATE_PLAYING:
+        player.Update(dt, walls);
+        golem.Update(dt);
+        hp.Update(dt);
+        attackCD.Update(dt);
+        dashCD.Update(dt);
+        player.Animate(dt);
 
-            if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
-                player.Dash(walls, dt);
-                hp.invincibleTimer = hp.invincibleDuration;
-                hp.Update(dt);
-                dashCD.Trigger();
-            }
-
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && attackCD.Ready()) {
-                melee.Start(player.GetPos(), player.GetSize());
-                attackCD.Trigger();
-            }
-            melee.Update(dt, player.GetPos(), player.GetSize());
-
-            if (melee.active) {
-                if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
-                    if (!golem.wasHit) golem.TakeDamage(melee.damage);
-                }
-            } else golem.wasHit = false;
-
-            if (hp.Gethealth() <= 0) {
-                currentState = STATE_DEATH;
-            }
-
+        // Pause aktivieren
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            currentState = STATE_PAUSE;
         }
 
-
-        if (IsKeyDown(KEY_LEFT_ALT) && IsKeyPressed(KEY_ENTER)) {
-            //Fullscreen logic.
-            if (IsWindowFullscreen()) {
-                ToggleFullscreen();
-                SetWindowSize(Game::ScreenWidth, Game::ScreenHeight);
-            } else {
-                SetWindowSize(GetMonitorWidth(GetCurrentMonitor()), GetMonitorHeight(GetCurrentMonitor()));
-                ToggleFullscreen();
-            }
+        // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
+        if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
+            player.Dash(walls, dt);
+            hp.invincibleTimer = hp.invincibleDuration;
+            dashCD.Trigger();
         }
+        if (hp.Gethealth() <= 0) {
+            currentState = STATE_DEATH;
+        }
+        break;
+
+    case STATE_OPTIONS:
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            currentState = previousState;
+        }
+        break;
+
+    case STATE_MENU:
+        mainMenu.Update();
+        if (mainMenu.GetChoice() == 0) {
+            hp.Init();
+            melee.Reset();
+            player.Reset();
+            currentState = STATE_PLAYING;
+            mainMenu.ResetChoice();
+        }
+        else if (mainMenu.GetChoice() == 1) {
+            previousState = STATE_MENU;
+            currentState = STATE_OPTIONS;
+            mainMenu.ResetChoice();
+        }
+        else if (mainMenu.GetChoice() == 2) {
+            currentState = STATE_EXIT;
+        }
+        break;
+
+    case STATE_DEATH:
+        deathScreen.Update();
+        if (deathScreen.GetChoice() == 0) {
+            hp.Init();
+            player.Reset();
+            melee.Reset();
+            deathScreen.ResetChoice();
+            currentState = STATE_PLAYING;
+        }
+        else if (deathScreen.GetChoice() == 1) {
+            deathScreen.ResetChoice();
+            mainMenu.ResetChoice();
+            currentState = STATE_MENU;
+        }
+        break;
+}
+
+
+
+
         // ---------- Pause Menu Update ----------
 
-        pauseMenu.Update();
+
 
 
         BeginDrawing();
@@ -178,8 +182,11 @@ int main() {
                 options.Draw();
             } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
-            } else if (currentState == STATE_PLAYING) {
+            }
+            else if (currentState == STATE_PAUSE) {
                 pauseMenu.Draw();
+            }
+            else if (currentState == STATE_PLAYING) {
                 player.Draw();
                 golem.Draw();
                 if (melee.active)
@@ -197,6 +204,7 @@ int main() {
                     DrawText("Hit", 400, 100, 24, BLACK);
                 }
                 hp.Draw(player.GetCollision());
+
 
             } else if (currentState == STATE_DEATH) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht

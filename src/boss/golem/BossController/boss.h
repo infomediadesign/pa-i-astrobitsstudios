@@ -5,10 +5,11 @@
 #pragma once
 #include "raylib.h"
 
-struct Enemy {
+class Enemy {
+
+public:
     Texture2D texture;
     Vector2 pos;
-
 
     // Neue Variablen für Schaden und Lebensbalken
     float health;
@@ -25,6 +26,8 @@ struct Enemy {
 
     void Unload();
 
+    //set Position vom Boss
+    void setPos(float x, float y);
 
     // Funktion, um Schaden zu verursachen
     void TakeDamage(float amount);

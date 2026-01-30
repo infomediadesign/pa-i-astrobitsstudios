@@ -3,6 +3,13 @@
 //
 
 #include "AttackJump.h"
+#include "../../../cooldown.h"
+#include "../../../player/schaden/schaden.h"
+
+
+Cooldown startAttackCD(4.0f);
+Cooldown doAttackCD(2.0f);
+Cooldown stopAttackCD(3.0f);
 
 void AttackJump::setRange(float range) {
     this->attackRange = range;
@@ -25,44 +32,102 @@ void AttackJump::setPos(Vector2 pos) {
 }
 
 bool AttackJump::hitPlayer(Rectangle playerRect) {
-    if (CheckCollisionCircleRec(this->pos, this->getAttackRange(),  playerRect))
+    if (CheckCollisionCircleRec(this->pos, this->getAttackRange(), playerRect))
         return true;
-    else
-    {
+    else {
         return false;
     }
 }
 
-void AttackJump::attack(Vector2 playerPos, Rectangle playerRect, float dt) {
+void AttackJump::attack(Vector2 playerPos, Rectangle playerRect, float dt, Player &schadensSystem) {
     startAttack(playerPos);
-    jumpAttackCD(2.0f, dt);
-    doAttack(playerRect, playerPos);
-    //stopAttack();
+    if (doAttackCD.Ready())
+        doAttack(playerRect, playerPos, schadensSystem);
+    if (stopAttackCD.Ready())
+        stopAttack();
+
 }
 
 void AttackJump::startAttack(Vector2 playerPos) {
     setRange(100.0f);
-    DrawCircleLines(playerPos.x +30,playerPos.y+35, this->getAttackRange(),RED);
     setPos(playerPos);
+    doAttackCD.Trigger();
+    stopAttackCD.Trigger();
+    this->setStartAttackActive(true);
 }
 
-void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos) {
-    DrawCircle(playerPos.x +30,playerPos.y+35, this->getAttackRange(),RED);
+void AttackJump::startAttackDraw(Vector2 playerPos) {
+    if (startAttackActive && startAttackCD.Ready())
+        DrawCircleLines(playerPos.x + 30, playerPos.y + 35, this->getAttackRange(),RED);
+}
 
-    if (CheckCollisionCircleRec(this->pos, this->getAttackRange(),  playerRect)) {
-        //TakeDamage(30);
+void AttackJump::upadteAttackCD(float dt) {
+    startAttackCD.Update(dt);
+    doAttackCD.Update(dt);
+    stopAttackCD.Update(dt);
+}
+
+// Füge einen Parameter vom Typ deiner Schadens-Klasse hinzu (z.B. Player)
+void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos, Player &schadensSystem) {
+    if (CheckCollisionCircleRec(this->pos, this->getAttackRange(), playerRect)) {
+        schadensSystem.TakeDamage(20); // Jetzt klappt der Zugriff!
     }
+
+}
+
+void AttackJump::doAttackDraw(Vector2 playerPos) {
+    if (doAttackActive && doAttackCD.Ready()) {
+        DrawCircle(playerPos.x + 30, playerPos.y + 35, this->getAttackRange(),RED);
+    }
+    if (stopAttackCD.Ready())
+        stopAttack();
 }
 
 void AttackJump::stopAttack() {
-    //unload texture;
+    this->setDoAttackActive(false);
+    this->setStartAttackActive(false);
 }
 
 void AttackJump::jumpAttackCD(float duration, float dt) {
-
-    if (timer >0) timer -dt;
+    timer = duration;
+    if (timer > 0) timer - dt;
     DrawText(TextFormat("Cooldown %.2f", timer), 500, 600, 24,BLUE);
     if (timer == 0) timer == duration;
+}
 
+void AttackJump::setActive(bool active) {
+    this->active = active;
+}
+
+bool AttackJump::isActive() {
+    return active;
+}
+
+bool AttackJump::isDoAttackActive() {
+    return doAttackActive;
+}
+
+bool AttackJump::isStartAttackActive() {
+    return startAttackActive;
+}
+
+void AttackJump::setDoAttackActive(bool active) {
+    this->doAttackActive = active;
+}
+
+void AttackJump::setStartAttackActive(bool active) {
+    this->startAttackActive = active;
+}
+
+void AttackJump::DrawCD() {
+    if (doAttackCD.Ready())
+        DrawText("Ready", 300, 20, 10, GREEN);
+    else DrawText(TextFormat("do: Cooldown %.2f", doAttackCD.Remaining()), 300, 20, 10, GREEN);
+    if (startAttackCD.Ready())
+        DrawText("Ready", 450, 20, 10, GREEN);
+    else DrawText(TextFormat("start; Cooldown %.2f", startAttackCD.Remaining()), 450, 20, 10, GREEN);
+    if (stopAttackCD.Ready())
+        DrawText("Ready", 500, 20, 10, GREEN);
+    else DrawText(TextFormat("stop; Cooldown %.2f", stopAttackCD.Remaining()), 500, 20, 10, GREEN);
 }
 

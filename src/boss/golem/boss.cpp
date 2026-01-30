@@ -1,13 +1,3 @@
-//
-// Created by Ben on 04.12.2025.
-//
-
-#include "boss.h"
-
-
-#include "raylib.h"
-
-#include "config.h"
 
 
 

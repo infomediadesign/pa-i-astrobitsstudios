@@ -1,12 +1,15 @@
 ﻿#include <cstdlib>
 #include <algorithm>
+
 #include "raylib.h"
+
 #include "config.h"
 #include <math.h>
 #include"cooldown.h"
 #include <vector>
 #include "Sprite.h"
-#include "boss/golem/boss.h"
+#include "boss/golem/AttackJump/AttackJump.h"
+#include "boss/golem/BossController/boss.h"
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
 #include "player/combat/plattack.h"
@@ -20,6 +23,7 @@
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
+    Cooldown jumpAttackCD(4.0f);
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT| FLAG_WINDOW_UNDECORATED);
@@ -57,15 +61,16 @@ int main() {
     Enemy golem;
     controller player;
     plattack melee;
+    AttackJump attack_jump;
     melee.Init();
     golem.Init();
     player.Init();
     hp.Init();
     std::vector<Wall> walls = {
-        {0, 0, 1, (float)Game::ScreenHeight},                               // Links
-        {(float)Game::ScreenWidth - 5, 0, 1, (float)Game::ScreenHeight},    // Rechts
-        {0, 40, (float)Game::ScreenWidth, 5},                               // Oben
-        {0, (float)Game::ScreenHeight - 50, (float)Game::ScreenWidth, 1}     // Unten
+        {0, 0, 1, (float) Game::ScreenHeight}, // Links
+        {(float) Game::ScreenWidth - 5, 0, 1, (float) Game::ScreenHeight}, // Rechts
+        {0, 40, (float) Game::ScreenWidth, 5}, // Oben
+        {0, (float) Game::ScreenHeight - 50, (float) Game::ScreenWidth, 1} // Unten
     };
 
     // Your own initialization code here
@@ -82,9 +87,9 @@ int main() {
 
 
         // --- 1. LOGIK UPDATE ---
-switch (currentState) {
-    case STATE_PAUSE:
-        pauseMenu.Update();
+        switch (currentState) {
+            case STATE_PAUSE:
+                pauseMenu.Update();
 
         // Zurück zum Spiel mit ESC oder Button 0
         if (IsKeyPressed(KEY_ESCAPE) || pauseMenu.GetChoice() == 0) {
@@ -104,35 +109,56 @@ switch (currentState) {
         }
         break;
 
-    case STATE_PLAYING:
+            case STATE_PLAYING:
+                player.Update(dt, walls);
+                golem.Update(dt);
+                hp.Update(dt);
+                attackCD.Update(dt);
+                dashCD.Update(dt);
+                attack_jump.upadteAttackCD(dt);
+                jumpAttackCD.Update(dt);
+                melee.Update(dt, player.GetPos(), player.GetSize());
+                player.Animate(dt);
         runTimer.Update(dt);
-        player.Update(dt, walls);
-        golem.Update(dt);
-        hp.Update(dt);
-        attackCD.Update(dt);
-        dashCD.Update(dt);
-        melee.Update(dt,player.GetPos(), player.GetSize());
-        player.Animate(dt);
+
 
         // Pause aktivieren
         if (IsKeyPressed(KEY_ESCAPE)) {
             runTimer.Stop();
             currentState = STATE_PAUSE;
         }
+                //BossAttack
+               /* if (jumpAttackCD.Ready()) {
+                    attack_jump.startAttack(player.GetPos());
+                    circleCD.Trigger();
+                }
 
-        // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
-        if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
-            player.Dash(walls, dt);
-            hp.invincibleTimer = hp.invincibleDuration;
-            dashCD.Trigger();
-        }
-        if (attackCD.Ready() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            melee.Start(player.GetPos(), player.GetSize());
-            attackCD.Trigger();
-            if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
-                golem.TakeDamage(melee.damage);
-            }
-        }
+                if (circleCD.Ready() && attack_jump.isActive()) {
+                   attack_jump.doAttack(player.GetSize(), player.GetPos());
+                   attack_jump.stopAttack();
+                }*/
+                if (jumpAttackCD.Ready()) {
+                    attack_jump.attack(player.GetPos(), player.GetSize(),dt,hp);
+                    jumpAttackCD.Trigger();
+                }
+                // Pause aktivieren
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    currentState = STATE_PAUSE;
+                }
+
+                // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
+                if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
+                    player.Dash(walls, dt);
+                    hp.invincibleTimer = hp.invincibleDuration;
+                    dashCD.Trigger();
+                }
+                if (attackCD.Ready() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    melee.Start(player.GetPos(), player.GetSize());
+                    attackCD.Trigger();
+                    if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
+                        golem.TakeDamage(melee.damage);
+                    }
+                }
 
         if (hp.Gethealth() <= 0) {
             runTimer.Reset();
@@ -145,11 +171,11 @@ switch (currentState) {
         }
         break;
 
-    case STATE_OPTIONS:
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            currentState = previousState;
-        }
-        break;
+            case STATE_OPTIONS:
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    currentState = previousState;
+                }
+                break;
 
     case STATE_MENU:
         mainMenu.Update();
@@ -234,17 +260,25 @@ switch (currentState) {
                 pauseMenu.Draw();
             }*/
             else if (currentState == STATE_PLAYING) {
+                attack_jump.startAttackDraw(player.GetPos());
+                attack_jump.doAttackDraw(player.GetPos());
+
                 player.Draw();
                 golem.Draw();
+
+                attack_jump.DrawCD();
                 if (melee.active)
                     melee.Draw();
                 if (dashCD.Ready())
-                    DrawText("Ready", 150, 20, 24, BLUE);
-                else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 24, BLUE);
+                    DrawText("Ready", 150, 20, 10, BLUE);
+                else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 10, BLUE);
 
                 if (attackCD.Ready())
-                    DrawText("Ready", 20, 20, 24, GREEN);
-                else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 24, GREEN);
+                    DrawText("Ready", 20, 20, 10, GREEN);
+                else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
+                if (jumpAttackCD.Ready())
+                    DrawText("Ready", 600, 20, 10, GREEN);
+                else DrawText(TextFormat("Cooldown %.2f", jumpAttackCD.Remaining()), 600, 20, 10, GREEN);
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);
@@ -256,6 +290,7 @@ switch (currentState) {
 
 
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
+
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 player.Draw();
                 golem.Draw();
@@ -263,7 +298,7 @@ switch (currentState) {
                 // Jetzt den roten Text drüber zeichnen
                 if (currentState == STATE_PAUSE) {
                     pauseMenu.Draw();
-                }else if (currentState == STATE_DEATH) {
+                } else if (currentState == STATE_DEATH) {
                     deathScreen.Draw();
                 }
             }
@@ -305,18 +340,17 @@ switch (currentState) {
             DrawText(TextFormat("Render scale: %.0f", renderScale), 10, 10, 20, LIGHTGRAY);
         }
         EndDrawing();
+    }
+    // De-initialization here
+    // ...
+    // ...
+    melee.Unload();
+    golem.Unload();
+    player.Unload();
+    UnloadRenderTexture(canvas);
 
-}
-        // De-initialization here
-        // ...
-        // ...
-        melee.Unload();
-        golem.Unload();
-        player.Unload();
-        UnloadRenderTexture(canvas);
-
-        // Close window and OpenGL context
-        CloseWindow();
+    // Close window and OpenGL context
+    CloseWindow();
 
         return EXIT_SUCCESS;
 

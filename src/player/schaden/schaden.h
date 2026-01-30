@@ -2,7 +2,7 @@
 #define PLAYER_H
 
 #include "raylib.h"
-struct Player {
+class Player {
     public:
     int Gethealth() const { return hp; }
 

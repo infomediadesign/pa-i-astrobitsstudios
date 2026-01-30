@@ -1,95 +1,49 @@
 #include "pauseMenu.h"
 
+
+
+#include "config.h"
+
 // ---------------- Constructor ----------------
-pauseMenu::Pausenmenu()
-{
-    // Menu options
-    options = { "Continue", "Restart", "Quit" };
-
+pauseMenu::pauseMenu() {
+    options = {"Weiter", "Options", "Hauptmenu"};
+    choice = -1;
     selectedItem = 0;
-    choice = -1;      // nothing selected
-    active = false;   // pause menu starts inactive
 }
 
-// ---------------- Helpers ----------------
-void pauseMenu::MoveUp()
-{
-    selectedItem--;
-    if (selectedItem < 0)
-        selectedItem = (int)options.size() - 1;
-}
+void pauseMenu::Update() {
+    // Dynamische Anpassung an die Anzahl der Optionen (hier 3)
+    if (IsKeyPressed(KEY_S)) selectedItem = (selectedItem + 1) % 3;
+    if (IsKeyPressed(KEY_W)) selectedItem = (selectedItem - 1 + 3) % 3;
 
-void pauseMenu::MoveDown()
-{
-    selectedItem++;
-    if (selectedItem >= (int)options.size())
-        selectedItem = 0;
-}
-
-// ---------------- Update ----------------
-void pauseMenu::Update()
-{
-    // ESC toggles pause menu
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        active = !active;
-        choice = -1; // reset choice when toggling
-        return;
-    }
-
-    if (!active) return;
-
-    // navigation
-    if (IsKeyPressed(KEY_UP)) {
-        MoveUp();
-    }
-
-    if (IsKeyPressed(KEY_DOWN)) {
-        MoveDown();
-    }
-
-    // confirm
-    if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER)) {
-        choice = selectedItem;   // store result
-        active = false;          // close menu after choice
+    if (IsKeyPressed(KEY_ENTER)) {
+        choice = selectedItem; // Setzt 0 für Start, 1 für Exit
     }
 }
 
-// ---------------- Draw ----------------
-void pauseMenu::Draw()
-{
-    if (!active) return;
 
-    const int W = GetScreenWidth();
-    const int H = GetScreenHeight();
+void pauseMenu::Draw() {
+    // 1. Hintergrund abdunkeln
+    DrawRectangle(0, 0, Game::ScreenWidth, Game::ScreenHeight, Fade(BLACK, 0.8f));
 
-    // dark overlay
-    DrawRectangle(0, 0, W, H, overlayColor);
+    // 2. Titel anzeigen
+    DrawText("Pause", Game::ScreenWidth / 2 - MeasureText("Pause", 40) / 2, 150, 40, RED);
 
-    // title
-    const char* title = "PAUSED";
-    int titleWidth = MeasureText(title, titleFontSize);
-    DrawText(title, (W - titleWidth) / 2, 140, titleFontSize, WHITE);
+    // 3. Optionen dynamisch zeichnen
+    for (int i = 0; i < options.size(); i++) {
+        // Text zentrieren
+        int textWidth = MeasureText(options[i].c_str(), 30);
+        int xPos = Game::ScreenWidth / 2 - textWidth / 2;
+        int yPos = 300 + (i * 60);
 
-    // menu items
-    int startY = 240;
-    for (int i = 0; i < (int)options.size(); i++) {
-        const std::string& textStr = options[i];
-        int y = startY + i * 50;
+        // Farbe wählen: Rot wenn ausgewählt, Weiß wenn nicht
+        Color color = (i == selectedItem) ? RED : BLACK;
 
+        // Kleiner Indikator (Pfeil) vor dem ausgewählten Text
         if (i == selectedItem) {
-            const char* text = TextFormat("> %s <", textStr.c_str());
-            int w = MeasureText(text, itemFontSize);
-            DrawText(text, (W - w) / 2, y, itemFontSize, YELLOW);
-        } else {
-            int w = MeasureText(textStr.c_str(), itemFontSize);
-            DrawText(textStr.c_str(), (W - w) / 2, y, itemFontSize, RAYWHITE);
+            DrawText("> ", xPos - 30, yPos, 30, RED);
         }
+
+        DrawText(options[i].c_str(), xPos, yPos, 30, color);
     }
-
-    // hints
-    const char* hint1 = "UP/DOWN to select, ENTER to confirm";
-    const char* hint2 = "ESC to pause/resume";
-
-    DrawText(hint1, (W - MeasureText(hint1, 18)) / 2, startY + 180, 18, LIGHTGRAY);
-    DrawText(hint2, (W - MeasureText(hint2, 18)) / 2, startY + 205, 18, LIGHTGRAY);
 }

@@ -1,7 +1,8 @@
 #ifndef RAYLIBSTARTER_PAUSENMENU_H
 #define RAYLIBSTARTER_PAUSENMENU_H
+#pragma once
 
-#include "Menu.hpp"   //
+#include "Menu.hpp"
 #include "raylib.h"
 #include <vector>
 #include <string>
@@ -13,17 +14,17 @@ public:
     void Update() override;
     void Draw() override;
 
+    // Hilfsfunktion, um zu wissen, was geklickt wurde
+    int GetChoice() { return choice; }
+    void ResetChoice() { choice = -1; }
+
 private:
     // layout values
-    int titleFontSize = 50;
-    int itemFontSize  = 28;
+    int choice = -1; // -1 = nichts, 0 = Start, 1 = Exit
 
-    // overlay
-    Color overlayColor = {0, 0, 0, 180};
 
-    // helpers
-    void MoveUp();
-    void MoveDown();
+
+
 };
 
 #endif // RAYLIBSTARTER_PAUSENMENU_H

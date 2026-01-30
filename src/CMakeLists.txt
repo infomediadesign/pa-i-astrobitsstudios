@@ -25,7 +25,7 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/Options.h
         Menu/Death_Screen.cpp
         Menu/Death_Screen.h
-        boss/golem/AttackJump/AttackJump.cpp
+        Menu/pauseMenu.cpp
 
 )
 

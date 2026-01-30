@@ -163,12 +163,6 @@ switch (currentState) {
 
 
 
-
-        // ---------- Pause Menu Update ----------
-
-
-
-
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
         // For the letterbox we draw on canvas instead

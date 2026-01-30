@@ -101,6 +101,7 @@ switch (currentState) {
         hp.Update(dt);
         attackCD.Update(dt);
         dashCD.Update(dt);
+        melee.Update(dt,player.GetPos(), player.GetSize());
         player.Animate(dt);
 
         // Pause aktivieren
@@ -114,6 +115,14 @@ switch (currentState) {
             hp.invincibleTimer = hp.invincibleDuration;
             dashCD.Trigger();
         }
+        if (attackCD.Ready() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            melee.Start(player.GetPos(), player.GetSize());
+            attackCD.Trigger();
+            if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
+                golem.TakeDamage(melee.damage);
+            }
+        }
+
         if (hp.Gethealth() <= 0) {
             currentState = STATE_DEATH;
         }
@@ -150,6 +159,7 @@ switch (currentState) {
             hp.Init();
             player.Reset();
             melee.Reset();
+            hp.invincibleTimer = hp.invincibleDuration;
             deathScreen.ResetChoice();
             currentState = STATE_PLAYING;
         }
@@ -177,9 +187,9 @@ switch (currentState) {
             } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
             }
-            else if (currentState == STATE_PAUSE) {
+            /*else if (currentState == STATE_PAUSE) {
                 pauseMenu.Draw();
-            }
+            }*/
             else if (currentState == STATE_PLAYING) {
                 player.Draw();
                 golem.Draw();
@@ -200,13 +210,17 @@ switch (currentState) {
                 hp.Draw(player.GetCollision());
 
 
-            } else if (currentState == STATE_DEATH) {
+            } else if (currentState == STATE_DEATH || STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 player.Draw();
                 golem.Draw();
 
                 // Jetzt den roten Text drüber zeichnen
-                deathScreen.Draw();
+                if (currentState == STATE_PAUSE) {
+                    pauseMenu.Draw();
+                }else if (currentState == STATE_DEATH) {
+                    deathScreen.Draw();
+                }
             }
 
         }

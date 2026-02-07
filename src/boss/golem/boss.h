@@ -10,6 +10,8 @@ struct Enemy {
         Texture2D texture;
         Vector2 pos;
 
+        // Hitbox function
+        Rectangle GetHitbox() const;
 
         // Neue Variablen für Schaden und Lebensbalken
         float health;
@@ -17,6 +19,8 @@ struct Enemy {
         float hitTimer;      // Steuert das rote Aufblinken
         bool active;         // Ist der Boss noch am Leben?
         bool wasHit;
+
+        // Functions
         void Init();
         void Update(float dt);
         void Draw();

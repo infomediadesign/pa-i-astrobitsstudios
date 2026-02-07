@@ -26,11 +26,13 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/Death_Screen.cpp
         Menu/Death_Screen.h
         Menu/pauseMenu.cpp
+        Menu/highscore.cpp
+        Menu/highscore.h
 
 )
 
-# Add config.h.in file
-configure_file(config.h.in config.h)
+# Add config.h file
+configure_file(config.h config.h)
 target_include_directories(${PROJECT_NAME} PUBLIC
         "${PROJECT_BINARY_DIR}"
         )

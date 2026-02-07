@@ -12,7 +12,15 @@
 
 
 
-
+Rectangle Enemy::GetHitbox() const
+{
+    return Rectangle{
+        pos.x,
+        pos.y,
+        (float)texture.width,
+        (float)texture.height
+    };; // or bodyRect; depends on your code
+}
 
     void Enemy::Init()
     {

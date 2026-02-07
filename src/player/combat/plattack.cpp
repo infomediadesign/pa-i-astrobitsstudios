@@ -73,9 +73,9 @@ void plattack::Reset() {
      pos = {0,0};
      damage=10;
      active = false;
-     frames;
-     frameSpeed;
-     frameCount;
+     int frames;
+     float frameSpeed;
+     int frameCount;
      rotation =0;
      dstH = {pos.x+texture.width / 2.0f,pos.y+texture.height/2.0f,(float)texture.width,(float)texture.height};
      srcH = {0,0,(float)texture.width,(float)texture.height};

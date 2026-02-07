@@ -9,7 +9,15 @@
 
 #include "../../enviroment/walls.h"
 
-
+Rectangle controller::GetHitbox() const
+{
+    return Rectangle{
+        pos.x,
+        pos.y,
+        size.width,
+        size.height
+    };
+}
 void controller::Update(float dt, const std::vector<Wall>& walls)
 {
     Vector2 velocity = {0, 0};

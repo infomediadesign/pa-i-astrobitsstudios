@@ -171,8 +171,13 @@ switch (currentState) {
             currentState = STATE_OPTIONS;
             mainMenu.ResetChoice();
         }
-        else if (mainMenu.GetChoice() == 2) {
+        else if (mainMenu.GetChoice() == 3) {
             currentState = STATE_EXIT;
+        }
+        else if (mainMenu.GetChoice() == 2) {
+            previousState = STATE_MENU;
+            currentState = STATE_HIGHSCORES;
+            mainMenu.ResetChoice();
         }
         break;
 

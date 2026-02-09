@@ -7,14 +7,14 @@
 #include <config.h>
 
 MainMenu::MainMenu() {
-    options = {"Spiel Starten","Optionen", "Beenden"};
+    options = {"Spiel Starten","Optionen","Highscores","Beenden"};
     selectedItem = 0;
     choice = -1;
 }
 
 void MainMenu::Update() {
-    if (IsKeyPressed(KEY_S)) selectedItem = (selectedItem + 1) % 3;
-    if (IsKeyPressed(KEY_W)) selectedItem = (selectedItem - 1 + 3) % 3;
+    if (IsKeyPressed(KEY_S)) selectedItem = (selectedItem + 1) % 4;
+    if (IsKeyPressed(KEY_W)) selectedItem = (selectedItem - 1 + 4) % 4;
 
     if (IsKeyPressed(KEY_ENTER)) {
         choice = selectedItem; // Setzt 0 für Start, 1 für Exit

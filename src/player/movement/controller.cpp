@@ -60,7 +60,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 
 void controller::Init()
 {
-    texture =LoadTexture("assets/graphics/player.png");
+    texture =LoadTexture("assets/graphics/Player/player.png");
     pos = {10, 100};
     speed = 7;
     frames=0;

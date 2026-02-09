@@ -8,7 +8,7 @@
 #include "config.h"
 
 void plattack::Init() {
-     texture =LoadTexture("assets/graphics/shot.png");
+     texture =LoadTexture("assets/graphics/Player/shot.png");
      pos = {0,0};
      damage=10;
      active = false;

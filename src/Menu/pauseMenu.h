@@ -13,6 +13,7 @@ public:
 
     void Update() override;
     void Draw() override;
+    void Open();
 
     // Hilfsfunktion, um zu wissen, was geklickt wurde
     int GetChoice() { return choice; }

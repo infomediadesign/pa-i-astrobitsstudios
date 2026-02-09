@@ -1,3 +1,4 @@
+#pragma once
 #include "pauseMenu.h"
 
 
@@ -12,6 +13,8 @@ pauseMenu::pauseMenu() {
 }
 
 void pauseMenu::Update() {
+
+
     // Dynamische Anpassung an die Anzahl der Optionen (hier 3)
     if (IsKeyPressed(KEY_S)) selectedItem = (selectedItem + 1) % 3;
     if (IsKeyPressed(KEY_W)) selectedItem = (selectedItem - 1 + 3) % 3;
@@ -21,6 +24,11 @@ void pauseMenu::Update() {
     }
 }
 
+void pauseMenu::Open() {
+    // Sichtbar "Weiterspielen" auswählen, wenn das Menü geöffnet wird
+    selectedItem = 0;
+    choice = -1;
+}
 
 void pauseMenu::Draw() {
     // 1. Hintergrund abdunkeln

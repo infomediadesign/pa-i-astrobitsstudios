@@ -4,6 +4,7 @@
 
 #ifndef RAYLIBSTARTER_MENU_UI_H
 #define RAYLIBSTARTER_MENU_UI_H
+#pragma once
 
 #include "Menu.hpp"
 

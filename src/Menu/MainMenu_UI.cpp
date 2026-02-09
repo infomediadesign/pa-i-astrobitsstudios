@@ -22,10 +22,14 @@ void MainMenu::Update() {
 }
 
 void MainMenu::Draw() {
-    DrawText("Hauptmenü", Game::ScreenWidth/2.5, Game::ScreenHeight/6.5, 40, BLACK);
+    DrawText("Hauptmenu", Game::ScreenWidth/2.5, Game::ScreenHeight/6.5, 40, BLACK);
 
     for (int i = 0; i < options.size(); i++) {
         Color color = (i == selectedItem) ? RED : BLACK;
         DrawText(options[i].c_str(), 100, 200 + (i * 50), 30, color);
+/*
+           if (i == selectedItem) {
+            DrawText("> ", - 30,300 + (i * 60) , 30, RED);
+        }*/
     }
 }

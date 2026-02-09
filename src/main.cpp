@@ -97,11 +97,13 @@ switch (currentState) {
         }
         else if (pauseMenu.GetChoice() == 1) {
             pauseMenu.ResetChoice();
+            pauseMenu.Open();
             previousState = STATE_PAUSE;
             currentState = STATE_OPTIONS;
         }
         else if (pauseMenu.GetChoice() == 2) {
             pauseMenu.ResetChoice();
+            pauseMenu.Open();
             runTimer.Reset();
             currentState = STATE_MENU;
         }

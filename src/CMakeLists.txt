@@ -28,6 +28,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/pauseMenu.cpp
         Menu/highscore.cpp
         Menu/highscore.h
+        enviroment/background.cpp
+        enviroment/background.h
 
 )
 

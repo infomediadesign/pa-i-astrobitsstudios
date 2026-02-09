@@ -23,7 +23,7 @@
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
-    Cooldown jumpAttackCD(4.0f);
+    Cooldown jumpAttackCD(1.75f);
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT| FLAG_WINDOW_UNDECORATED);
@@ -66,6 +66,7 @@ int main() {
     golem.Init();
     player.Init();
     hp.Init();
+
     std::vector<Wall> walls = {
         {0, 0, 1, (float) Game::ScreenHeight}, // Links
         {(float) Game::ScreenWidth - 5, 0, 1, (float) Game::ScreenHeight}, // Rechts
@@ -79,7 +80,6 @@ int main() {
     RenderTexture2D canvas = LoadRenderTexture(Game::ScreenWidth, Game::ScreenHeight);
     float renderScale{}; // this and the line below are relevant to drawing later.
     Rectangle renderRec{};
-
 
     // Main game loop
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
@@ -127,18 +127,9 @@ int main() {
             runTimer.Stop();
             currentState = STATE_PAUSE;
         }
-                //BossAttack
-               /* if (jumpAttackCD.Ready()) {
-                    attack_jump.startAttack(player.GetPos());
-                    circleCD.Trigger();
-                }
-
-                if (circleCD.Ready() && attack_jump.isActive()) {
-                   attack_jump.doAttack(player.GetSize(), player.GetPos());
-                   attack_jump.stopAttack();
-                }*/
+            
                 if (jumpAttackCD.Ready()) {
-                    attack_jump.attack(player.GetPos(), player.GetSize(),dt,hp);
+                    attack_jump.attack(player.GetPos(), player.GetSize(),dt,hp, golem);
                     jumpAttackCD.Trigger();
                 }
                 // Pause aktivieren
@@ -256,12 +247,10 @@ int main() {
             } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
             }
-            /*else if (currentState == STATE_PAUSE) {
-                pauseMenu.Draw();
-            }*/
+
             else if (currentState == STATE_PLAYING) {
-                attack_jump.startAttackDraw(player.GetPos());
-                attack_jump.doAttackDraw(player.GetPos());
+                attack_jump.startAttackDraw(attack_jump.getPos());
+                attack_jump.doAttackDraw(attack_jump.getPos());
 
                 player.Draw();
                 golem.Draw();

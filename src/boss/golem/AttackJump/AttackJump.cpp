@@ -5,11 +5,13 @@
 #include "AttackJump.h"
 #include "../../../cooldown.h"
 #include "../../../player/schaden/schaden.h"
+#include "../BossController/boss.h"
 
 
-Cooldown startAttackCD(4.0f);
-Cooldown doAttackCD(2.0f);
-Cooldown stopAttackCD(3.0f);
+
+Cooldown startAttackCD(1.0f);
+Cooldown doAttackCD(1.0f);
+Cooldown stopAttackCD(2.0f);
 
 void AttackJump::setRange(float range) {
     this->attackRange = range;
@@ -39,13 +41,22 @@ bool AttackJump::hitPlayer(Rectangle playerRect) {
     }
 }
 
-void AttackJump::attack(Vector2 playerPos, Rectangle playerRect, float dt, Player &schadensSystem) {
-    startAttack(playerPos);
-    if (doAttackCD.Ready())
-        doAttack(playerRect, playerPos, schadensSystem);
-    if (stopAttackCD.Ready())
-        stopAttack();
+void AttackJump::attack(Vector2 playerPos, Rectangle playerRect, float dt, Player &schadensSystem, Enemy &golem) {
+    if (startAttackCD.Ready() && !this->isStartAttackActive()) {
+        startAttack(playerPos);
+        startAttackCD.Trigger(); // Verhindert sofortigen Neustart
+    }
 
+    if (this->isStartAttackActive()) {
+        if (doAttackCD.Ready())
+            if (!isDoAttackActive()) {
+                setDoAttackActive(true);
+                doAttack(playerRect, playerPos, schadensSystem, golem);
+            }
+
+        if (stopAttackCD.Ready())
+            stopAttack();
+    }
 }
 
 void AttackJump::startAttack(Vector2 playerPos) {
@@ -57,7 +68,7 @@ void AttackJump::startAttack(Vector2 playerPos) {
 }
 
 void AttackJump::startAttackDraw(Vector2 playerPos) {
-    if (startAttackActive && startAttackCD.Ready())
+    if (startAttackActive)
         DrawCircleLines(playerPos.x + 30, playerPos.y + 35, this->getAttackRange(),RED);
 }
 
@@ -68,7 +79,10 @@ void AttackJump::upadteAttackCD(float dt) {
 }
 
 // Füge einen Parameter vom Typ deiner Schadens-Klasse hinzu (z.B. Player)
-void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos, Player &schadensSystem) {
+void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos, Player &schadensSystem, Enemy &golem) {
+
+    golem.setPos(getPos());
+
     if (CheckCollisionCircleRec(this->pos, this->getAttackRange(), playerRect)) {
         schadensSystem.TakeDamage(20); // Jetzt klappt der Zugriff!
     }
@@ -77,6 +91,7 @@ void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos, Player &schad
 
 void AttackJump::doAttackDraw(Vector2 playerPos) {
     if (doAttackActive && doAttackCD.Ready()) {
+
         DrawCircle(playerPos.x + 30, playerPos.y + 35, this->getAttackRange(),RED);
     }
     if (stopAttackCD.Ready())

@@ -27,7 +27,7 @@ public:
     void Unload();
 
     //set Position vom Boss
-    void setPos(float x, float y);
+    void setPos(Vector2 position);
 
     // Funktion, um Schaden zu verursachen
     void TakeDamage(float amount);

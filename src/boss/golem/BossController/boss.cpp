@@ -60,7 +60,6 @@ Rectangle Enemy::GetRect() {
     return {pos.x, pos.y, (float) texture.width, (float) texture.height};
 }
 
-void Enemy::setPos(float x, float y) {
-    pos.x = x;
-    pos.y = y;
+void Enemy::setPos(Vector2 position) {
+    this->pos = position;
 }

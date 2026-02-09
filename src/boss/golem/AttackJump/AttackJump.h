@@ -6,7 +6,7 @@
 #define PA_I_ASTROBITSSTUDIOS_ATTACKJUMP_H
 #include "raylib.h"
 #include "../../../player/schaden/schaden.h"
-
+#include "../BossController/boss.h"
 
 class AttackJump {
 public:
@@ -19,10 +19,9 @@ public:
 
     void startAttack(Vector2 playerPos);
 
-    void attack(Vector2, Rectangle, float dt,Player &schadensSystem);
+    void attack(Vector2, Rectangle, float dt,Player &schadensSystem, Enemy &golem);
 
-    // Füge einen Parameter vom Typ deiner Schadens-Klasse hinzu (z.B. Player)
-    void doAttack(Rectangle playerRect, Vector2 playerPos, Player &schadensSystem);
+    void doAttack(Rectangle playerRect, Vector2 playerPos, Player &schadensSystem, Enemy &);
 
     void stopAttack();
 

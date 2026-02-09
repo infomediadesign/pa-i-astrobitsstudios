@@ -5,9 +5,22 @@
 #ifndef RAYLIBSTARTER_BACKGROUND_H
 #define RAYLIBSTARTER_BACKGROUND_H
 
+#pragma once
 
-class background {
-    void draw() override;
+#include "raylib.h"
+
+
+struct  background {
+
+    Texture2D texture;
+  Vector2 pos;
+    int frames;
+
+    void init();
+
+    void Unload();
+
+    void draw();
 };
 
 

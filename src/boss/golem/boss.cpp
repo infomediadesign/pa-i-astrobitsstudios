@@ -24,7 +24,7 @@ Rectangle Enemy::GetHitbox() const
 
     void Enemy::Init()
     {
-        texture  = LoadTexture("assets/graphics/Boss/testimage.png");
+        texture  = LoadTexture("assets/graphics/Boss/testimage1.png");
         pos = {Game::ScreenWidth/2, Game::ScreenHeight/2};
 
         health = 100.0f;

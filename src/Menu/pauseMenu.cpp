@@ -37,7 +37,7 @@ void pauseMenu::Draw() {
         int yPos = 300 + (i * 60);
 
         // Farbe wählen: Rot wenn ausgewählt, Weiß wenn nicht
-        Color color = (i == selectedItem) ? RED : BLACK;
+        Color color = (i == selectedItem) ? RED : WHITE;
 
         // Kleiner Indikator (Pfeil) vor dem ausgewählten Text
         if (i == selectedItem) {

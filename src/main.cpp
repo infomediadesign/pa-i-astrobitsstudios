@@ -7,6 +7,7 @@
 #include <vector>
 #include "Sprite.h"
 #include "boss/golem/boss.h"
+#include "enviroment/background.h"
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
 #include "player/combat/plattack.h"
@@ -51,6 +52,7 @@ int main() {
     RunTimer runTimer;
     HighscoreBoard board;
     NameInput nameInput;
+
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);
     Player hp;
@@ -61,13 +63,14 @@ int main() {
     golem.Init();
     player.Init();
     hp.Init();
+
     std::vector<Wall> walls = {
         {0, 0, 1, (float)Game::ScreenHeight},                               // Links
         {(float)Game::ScreenWidth - 5, 0, 1, (float)Game::ScreenHeight},    // Rechts
         {0, 40, (float)Game::ScreenWidth, 5},                               // Oben
         {0, (float)Game::ScreenHeight - 50, (float)Game::ScreenWidth, 1}     // Unten
     };
-
+    Texture2D background = LoadTexture("assets/graphics/backgrounds/Background1_Boss_Room.png");
     // Your own initialization code here
     // ...
     // ...
@@ -230,10 +233,9 @@ switch (currentState) {
             } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
             }
-            /*else if (currentState == STATE_PAUSE) {
-                pauseMenu.Draw();
-            }*/
+
             else if (currentState == STATE_PLAYING) {
+                DrawTexture(background, 0, 0, WHITE);
                 player.Draw();
                 golem.Draw();
                 if (melee.active)
@@ -257,8 +259,11 @@ switch (currentState) {
 
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
+                DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
                 golem.Draw();
+                hp.Draw(player.GetCollision());
+                DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 20, 60, 24, WHITE);
 
                 // Jetzt den roten Text drüber zeichnen
                 if (currentState == STATE_PAUSE) {
@@ -301,6 +306,7 @@ switch (currentState) {
                        Rectangle{0, 0, (float) canvas.texture.width, (float) -canvas.texture.height},
                        renderRec,
                        {}, 0, WHITE);
+
         if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_S)) {
             DrawText(TextFormat("Render scale: %.0f", renderScale), 10, 10, 20, LIGHTGRAY);
         }
@@ -313,7 +319,9 @@ switch (currentState) {
         melee.Unload();
         golem.Unload();
         player.Unload();
+
         UnloadRenderTexture(canvas);
+
 
         // Close window and OpenGL context
         CloseWindow();

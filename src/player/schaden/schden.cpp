@@ -71,6 +71,4 @@
     // border
     DrawRectangleLines(x, y, width, height, BLACK);
 
-    // simple text
-    DrawText(TextFormat("HP: %d / %d", hp, maxHp), x, y - 20, 16, WHITE);
 }

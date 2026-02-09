@@ -68,7 +68,7 @@ int main() {
         {0, 0, 1, (float)Game::ScreenHeight},                               // Links
         {(float)Game::ScreenWidth - 5, 0, 1, (float)Game::ScreenHeight},    // Rechts
         {0, 40, (float)Game::ScreenWidth, 5},                               // Oben
-        {0, (float)Game::ScreenHeight - 50, (float)Game::ScreenWidth, 1}     // Unten
+        {0, (float)Game::ScreenHeight - 60, (float)Game::ScreenWidth, 1}     // Unten
     };
     Texture2D background = LoadTexture("assets/graphics/backgrounds/Background1_Boss_Room.png");
     // Your own initialization code here
@@ -129,7 +129,7 @@ switch (currentState) {
             hp.invincibleTimer = hp.invincibleDuration;
             dashCD.Trigger();
         }
-        if (attackCD.Ready() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
             melee.Start(player.GetPos(), player.GetSize());
             attackCD.Trigger();
             if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
@@ -236,6 +236,7 @@ switch (currentState) {
 
             else if (currentState == STATE_PLAYING) {
                 DrawTexture(background, 0, 0, WHITE);
+                DrawRectangle(380,30,200,45,Fade(BLACK,0.6));
                 player.Draw();
                 golem.Draw();
                 if (melee.active)
@@ -250,11 +251,10 @@ switch (currentState) {
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);
-                    DrawText("Hit", 400, 100, 24, BLACK);
                 }
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
-                 20, 60, 24, BLACK);
+                 395, 40, 24, WHITE);
 
 
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
@@ -263,7 +263,7 @@ switch (currentState) {
                 player.Draw();
                 golem.Draw();
                 hp.Draw(player.GetCollision());
-                DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 20, 60, 24, WHITE);
+                DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
 
                 // Jetzt den roten Text drüber zeichnen
                 if (currentState == STATE_PAUSE) {

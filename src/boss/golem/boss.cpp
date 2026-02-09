@@ -54,9 +54,10 @@ Rectangle Enemy::GetHitbox() const
         DrawTextureV(texture, pos, tint);
 
         // OPTIONAL: Lebensbalken zeichnen
-        float barWidth = 60.0f;
-        DrawRectangle(pos.x + (texture.width/2) - (barWidth/2), pos.y - 15, barWidth, 6, DARKGRAY);
-        DrawRectangle(pos.x + (texture.width/2) - (barWidth/2), pos.y - 15, barWidth * (health/maxHealth), 6, GREEN);
+        float barWidth = 480.0f;
+        DrawText("Titty Frutti der Zweite", Game::ScreenWidth/2.5 +10,Game::ScreenHeight -50, 16,WHITE);
+        DrawRectangle((float)Game::ScreenWidth/4, (float)Game::ScreenHeight - 30, barWidth, 20, GRAY);
+        DrawRectangle((float)Game::ScreenWidth/4, (float)Game::ScreenHeight - 30, barWidth * (health/maxHealth), 20, GREEN);
     }
 
 void Enemy::TakeDamage(float amount) {

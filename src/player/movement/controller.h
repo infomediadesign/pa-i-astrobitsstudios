@@ -16,8 +16,10 @@ struct controller
     Rectangle size;
     int frameSpeed;
     int frameCount;
+    bool moving;
     Rectangle GetHitbox() const;
-
+    bool getMoving(){return moving;}
+    void setMoving(bool moving){this->moving = moving;}
     void Init();
     void Draw();
     void Animate(float dt);

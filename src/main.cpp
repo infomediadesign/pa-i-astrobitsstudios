@@ -121,7 +121,7 @@ int main() {
                 jumpAttackCD.Update(dt);
                 melee.Update(dt, player.GetPos(), player.GetSize());
                 player.Animate(dt);
-        runTimer.Update(dt);
+                runTimer.Update(dt);
 
 
         // Pause aktivieren
@@ -140,7 +140,7 @@ int main() {
                 }
 
         // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
-        if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
+        if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
             player.Dash(walls, dt);
             hp.invincibleTimer = hp.invincibleDuration;
             dashCD.Trigger();
@@ -180,6 +180,7 @@ int main() {
             runTimer.Reset();
             runTimer.Start();
             currentState = STATE_PLAYING;
+            hp.invincibleTimer = hp.invincibleDuration;
             mainMenu.ResetChoice();
         }
         else if (mainMenu.GetChoice() == 1) {

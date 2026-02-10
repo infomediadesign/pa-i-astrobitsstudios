@@ -22,11 +22,17 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 {
     Vector2 velocity = {0, 0};
 
-    if (IsKeyDown(KEY_W)) velocity.y -= speed;
-    if (IsKeyDown(KEY_S)) velocity.y += speed;
-    if (IsKeyDown(KEY_A)) velocity.x -= speed;
-    if (IsKeyDown(KEY_D)) velocity.x += speed;
-
+    if (IsKeyDown(KEY_W)){ velocity.y -= speed;
+        setMoving(true); }
+    if (IsKeyDown(KEY_S)) {velocity.y += speed;
+        setMoving(true); }
+    if (IsKeyDown(KEY_A)) {velocity.x -= speed;
+        setMoving(true); }
+    if (IsKeyDown(KEY_D)) {velocity.x += speed;
+        setMoving(true); }
+    if (!IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)&&!IsKeyDown(KEY_A)&&!IsKeyDown(KEY_D)) {
+        setMoving(false);
+    }
     // --- X ACHSE ---
     Rectangle nextX = {
         pos.x + velocity.x,

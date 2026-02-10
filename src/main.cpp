@@ -6,7 +6,9 @@
 #include"cooldown.h"
 #include <vector>
 #include "Sprite.h"
-#include "boss/golem/boss.h"
+#include "boss/golem/AttackJump/AttackJump.h"
+#include "boss/golem/BossController/boss.h"
+
 #include "enviroment/background.h"
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
@@ -21,6 +23,7 @@
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
+    Cooldown jumpAttackCD(1.75f);
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT| FLAG_WINDOW_UNDECORATED);
@@ -52,23 +55,22 @@ int main() {
     RunTimer runTimer;
     HighscoreBoard board;
     NameInput nameInput;
-
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);
     Player hp;
     Enemy golem;
     controller player;
     plattack melee;
+    AttackJump attack_jump;
     melee.Init();
     golem.Init();
     player.Init();
     hp.Init();
-
     std::vector<Wall> walls = {
-        {0, 0, 1, (float)Game::ScreenHeight},                               // Links
-        {(float)Game::ScreenWidth - 5, 0, 1, (float)Game::ScreenHeight},    // Rechts
-        {0, 40, (float)Game::ScreenWidth, 5},                               // Oben
-        {0, (float)Game::ScreenHeight - 60, (float)Game::ScreenWidth, 1}     // Unten
+        {0, 0, 1, (float) Game::ScreenHeight}, // Links
+        {(float) Game::ScreenWidth - 5, 0, 1, (float) Game::ScreenHeight}, // Rechts
+        {0, 40, (float) Game::ScreenWidth, 5}, // Oben
+        {0, (float) Game::ScreenHeight - 50, (float) Game::ScreenWidth, 1} // Unten
     };
     Texture2D background = LoadTexture("assets/graphics/backgrounds/Background1_Boss_Room.png");
     // Your own initialization code here
@@ -85,9 +87,9 @@ int main() {
 
 
         // --- 1. LOGIK UPDATE ---
-switch (currentState) {
-    case STATE_PAUSE:
-        pauseMenu.Update();
+        switch (currentState) {
+            case STATE_PAUSE:
+                pauseMenu.Update();
 
         // Zurück zum Spiel mit ESC oder Button 0
         if (IsKeyPressed(KEY_ESCAPE) || pauseMenu.GetChoice() == 0) {
@@ -109,21 +111,33 @@ switch (currentState) {
         }
         break;
 
-    case STATE_PLAYING:
+            case STATE_PLAYING:
+                player.Update(dt, walls);
+                golem.Update(dt);
+                hp.Update(dt);
+                attackCD.Update(dt);
+                dashCD.Update(dt);
+                attack_jump.upadteAttackCD(dt);
+                jumpAttackCD.Update(dt);
+                melee.Update(dt, player.GetPos(), player.GetSize());
+                player.Animate(dt);
         runTimer.Update(dt);
-        player.Update(dt, walls);
-        golem.Update(dt);
-        hp.Update(dt);
-        attackCD.Update(dt);
-        dashCD.Update(dt);
-        melee.Update(dt,player.GetPos(), player.GetSize());
-        player.Animate(dt);
+
 
         // Pause aktivieren
         if (IsKeyPressed(KEY_ESCAPE)) {
             runTimer.Stop();
             currentState = STATE_PAUSE;
         }
+
+                if (jumpAttackCD.Ready()) {
+                    attack_jump.attack(player.GetPos(), player.GetSize(),dt,hp, golem);
+                    jumpAttackCD.Trigger();
+                }
+                // Pause aktivieren
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    currentState = STATE_PAUSE;
+                }
 
         // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
         if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT)) {
@@ -150,11 +164,11 @@ switch (currentState) {
         }
         break;
 
-    case STATE_OPTIONS:
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            currentState = previousState;
-        }
-        break;
+            case STATE_OPTIONS:
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    currentState = previousState;
+                }
+                break;
 
     case STATE_MENU:
         mainMenu.Update();
@@ -244,17 +258,25 @@ switch (currentState) {
             else if (currentState == STATE_PLAYING) {
                 DrawTexture(background, 0, 0, WHITE);
                 DrawRectangle(380,30,200,45,Fade(BLACK,0.6));
+                attack_jump.startAttackDraw(attack_jump.getPos());
+                attack_jump.doAttackDraw(attack_jump.getPos());
+
                 player.Draw();
                 golem.Draw();
+
+                attack_jump.DrawCD();
                 if (melee.active)
                     melee.Draw();
                 if (dashCD.Ready())
-                    DrawText("Ready", 150, 20, 24, BLUE);
-                else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 24, BLUE);
+                    DrawText("Ready", 150, 20, 10, BLUE);
+                else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 10, BLUE);
 
                 if (attackCD.Ready())
-                    DrawText("Ready", 20, 20, 24, GREEN);
-                else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 24, GREEN);
+                    DrawText("Ready", 20, 20, 10, GREEN);
+                else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
+                if (jumpAttackCD.Ready())
+                    DrawText("Ready", 600, 20, 10, GREEN);
+                else DrawText(TextFormat("Cooldown %.2f", jumpAttackCD.Remaining()), 600, 20, 10, GREEN);
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);
@@ -265,6 +287,7 @@ switch (currentState) {
 
 
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
+
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
@@ -275,7 +298,7 @@ switch (currentState) {
                 // Jetzt den roten Text drüber zeichnen
                 if (currentState == STATE_PAUSE) {
                     pauseMenu.Draw();
-                }else if (currentState == STATE_DEATH) {
+                } else if (currentState == STATE_DEATH) {
                     deathScreen.Draw();
                 }
             }

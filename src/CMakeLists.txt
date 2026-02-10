@@ -13,8 +13,8 @@ add_executable(${PROJECT_NAME} main.cpp
         player/movement/controller.h
         player/combat/plattack.cpp
         player/combat/plattack.h
-        boss/golem/boss.cpp
-        boss/golem/boss.h
+        boss/golem/BossController/boss.cpp
+        boss/golem/BossController/boss.h
         enviroment/walls.h
         enviroment/walls.cpp
         player/schaden/schden.cpp
@@ -25,6 +25,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/Options.h
         Menu/Death_Screen.cpp
         Menu/Death_Screen.h
+        boss/golem/AttackJump/AttackJump.h
+        boss/golem/AttackJump/AttackJump.cpp
         Menu/pauseMenu.cpp
         Menu/highscore.cpp
         Menu/highscore.h

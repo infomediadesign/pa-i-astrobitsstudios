@@ -3,32 +3,17 @@
 //
 
 #include "boss.h"
-
-
 #include "raylib.h"
-
 #include "config.h"
 
-
-
-
-Rectangle Enemy::GetHitbox() const
-{
-    return Rectangle{
-        pos.x,
-        pos.y,
-        (float)texture.width,
-        (float)texture.height
-    };; // or bodyRect; depends on your code
-}
 
     void Enemy::Init()
     {
         texture  = LoadTexture("assets/graphics/Boss/testimage1.png");
         pos = {Game::ScreenWidth/2, Game::ScreenHeight/2};
 
-        health = 100.0f;
-        maxHealth = 100.0f;
+        health = 250.0f;
+        maxHealth = 250.0f;
         hitTimer = 0.0f;
         active = true;
         wasHit= false;

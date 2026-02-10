@@ -4,14 +4,12 @@
 
 #pragma once
 #include "raylib.h"
+#include "boss_Angriff.h"
 
 struct Enemy {
 
         Texture2D texture;
         Vector2 pos;
-
-        // Hitbox function
-        Rectangle GetHitbox() const;
 
         // Neue Variablen für Schaden und Lebensbalken
         float health;

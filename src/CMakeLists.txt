@@ -30,6 +30,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/highscore.h
         enviroment/background.cpp
         enviroment/background.h
+        boss/golem/boss_Angriff.cpp
+        boss/golem/boss_Angriff.h
 
 )
 

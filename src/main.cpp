@@ -17,6 +17,7 @@
 #include "Menu/Death_Screen.h"
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
+#include "boss/golem/boss_Angriff.h"
 
 int main() {
     Cooldown attackCD(0.5f);
@@ -63,6 +64,8 @@ int main() {
     golem.Init();
     player.Init();
     hp.Init();
+    BossAngriff bossAtk;
+    bossAtk.Init();
 
     std::vector<Wall> walls = {
         {0, 0, 1, (float)Game::ScreenHeight},                               // Links
@@ -109,7 +112,7 @@ switch (currentState) {
         }
         break;
 
-    case STATE_PLAYING:
+    case STATE_PLAYING: {
         runTimer.Update(dt);
         player.Update(dt, walls);
         golem.Update(dt);
@@ -118,6 +121,16 @@ switch (currentState) {
         dashCD.Update(dt);
         melee.Update(dt,player.GetPos(), player.GetSize());
         player.Animate(dt);
+
+        //==========================
+        Rectangle br = golem.GetRect();
+        Vector2 bossPos = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
+        bossAtk.SetBossHP(golem.health, golem.maxHealth);
+        bossAtk.Update(dt, bossPos, player.GetPos());
+
+        float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
+        if (dmg > 0) hp.TakeDamage(dmg);
+
 
         // Pause aktivieren
         if (IsKeyPressed(KEY_ESCAPE)) {
@@ -149,7 +162,7 @@ switch (currentState) {
             currentState = STATE_NAME_ENTRY;
         }
         break;
-
+    }
     case STATE_OPTIONS:
         if (IsKeyPressed(KEY_ESCAPE)) {
             currentState = previousState;
@@ -163,6 +176,7 @@ switch (currentState) {
             melee.Reset();
             player.Reset();
             golem.Init();
+            bossAtk.Init();
             runTimer.Reset();
             runTimer.Start();
             currentState = STATE_PLAYING;
@@ -189,6 +203,8 @@ switch (currentState) {
             hp.Init();
             player.Reset();
             melee.Reset();
+            golem.Init();
+            bossAtk.Init();
             hp.invincibleTimer = hp.invincibleDuration;
             runTimer.Reset();
             runTimer.Start();
@@ -209,7 +225,7 @@ switch (currentState) {
         if (IsKeyPressed(KEY_ENTER)) {
             std::string finalName = nameInput.text.empty() ? "Player" : nameInput.text;
             HighscoreEntry e{ finalName, runTimer.elapsedMs };
-            board.AddAndPersist(SCORE_FILE, e, 10);     // ✅通关才保存
+            board.AddAndPersist(SCORE_FILE, e, 10);     //
             currentState = STATE_HIGHSCORES;
         }
         // 可选：ESC 放弃保存（这会变成“通关但不写榜”）
@@ -246,6 +262,16 @@ switch (currentState) {
                 DrawRectangle(380,30,200,45,Fade(BLACK,0.6));
                 player.Draw();
                 golem.Draw();
+                if (bossAtk.IsEnraged()) {
+                    Rectangle r = golem.GetRect();
+                    // 用原贴图再画一次，使用半透明红色当 tint（叠加染色效果）
+                    DrawTextureV(golem.texture, golem.pos, Fade(RED, 0.35f));
+                }
+
+                Rectangle br = golem.GetRect();
+                Vector2 bossPos = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
+                bossAtk.Draw(bossPos);
+
                 if (melee.active)
                     melee.Draw();
                 if (dashCD.Ready())

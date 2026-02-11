@@ -3,7 +3,7 @@
 #include <iostream>
 
 Death_Screen::Death_Screen() {
-    options = {"Erneut versuchen", "Ins Hauptmenue"};
+    options = {"Erneut versuchen", "Ins Hauptmenu"};
     choice = -1;
     selectedItem = 0;
 }

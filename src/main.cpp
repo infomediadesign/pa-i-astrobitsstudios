@@ -264,8 +264,12 @@ int main() {
 
                 player.Draw();
                 golem.Draw();
-
                 attack_jump.DrawCD();
+
+                //Hitboxen Zeichnen
+                DrawRectangleRec(golem.GetRect(), YELLOW);
+                DrawRectangleRec(player.GetHitbox(), GREEN);
+
                 if (melee.active)
                     melee.Draw();
                 if (dashCD.Ready())
@@ -285,6 +289,10 @@ int main() {
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                  395, 40, 24, WHITE);
+
+                //Hitboxen Zeichnen
+                DrawRectangleRec(golem.GetRect(), YELLOW);
+                DrawRectangleRec(player.GetHitbox(), GREEN);
 
 
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {

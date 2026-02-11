@@ -34,7 +34,8 @@ void Enemy::Draw() {
 
     // EFFEKT: Wenn hitTimer > 0, färbe die Textur Rot ein
     Color tint = (hitTimer > 0) ? RED : WHITE;
-    DrawTextureV(texture, pos, tint);
+    //DrawTextureV(texture, pos, tint);
+    DrawTexture(texture, pos.x - (texture.width / 2), pos.y - (texture.width / 2), tint);
 
     // OPTIONAL: Lebensbalken zeichnen
     float barWidth = 60.0f;
@@ -57,9 +58,10 @@ void Enemy::Unload() {
 }
 
 Rectangle Enemy::GetRect() {
-    return {pos.x, pos.y, (float) texture.width, (float) texture.height};
+    return {pos.x - 100, pos.y - 50, 200, 100};
 }
 
 void Enemy::setPos(Vector2 position) {
     this->pos = position;
+
 }

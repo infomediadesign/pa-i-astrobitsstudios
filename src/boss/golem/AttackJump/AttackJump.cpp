@@ -29,8 +29,10 @@ Vector2 AttackJump::getPos() {
     return this->pos;
 }
 
-void AttackJump::setPos(Vector2 pos) {
-    this->pos = pos;
+void AttackJump::setPos(Vector2 playerPos) {
+    this->pos.x = playerPos.x + 30;
+    this->pos.y = playerPos.y + 35;
+
 }
 
 bool AttackJump::hitPlayer(Rectangle playerRect) {
@@ -69,7 +71,7 @@ void AttackJump::startAttack(Vector2 playerPos) {
 
 void AttackJump::startAttackDraw(Vector2 playerPos) {
     if (startAttackActive)
-        DrawCircleLines(playerPos.x + 30, playerPos.y + 35, this->getAttackRange(),RED);
+        DrawCircleLines(pos.x, pos.y, this->getAttackRange(),RED);
 }
 
 void AttackJump::upadteAttackCD(float dt) {
@@ -79,20 +81,21 @@ void AttackJump::upadteAttackCD(float dt) {
 }
 
 // Füge einen Parameter vom Typ deiner Schadens-Klasse hinzu (z.B. Player)
-void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos, Player &schadensSystem, Enemy &golem) {
+void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos, Player &player, Enemy &golem) {
 
     golem.setPos(getPos());
-
-    if (CheckCollisionCircleRec(this->pos, this->getAttackRange(), playerRect)) {
-        schadensSystem.TakeDamage(20); // Jetzt klappt der Zugriff!
+/*
+    if (hitPlayer(player.)) {
+        player.TakeDamage(20); // Jetzt klappt der Zugriff!
     }
+    */
 
 }
 
 void AttackJump::doAttackDraw(Vector2 playerPos) {
     if (doAttackActive && doAttackCD.Ready()) {
 
-        DrawCircle(playerPos.x + 30, playerPos.y + 35, this->getAttackRange(),RED);
+        DrawCircle(playerPos.x, playerPos.y, this->getAttackRange(),RED);
     }
     if (stopAttackCD.Ready())
         stopAttack();

@@ -6,7 +6,7 @@
 #include"cooldown.h"
 #include <vector>
 #include "Sprite.h"
-#include "boss/golem/AttackJump/AttackJump.h"
+// #include "boss/golem/AttackJump/AttackJump.h" // removed: jump handled by BossAngriff
 #include "boss/golem/BossController/boss.h"
 
 #include "enviroment/background.h"
@@ -24,7 +24,8 @@
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
-    Cooldown jumpAttackCD(1.75f);
+    // Jump attack is now handled by the boss system; removed standalone cooldown
+    //Cooldown jumpAttackCD(1.75f);
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT| FLAG_WINDOW_UNDECORATED);
@@ -63,7 +64,7 @@ int main() {
     Enemy golem;
     controller player;
     plattack melee;
-    AttackJump attack_jump;
+    // AttackJump attack_jump;  // removed: jump handled by BossAngriff
     melee.Init();
     golem.Init();
     player.Init();
@@ -122,8 +123,7 @@ int main() {
                 hp.Update(dt);
                 attackCD.Update(dt);
                 dashCD.Update(dt);
-                attack_jump.upadteAttackCD(dt);
-                jumpAttackCD.Update(dt);
+                // attack_jump.upadteAttackCD(dt); removed
 
                 player.Animate(dt);
                 runTimer.Update(dt);
@@ -133,7 +133,8 @@ int main() {
                 Rectangle br = golem.GetRect();
                 Vector2 bossPos = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
                 bossAtk.SetBossHP(golem.health, golem.maxHealth);
-                bossAtk.Update(dt, bossPos, player.GetPos());
+
+                bossAtk.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
 
                 float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
                 if (dmg > 0) hp.TakeDamage(dmg);
@@ -145,10 +146,7 @@ int main() {
                     currentState = STATE_PAUSE;
                 }
 
-                if (jumpAttackCD.Ready()) {
-                    attack_jump.attack(player.GetPos(), player.GetSize(),dt,hp, golem);
-                    jumpAttackCD.Trigger();
-                }
+                // removed manual jump attack trigger; boss controls its own jumps now
                 // Pause aktivieren
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     currentState = STATE_PAUSE;
@@ -260,6 +258,10 @@ int main() {
             currentState = STATE_MENU;
         }
         break;
+
+        default:
+            // Unhandled states: do nothing
+            break;
 }
 
         BeginDrawing();
@@ -278,28 +280,23 @@ int main() {
             }
 
             else if (currentState == STATE_PLAYING) {
+                Rectangle br = golem.GetRect();
+                Vector2 bossPosForDraw = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
+
                 DrawTexture(background, 0, 0, WHITE);
                 DrawRectangle(380,30,200,45,Fade(BLACK,0.6));
-                attack_jump.startAttackDraw(attack_jump.getPos());
-                attack_jump.doAttackDraw(attack_jump.getPos());
+                // Jump attack drawing is handled inside bossAtk.Draw()
+
+                bossAtk.Draw(bossPosForDraw);
 
                 player.Draw();
                 golem.Draw();
-                attack_jump.DrawCD();
+                // attack jump cooldown display removed (handled by boss or UI)
 
                 //Hitboxen Zeichnen
-                DrawRectangleRec(golem.GetRect(), YELLOW);
+                DrawRectangleRec(br, YELLOW);
                 DrawRectangleRec(player.GetHitbox(), GREEN);
 
-                if (bossAtk.IsEnraged()) {
-                    Rectangle r = golem.GetRect();
-                    // Mit der ursprünglichen Textur neu zeichnen und dabei ein durchscheinendes Rot als Farbton verwenden (Überlagerungseffekt).
-                    DrawTextureV(golem.texture, golem.pos, Fade(RED, 0.35f));
-                }
-
-                Rectangle br = golem.GetRect();
-                Vector2 bossPos = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
-                bossAtk.Draw(bossPos);
 
                 if (melee.active) {
                     melee.Draw();
@@ -312,9 +309,7 @@ int main() {
                 if (attackCD.Ready())
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
-                if (jumpAttackCD.Ready())
-                    DrawText("Ready", 600, 20, 10, GREEN);
-                else DrawText(TextFormat("Cooldown %.2f", jumpAttackCD.Remaining()), 600, 20, 10, GREEN);
+                // jump attack cooldown display removed
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);

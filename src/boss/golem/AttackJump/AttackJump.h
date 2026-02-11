@@ -21,8 +21,6 @@ public:
 
     void attack(Vector2, Rectangle, float dt,Player &schadensSystem, Enemy &golem);
 
-    void doAttack(Rectangle playerRect, Vector2 playerPos, Player &schadensSystem, Enemy &);
-
     void stopAttack();
 
     void setRange(float range);
@@ -43,6 +41,8 @@ public:
 
     void startAttackDraw(Vector2 playerPos);
 
+    void doAttack(Rectangle playerRect,Player &player, Enemy &boss);
+
     void doAttackDraw(Vector2);
 
     bool isActive();
@@ -55,25 +55,25 @@ public:
 
     void setStartAttackActive(bool active);
 
-    void upadteAttackCD(float dt);
+    void updateAttackCD( float dt);
 
     void DrawCD();
 
 private:
-    int frames;
-    int frameSpeed;
-    int frameCount;
+    int frames = 0;
+    int frameSpeed = 0;
+    int frameCount = 0;
 
-    float lifespan;
-    float attackRange;
-    float timer;
-    float duration;
+    float lifespan = 0.0f;
+    float attackRange = 0.0f;
+    float timer = 0.0f;
+    float duration = 0.0f;
 
-    int damage;
-    bool doAttackActive;
-    bool startAttackActive;
-    bool active;
-    bool hasHitPlayer;
+    int damage = 0;
+    bool doAttackActive = false;
+    bool startAttackActive = false;
+    bool active = false;
+    bool hasHitPlayer = false;
 };
 
 

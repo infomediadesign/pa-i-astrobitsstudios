@@ -7,7 +7,7 @@
 #include "boss_Angriff.h"
 
 class Enemy {
-
+public:
         Texture2D texture;
         Vector2 pos;
 

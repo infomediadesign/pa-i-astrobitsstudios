@@ -6,7 +6,7 @@
 #include "raylib.h"
 #include "boss_Angriff.h"
 
-struct Enemy {
+class Enemy {
 
         Texture2D texture;
         Vector2 pos;

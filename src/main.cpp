@@ -122,15 +122,15 @@ int main() {
                 hp.Update(dt);
                 attackCD.Update(dt);
                 dashCD.Update(dt);
-                attack_jump.upadteAttackCD(dt);
-                jumpAttackCD.Update(dt);
-                melee.Update(dt, player.GetPos(), player.GetSize());
+               // attack_jump.upadteAttackCD(dt);
+              //  jumpAttackCD.Update(dt);
+
                 player.Animate(dt);
                 runTimer.Update(dt);
 
 
                 //==========================
-                Rectangle br = golem.GetRect();
+             /*   Rectangle br = golem.GetRect();
                 Vector2 bossPos = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
                 bossAtk.SetBossHP(golem.health, golem.maxHealth);
                 bossAtk.Update(dt, bossPos, player.GetPos());
@@ -138,7 +138,7 @@ int main() {
                 float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
                 if (dmg > 0) hp.TakeDamage(dmg);
 
-
+*/
                 // Pause aktivieren
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     runTimer.Stop();
@@ -160,6 +160,7 @@ int main() {
                     hp.invincibleTimer = hp.invincibleDuration;
                     dashCD.Trigger();
                 }
+                melee.UpdateDirection();
                 if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
                     melee.Start(player.GetPos(), player.GetSize());
                     attackCD.Trigger();
@@ -167,6 +168,7 @@ int main() {
                         golem.TakeDamage(melee.damage);
                     }
                 }
+                melee.Update(dt, player.GetPos(), player.GetSize());
 
                 if (hp.Gethealth() <= 0) {
                     runTimer.Reset();
@@ -286,8 +288,8 @@ int main() {
                 attack_jump.DrawCD();
 
                 //Hitboxen Zeichnen
-                DrawRectangleRec(golem.GetRect(), YELLOW);
-                DrawRectangleRec(player.GetHitbox(), GREEN);
+               // DrawRectangleRec(golem.GetRect(), YELLOW);
+               // DrawRectangleRec(player.GetHitbox(), GREEN);
 
                 if (bossAtk.IsEnraged()) {
                     Rectangle r = golem.GetRect();
@@ -299,8 +301,10 @@ int main() {
                 Vector2 bossPos = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
                 bossAtk.Draw(bossPos);
 
-                if (melee.active)
+                if (melee.active) {
                     melee.Draw();
+                    DrawRectangleRec(melee.hitBox,WHITE);
+                }
                 if (dashCD.Ready())
                     DrawText("Ready", 150, 20, 10, BLUE);
                 else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 10, BLUE);
@@ -320,8 +324,8 @@ int main() {
                  395, 40, 24, WHITE);
 
                 //Hitboxen Zeichnen
-                DrawRectangleRec(golem.GetRect(), YELLOW);
-                DrawRectangleRec(player.GetHitbox(), GREEN);
+                //DrawRectangleRec(golem.GetRect(), YELLOW);
+               // DrawRectangleRec(player.GetHitbox(), GREEN);
 
 
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {

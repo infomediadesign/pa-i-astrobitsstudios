@@ -9,47 +9,62 @@
 
 void plattack::Init() {
      texture =LoadTexture("assets/graphics/Player/shot.png");
-     pos = {0,0};
-     damage=10;
-     active = false;
-     frames;
-     frameSpeed;
-     frameCount;
-     rotation =0;
-      dstH = {pos.x+texture.width / 2.0f,pos.y+texture.height/2.0f,(float)texture.width,(float)texture.height};
       srcH = {0,0,(float)texture.width,(float)texture.height};
+     Reset();
 }
 void plattack::Unload() {
      UnloadTexture(texture);
 }
 void plattack::Update(float dt, Vector2 playerPos, Rectangle playerSize)
 {
-     if (!active) return;
+    if (!active) return;
 
-     lifeTime -= dt;
-     if (lifeTime <= 0.0f) {
-          active = false;
-          return;
-     }
-     if (rotation == 180) { // Links
-          pos.x = playerPos.x;
-          pos.y = playerPos.y + playerSize.height / 2;
-     } else if (rotation == 0) { // Rechts
-          pos.x = playerPos.x + playerSize.width;
-          pos.y = playerPos.y + playerSize.height / 2;
-     } else if (rotation == 270) { // Oben
-          pos.x = playerPos.x + playerSize.width / 2;
-          pos.y = playerPos.y;
-     } else if (rotation == 90) { // Unten
-          pos.x = playerPos.x + playerSize.width / 2;
-          pos.y = playerPos.y + playerSize.height;
-     }
+    lifeTime -= dt;
+    if (lifeTime <= 0.0f) {
+        active = false;
+        return;
+    }
 
-     dstH.x = pos.x;
-     dstH.y = pos.y;
+    // 1. Das Zentrum des Spielers als Basis
+    Vector2 pCenter = {
+        playerPos.x + playerSize.width / 2.0f,
+        playerPos.y + playerSize.height / 2.0f
+    };
+
+    // 2. Positionierung der Textur (dstH) und Hitbox
+    // Wir schieben den Startpunkt an den Rand des Spieler-Rechtecks.
+    if (rotation == 0) { // RECHTS
+        dstH.x = playerPos.x + playerSize.width; // Direkt an die rechte Kante
+        dstH.y = pCenter.y;
+        hitBox = { dstH.x, dstH.y - (float)texture.height / 2.0f, (float)texture.width, (float)texture.height };
+    }
+    else if (rotation == 180) { // LINKS
+        dstH.x = playerPos.x; // Direkt an die linke Kante
+        dstH.y = pCenter.y;
+        hitBox = { dstH.x - (float)texture.width, dstH.y - (float)texture.height / 2.0f, (float)texture.width, (float)texture.height };
+    }
+    else if (rotation == 270) { // OBEN
+        dstH.x = pCenter.x;
+        dstH.y = playerPos.y; // Direkt an die obere Kante
+        // Hitbox ist hochkant: Breite = Textur-Höhe, Höhe = Textur-Breite
+        hitBox = { dstH.x - (float)texture.height / 2.0f, dstH.y - (float)texture.width, (float)texture.height, (float)texture.width };
+    }
+    else if (rotation == 90) { // UNTEN
+        dstH.x = pCenter.x;
+        dstH.y = playerPos.y + playerSize.height; // Direkt an die untere Kante
+        hitBox = { dstH.x - (float)texture.height / 2.0f, dstH.y, (float)texture.height, (float)texture.width };
+    }
+
+    dstH.width = (float)texture.width;
+    dstH.height = (float)texture.height;
 }
 
-
+void plattack::UpdateDirection() {
+     if (IsKeyDown(KEY_A)) rotation = 180;
+     else if (IsKeyDown(KEY_D)) rotation = 0;
+     else if (IsKeyDown(KEY_W)) rotation = 270;
+     else if (IsKeyDown(KEY_S)) rotation = 90;
+}
 void plattack::Start(Vector2 playerPos, Rectangle playerSize)
 {
      active = true;
@@ -65,9 +80,14 @@ void plattack::Start(Vector2 playerPos, Rectangle playerSize)
 
 
 void plattack::Draw() {
-     if (!active) return;
-     Vector2 origin = { 0, (float)texture.height /2.0f };
-     DrawTexturePro(texture,srcH, dstH, origin,rotation, WHITE);
+    if (!active) return;
+
+    // Der Pivot (origin) liegt bei {0, Höhe/2}.
+    // Das bedeutet, das Schwert dreht sich um sein Heft.
+    Vector2 origin = { 0, (float)texture.height / 2.0f };
+
+    // Wir nutzen DrawTexturePro, damit die Rotation um das Heft (origin) funktioniert.
+    DrawTexturePro(texture, srcH, dstH, origin, (float)rotation, WHITE);
 }
 void plattack::Reset() {
      pos = {0,0};
@@ -77,7 +97,7 @@ void plattack::Reset() {
      float frameSpeed;
      int frameCount;
      rotation =0;
-     dstH = {pos.x+texture.width / 2.0f,pos.y+texture.height/2.0f,(float)texture.width,(float)texture.height};
-     srcH = {0,0,(float)texture.width,(float)texture.height};
+     dstH = {0,0,(float)texture.width,(float)texture.height};
+     hitBox={0,0,0,0};
 }
 

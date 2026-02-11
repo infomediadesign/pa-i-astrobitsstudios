@@ -298,6 +298,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos)
             ringInnerR = Lerp(ring1InnerStart, ring1InnerEnd, t);
 
             float minThickness = 30.0f;
+
             if (ringOuterR < ringInnerR + minThickness)
                 ringOuterR = ringInnerR + minThickness;
 

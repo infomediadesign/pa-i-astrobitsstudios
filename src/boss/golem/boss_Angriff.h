@@ -37,8 +37,8 @@ struct BossAngriff
     float enragedPct       = 0.25f;   //  25 % Berserker
 
     // ===== Sequenz (Basiswert) =====
-    float ringTeleDuration = 0.80f;
-    float ring1BurstDuration = 0.45f;
+    float ringTeleDuration = 1.0f;
+    float ring1BurstDuration = 1.0f;
     float waitBetweenRings = 3.0f;
     float ring2BurstDuration = 0.35f;
     float restAfterRings = 2.2f;
@@ -55,8 +55,8 @@ struct BossAngriff
     float ring1OuterTele = 165.0f;
     float ring1InnerStart = 78.0f;
     float ring1OuterStart = 132.0f;
-    float ring1InnerEnd   = 108.0f;
-    float ring1OuterEnd   = 185.0f;
+    float ring1InnerEnd   = 300.0f;
+    float ring1OuterEnd   = 350.0f;
 
     float ring2InnerTele = 185.0f;
     float ring2OuterTele = 285.0f;

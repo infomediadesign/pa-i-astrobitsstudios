@@ -164,7 +164,7 @@ int main() {
                 if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
                     melee.Start(player.GetPos(), player.GetSize());
                     attackCD.Trigger();
-                    if (CheckCollisionRecs(melee.dstH, golem.GetRect())) {
+                    if (CheckCollisionRecs(melee.hitBox, golem.GetRect())) {
                         golem.TakeDamage(melee.damage);
                     }
                 }
@@ -288,7 +288,7 @@ int main() {
                 attack_jump.DrawCD();
 
                 //Hitboxen Zeichnen
-               // DrawRectangleRec(golem.GetRect(), YELLOW);
+                //DrawRectangleRec(golem.GetRect(), YELLOW);
                // DrawRectangleRec(player.GetHitbox(), GREEN);
 
                 if (bossAtk.IsEnraged()) {
@@ -303,7 +303,7 @@ int main() {
 
                 if (melee.active) {
                     melee.Draw();
-                    DrawRectangleRec(melee.hitBox,WHITE);
+                   // DrawRectangleRec(melee.hitBox,WHITE);
                 }
                 if (dashCD.Ready())
                     DrawText("Ready", 150, 20, 10, BLUE);
@@ -324,7 +324,7 @@ int main() {
                  395, 40, 24, WHITE);
 
                 //Hitboxen Zeichnen
-                //DrawRectangleRec(golem.GetRect(), YELLOW);
+               // DrawRectangleRec(golem.GetRect(), YELLOW);
                // DrawRectangleRec(player.GetHitbox(), GREEN);
 
 

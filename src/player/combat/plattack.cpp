@@ -4,6 +4,7 @@
 
 #include "plattack.h"
 #include "raylib.h"
+#include <cmath>
 
 #include "config.h"
 
@@ -25,36 +26,31 @@ void plattack::Update(float dt, Vector2 playerPos, Rectangle playerSize)
         return;
     }
 
-    // 1. Das Zentrum des Spielers als Basis
-    Vector2 pCenter = {
-        playerPos.x + playerSize.width / 2.0f,
-        playerPos.y + playerSize.height / 2.0f
-    };
+    // FIX: Wir nehmen den absoluten Wert der Breite und Höhe,
+    // falls diese durch Spiegelung negativ sind.
+    float pW = fabsf(playerSize.width);
+    float pH = fabsf(playerSize.height);
 
-    // 2. Positionierung der Textur (dstH) und Hitbox
-    // Wir schieben den Startpunkt an den Rand des Spieler-Rechtecks.
-    if (rotation == 0) { // RECHTS
-        dstH.x = playerPos.x + playerSize.width; // Direkt an die rechte Kante
-        dstH.y = pCenter.y;
-        hitBox = { dstH.x, dstH.y - (float)texture.height / 2.0f, (float)texture.width, (float)texture.height };
+    Vector2 attackStart;
+    if (rotation == 0) { // Rechts
+        attackStart = { playerPos.x + pW, playerPos.y + pH / 2.0f };
+        hitBox = { attackStart.x, attackStart.y - (float)texture.height / 2.0f, (float)texture.width, (float)texture.height };
     }
-    else if (rotation == 180) { // LINKS
-        dstH.x = playerPos.x; // Direkt an die linke Kante
-        dstH.y = pCenter.y;
-        hitBox = { dstH.x - (float)texture.width, dstH.y - (float)texture.height / 2.0f, (float)texture.width, (float)texture.height };
+    else if (rotation == 180) { // Links
+        attackStart = { playerPos.x, playerPos.y + pH / 2.0f };
+        hitBox = { attackStart.x - (float)texture.width, attackStart.y - (float)texture.height / 2.0f, (float)texture.width, (float)texture.height };
     }
-    else if (rotation == 270) { // OBEN
-        dstH.x = pCenter.x;
-        dstH.y = playerPos.y; // Direkt an die obere Kante
-        // Hitbox ist hochkant: Breite = Textur-Höhe, Höhe = Textur-Breite
-        hitBox = { dstH.x - (float)texture.height / 2.0f, dstH.y - (float)texture.width, (float)texture.height, (float)texture.width };
+    else if (rotation == 270) { // Oben
+        attackStart = { playerPos.x + pW / 2.0f, playerPos.y };
+        hitBox = { attackStart.x - (float)texture.height / 2.0f, attackStart.y - (float)texture.width, (float)texture.height, (float)texture.width };
     }
-    else if (rotation == 90) { // UNTEN
-        dstH.x = pCenter.x;
-        dstH.y = playerPos.y + playerSize.height; // Direkt an die untere Kante
-        hitBox = { dstH.x - (float)texture.height / 2.0f, dstH.y, (float)texture.height, (float)texture.width };
+    else if (rotation == 90) { // Unten
+        attackStart = { playerPos.x + pW / 2.0f, playerPos.y + pH };
+        hitBox = { attackStart.x - (float)texture.height / 2.0f, attackStart.y, (float)texture.height, (float)texture.width };
     }
 
+    dstH.x = attackStart.x;
+    dstH.y = attackStart.y;
     dstH.width = (float)texture.width;
     dstH.height = (float)texture.height;
 }
@@ -82,11 +78,10 @@ void plattack::Start(Vector2 playerPos, Rectangle playerSize)
 void plattack::Draw() {
     if (!active) return;
 
-    // Der Pivot (origin) liegt bei {0, Höhe/2}.
-    // Das bedeutet, das Schwert dreht sich um sein Heft.
+    // Origin ist die Mitte der linken Seite der Textur (das "Heft" des Schwerts)
     Vector2 origin = { 0, (float)texture.height / 2.0f };
 
-    // Wir nutzen DrawTexturePro, damit die Rotation um das Heft (origin) funktioniert.
+    // DrawTexturePro nutzt dstH.x/y als Drehpunkt
     DrawTexturePro(texture, srcH, dstH, origin, (float)rotation, WHITE);
 }
 void plattack::Reset() {

@@ -228,7 +228,8 @@ switch (currentState) {
             board.AddAndPersist(SCORE_FILE, e, 10);     //
             currentState = STATE_HIGHSCORES;
         }
-        // 可选：ESC 放弃保存（这会变成“通关但不写榜”）
+        // Optional: Drücken Sie ESC, um das Speichern abzubrechen (dies führt dazu, dass Sie den Level abschließen,
+        // ohne ihn an die Bestenliste zu übermitteln).
         if (IsKeyPressed(KEY_ESCAPE)) {
             runTimer.Reset();
             currentState = STATE_MENU;
@@ -264,7 +265,7 @@ switch (currentState) {
                 golem.Draw();
                 if (bossAtk.IsEnraged()) {
                     Rectangle r = golem.GetRect();
-                    // 用原贴图再画一次，使用半透明红色当 tint（叠加染色效果）
+                    // Mit der ursprünglichen Textur neu zeichnen und dabei ein durchscheinendes Rot als Farbton verwenden (Überlagerungseffekt).
                     DrawTextureV(golem.texture, golem.pos, Fade(RED, 0.35f));
                 }
 

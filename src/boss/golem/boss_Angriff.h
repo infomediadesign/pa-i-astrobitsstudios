@@ -28,15 +28,15 @@ struct BossAngriff
     Mode resumeMode = MODE_RING1_TELE;
     float modeTimer = 0.0f;
 
-    // === 由 main 每帧喂入 ===
+    // === pro Frame in den Hauptprozess eingespeist ===
     float bossHP = 1.0f;
     float bossMaxHP = 1.0f;
 
-    // === 阈值 ===
-    float meteorTriggerPct = 0.40f;   //  40%触发陨石雨
-    float enragedPct       = 0.25f;   //  25%狂暴
+    // === Schwellenwert ===
+    float meteorTriggerPct = 0.40f;   //  40 % Chance, einen Meteoritenschauer auszulösen
+    float enragedPct       = 0.25f;   //  25 % Berserker
 
-    // ===== 时序（基础值）=====
+    // ===== Sequenz (Basiswert) =====
     float ringTeleDuration = 0.80f;
     float ring1BurstDuration = 0.45f;
     float waitBetweenRings = 3.0f;
@@ -45,7 +45,7 @@ struct BossAngriff
     float swingDuration = 2.2f;
     float restAfterSwing = 2.2f;
 
-    // ===== 圆环状态 =====
+    // ===== Zirkulärer Zustand =====
     bool ringTeleActive = false;
     bool ringBurstActive = false;
 
@@ -68,7 +68,7 @@ struct BossAngriff
     float teleInnerR = 0.0f;
     float teleOuterR = 0.0f;
 
-    // ===== 摆锤 =====
+    // ===== Pendel =====
     bool  swingActive = false;
     float swingAngle = 0.0f;
     float swingAngularSpeed = 5.0f;
@@ -76,7 +76,7 @@ struct BossAngriff
     float swingBallRadius = 18.0f;
     Vector2 swingBallPos{};
 
-    // ===== 伤害（基础值）=====
+    // =====Schaden (Basiswert) =====
     float ring1Damage = 5.0f;
     float ring2Damage = 7.0f;
     float swingDamage = 8.0f;
@@ -85,7 +85,7 @@ struct BossAngriff
     float dmgTimer = 0.0f;
 
     // =========================
-    // 陨石雨
+    // Meteorschauer
     // =========================
     struct Meteor {
         Vector2 targetPos{};
@@ -107,12 +107,12 @@ struct BossAngriff
     float meteorSpawnMin = 0.08f;
     float meteorSpawnMax = 0.22f;
 
-    // “更肉鸽”：落点偏向玩家
-    float meteorNearPlayerChance = 0.70f; // 70%落在玩家附近
-    float meteorNearRadius = 190.0f;      // 玩家附近散布半径
+    // „Mehr Spielerorientierung“: Designentscheidungen priorisieren das Spielerlebnis
+    float meteorNearPlayerChance = 0.70f; // 70 % Land in der Nähe des Spielers
+    float meteorNearRadius = 190.0f;      // Spieler-Näherungsradius
     float meteorDamage = 10.0f;
 
-    // 保存最近玩家坐标（用于SpawnMeteor）
+    // Letzte Spielerkoordinaten speichern (für SpawnMeteor)
     Vector2 lastPlayerPos{};
 
     // =========================
@@ -126,10 +126,10 @@ struct BossAngriff
 
     float CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect);
 
-    // 陨石雨期间：Boss只吃1点伤害
+    // Während des Meteoritenschauers: Bosse erleiden nur 1 Schadenspunkt.
     float ModifyIncomingBossDamage(float rawDamage) const;
 
-    // 狂暴查询：main 用它把 boss “变红”
+    // Rage Query: main Verwende es, um den Boss „rot“ zu machen.
     bool IsEnraged() const;
 
 private:
@@ -148,8 +148,8 @@ private:
     static float Lerp(float a, float b, float t);
     static float EaseOut(float t);
 
-    float DamageMultiplier() const;   // 狂暴后×1.2
-    float SpeedMultiplier() const;    // 狂暴后节奏略快
+    float DamageMultiplier() const;   // Nach der Wut ×1,2
+    float SpeedMultiplier() const;    // Nach der Hektik beschleunigt sich das Tempo etwas.
 };
 
 #endif //RAYLIBSTARTER_BOSS_ANGRIFF_H

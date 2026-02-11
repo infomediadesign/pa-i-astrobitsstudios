@@ -69,21 +69,21 @@ bool BossAngriff::IsEnraged() const
     return pct <= enragedPct;
 }
 
-// 狂暴后伤害小幅提升（不太高）
+// Leicht erhöhter Schaden nach Eintritt in den Berserk-Modus (nicht signifikant)
 float BossAngriff::DamageMultiplier() const
 {
-    return IsEnraged() ? 1.20f : 1.0f; // ✅ 25%后×1.2
+    return IsEnraged() ? 1.20f : 1.0f; // ✅ nach25%×1.2
 }
 
-// 狂暴后节奏略快（摆锤更快、休息更短）
+// Nach der Raserei beschleunigt sich das Tempo leicht (das Pendel schwingt schneller, mit kürzeren Intervallen zwischen den Bewegungen).
 float BossAngriff::SpeedMultiplier() const
 {
-    return IsEnraged() ? 1.12f : 1.0f; // 轻微提升
+    return IsEnraged() ? 1.12f : 1.0f; // Leicht erhöht
 }
 
 float BossAngriff::ModifyIncomingBossDamage(float rawDamage) const
 {
-    if (meteorStormActive) return 1.0f; // ✅ 陨石雨期间 Boss 只吃 1
+    if (meteorStormActive) return 1.0f; // ✅ Während des Meteoritenschauers kann der Boss nur einen Treffer einstecken.
     return rawDamage;
 }
 
@@ -134,7 +134,7 @@ void BossAngriff::TryTriggerMeteorStorm()
 {
     float pct = bossHP / bossMaxHP;
 
-    // ✅ 改为 40%触发一次
+    // ✅ Auf 40 % ändern, um einmal auszulösen
     if (!meteorStormTriggered && pct <= meteorTriggerPct)
     {
         meteorStormTriggered = true;
@@ -154,7 +154,8 @@ void BossAngriff::SpawnMeteor()
 {
     Meteor m;
 
-    // === 更肉鸽：70% 概率落在玩家附近（带偏移），30% 全屏随机 ===
+    // === Mehr Fleischtaube: 70 % Wahrscheinlichkeit, in der Nähe des Spielers zu landen (mit Versatz),
+    // 30 % Wahrscheinlichkeit, zufällig auf dem gesamten Bildschirm zu landen. ===
     float roll = (float)GetRandomValue(0, 1000) / 1000.0f;
 
     float x, y;
@@ -173,7 +174,7 @@ void BossAngriff::SpawnMeteor()
         y = (float)GetRandomValue(80, Game::ScreenHeight - 80);
     }
 
-    // clamp到屏幕内
+    // Klemme am Bildschirm
     if (x < 40) x = 40;
     if (x > Game::ScreenWidth - 40) x = (float)Game::ScreenWidth - 40;
     if (y < 80) y = 80;
@@ -181,7 +182,7 @@ void BossAngriff::SpawnMeteor()
 
     m.targetPos = { x, y };
 
-    // 不规则：预警时间、半径随机
+    // Unregelmäßig: Zufällige Vorwarnzeit und Radius
     m.warnTime = 0.45f + (float)GetRandomValue(0, 25) / 100.0f; // 0.45~0.70
     m.radius   = 16.0f + (float)GetRandomValue(0, 12);          // 16~28
 
@@ -206,7 +207,7 @@ void BossAngriff::UpdateMeteorStorm(float dt)
         return;
     }
 
-    // 生成节奏：不规则 + 偶尔双发
+    // Generationsrhythmus: Unregelmäßig + gelegentlich doppelt
     meteorSpawnTimer -= dt;
     if (meteorSpawnTimer <= 0.0f)
     {
@@ -233,7 +234,8 @@ void BossAngriff::UpdateMeteorStorm(float dt)
         }
         else
         {
-            // 命中窗口短一点，压迫感更强但仍可躲
+            // Das Trefferfenster ist etwas kürzer, wodurch ein intensiveres Gefühl von Druck entsteht,
+            // eine Ausweichmöglichkeit bleibt jedoch weiterhin bestehen.
             if (m.timer >= 0.18f)
             {
                 m.active = false;
@@ -268,7 +270,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos)
 
     modeTimer += dt;
 
-    // 狂暴轻微加速（节奏）
+    // Leichte Beschleunigung (Rhythmus)
     float spd = SpeedMultiplier();
 
     switch(mode)
@@ -364,7 +366,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos)
             ringBurstActive = false;
             swingActive = true;
 
-            float swingSpd = swingAngularSpeed * spd; // 狂暴略快
+            float swingSpd = swingAngularSpeed * spd; // Wütend und etwas schneller
             swingAngle += swingSpd * dt;
 
             swingBallPos = {
@@ -402,7 +404,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos)
 
 void BossAngriff::Draw(Vector2 bossPos) const
 {
-    // 圆环预警（双闪）
+    // Rundumwarnblinkleuchte (Warnblinker)
     if (ringTeleActive)
     {
         float u = Clamp01(modeTimer / ringTeleDuration);
@@ -414,7 +416,7 @@ void BossAngriff::Draw(Vector2 bossPos) const
         DrawCircleLines((int)ringCenter.x, (int)ringCenter.y, teleInnerR, Fade(YELLOW, alpha * 0.85f));
     }
 
-    // 圆环爆发
+    // Kreisförmiger Ausbruch
     if (ringBurstActive)
     {
         DrawRing(ringCenter, ringInnerR, ringOuterR, 0.0f, 360.0f, 72, Fade(RED, 0.18f));
@@ -422,7 +424,7 @@ void BossAngriff::Draw(Vector2 bossPos) const
         DrawCircleLines((int)ringCenter.x, (int)ringCenter.y, ringInnerR, Fade(RED, 0.95f));
     }
 
-    // 摆锤
+    // Pendel
     if (swingActive)
     {
         DrawLineEx(bossPos, swingBallPos, 10.0f, GRAY);
@@ -430,7 +432,7 @@ void BossAngriff::Draw(Vector2 bossPos) const
         DrawCircleLines((int)swingBallPos.x, (int)swingBallPos.y, swingBallRadius + 6.0f, Fade(ORANGE, 0.55f));
     }
 
-    // 陨石雨
+    // Meteorschauer
     if (meteorStormActive)
     {
         for (const auto &m : meteors)

@@ -39,7 +39,7 @@ void Enemy::Draw() {
 
     // OPTIONAL: Lebensbalken zeichnen
     float barWidth = 400.0f;
-    DrawText("Titty Frutti der Zweite",(float) Game::ScreenWidth/2.45,(float) Game::ScreenHeight-45, 16,WHITE);
+    DrawText("Tomb Golem",(float) Game::ScreenWidth/2.2,(float) Game::ScreenHeight-45, 18,LIGHTGRAY);
     DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth, 20, DARKGRAY);
     DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth * (health / maxHealth), 20, GREEN);
 }

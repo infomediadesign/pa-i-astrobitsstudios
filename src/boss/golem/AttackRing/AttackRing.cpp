@@ -1,5 +1,6 @@
 #include "AttackRing.h"
 #include "raylib.h"
+#include "config.h"
 
 AttackRing::AttackRing() {
 }
@@ -67,13 +68,13 @@ void AttackRing::Update(float dt, Vector2 bossPos, Vector2 playerPos) {
 void AttackRing::Draw(Vector2 bossPos) const {
     (void) bossPos;
     if (teleActive) {
-        DrawRingLines(center, teleInnerR, teleOuterR, 0.0f, 360.0f, 72, Fade(RED, 0.8f));
-        DrawCircleLines((int) center.x, (int) center.y, teleOuterR, Fade(RED, 0.8f));
+        DrawRing(center, teleInnerR, teleOuterR, 0.0f, 360.0f, 72, Fade(RED, 0.4f));
+        DrawCircleLines((int) center.x, (int) center.y, teleOuterR, RED);
     }
 
     if (burstActive) {
-        DrawRing(center, ringInnerR, ringOuterR, 0.0f, 360.0f, 72, Fade(RED, 0.18f));
-        DrawCircleLines((int) center.x, (int) center.y, ringOuterR, Fade(RED, 0.95f));
+        DrawRing(center, ringInnerR, ringOuterR, 0.0f, 360.0f, 72, RED);
+       // DrawCircleLines((int) center.x, (int) center.y, ringOuterR, Fade(RED, 0.95f));
     }
 }
 

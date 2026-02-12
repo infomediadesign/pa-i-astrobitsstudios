@@ -286,8 +286,8 @@ int main() {
                 golem.Draw();
 
                 //Hitboxen Zeichnen
-                DrawRectangleRec(hb, YELLOW);
-                DrawRectangleRec(br, BLUE);
+               // DrawRectangleRec(hb, YELLOW);
+                //DrawRectangleRec(br, BLUE);
 
                 //DrawRectangleRec(player.GetHitbox(), GREEN);
 
@@ -306,10 +306,12 @@ int main() {
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);
+                    DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                 }
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                          395, 40, 24, WHITE);
+
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 DrawTexture(background, 0, 0, GRAY);

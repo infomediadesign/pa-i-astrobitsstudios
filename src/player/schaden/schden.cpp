@@ -1,6 +1,7 @@
 #include "schaden.h"
 #include "raylib.h"
 #include <algorithm> // for std::clamp
+#include "config.h"
 
 
 void Player::Init() {
@@ -38,7 +39,7 @@ void Player::Draw(Rectangle box) {
     if (invincibleTimer > 0.0f) {
         // blink: draw only on some frames
         if (((int) (GetTime() * 10) % 2) == 0) {
-            DrawRectangleRec(box, BLUE);
+            DrawRectangleRec(box, Fade(BLUE,0.6));
         }
     } else {
         // DrawRectangleRec(player.GetCollision(), BLUE);
@@ -47,9 +48,6 @@ void Player::Draw(Rectangle box) {
     // UI: health bar
     DrawHealthBar(20, 40, 250, 20, hp, maxHp);
 
-    if (IsDead()) {
-        DrawText("You Died!", 380, 280, 40, MAROON);
-    }
 }
 
 const void Player::DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp) {

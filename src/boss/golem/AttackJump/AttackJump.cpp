@@ -6,6 +6,7 @@
 #include "../../../cooldown.h"
 #include "../../../player/schaden/schaden.h"
 #include "../BossController/boss.h"
+#include "config.h"
 
 
 

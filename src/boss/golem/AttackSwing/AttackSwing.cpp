@@ -1,6 +1,7 @@
 #include "AttackSwing.h"
 #include "raylib.h"
 #include <cmath>
+#include "config.h"
 
 AttackSwing::AttackSwing() {
 }

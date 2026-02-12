@@ -59,6 +59,8 @@ struct HighscoreBoard {
 
     void Draw(int x, int y);
 
+    void Reset(const std::string& file);
+
 };
 
 
@@ -68,6 +70,7 @@ struct NameInput {
 
     std::string text;
 
+    int minLength;
     int maxLength;
 
     NameInput();

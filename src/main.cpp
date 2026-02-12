@@ -252,6 +252,10 @@ int main() {
                 if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER)) {
                     currentState = STATE_MENU;
                 }
+                 if (IsKeyPressed(KEY_L)) {
+                    board.Reset("scores.csv");
+                }
+
                 break;
 
             default:

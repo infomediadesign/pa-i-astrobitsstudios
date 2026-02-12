@@ -128,6 +128,19 @@ void HighscoreBoard::SortAndTrim(int maxKeep)
         entries.resize(maxKeep);
 }
 
+void HighscoreBoard::Reset(const std::string& file)
+{
+    // 1. Alle Einträge aus dem aktuellen Vektor löschen
+    entries.clear();
+
+    // 2. Die Datei auf der Festplatte leeren (überschreiben)
+    // std::ios::trunc sorgt dafür, dass die Datei danach 0 Bytes groß ist
+    std::ofstream out(file, std::ios::trunc);
+
+    // Optional: Falls die Datei nicht geöffnet werden konnte,
+    // ist das meist kein Problem, da wir ja ohnehin "nichts" haben wollen.
+    out.close();
+}
 
 void HighscoreBoard::Draw(int x, int y)
 {
@@ -176,6 +189,7 @@ void HighscoreBoard::Draw(int x, int y)
 
 NameInput::NameInput()
 {
+    minLength = 1;
     maxLength = 12;
 }
 

@@ -113,7 +113,7 @@ void controller::Dash(const std::vector<Wall>& walls,float dt)
     if (IsKeyDown(KEY_W)) dashDir = {0, -1};
     if (IsKeyDown(KEY_S)) dashDir = {0, 1};
 
-    float dashDistance = 350;
+    float dashDistance = 125;
     float step = 10;
 
     for (float i = 0; i < dashDistance; i += step)

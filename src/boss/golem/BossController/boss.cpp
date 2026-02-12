@@ -58,7 +58,11 @@ void Enemy::Unload() {
 }
 
 Rectangle Enemy::GetRect() {
-    return {pos.x - 100, pos.y - 50, 200, 100};
+    return {pos.x - 62.5f, pos.y - 25, 125, 75};
+}
+
+Rectangle Enemy::GetDmgBox() {
+    return {pos.x - 75, pos.y - 75, 150, 150};
 }
 
 void Enemy::setPos(Vector2 position) {

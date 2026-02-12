@@ -1,7 +1,7 @@
 //
 // Created by justu on 26/01/2026.
 //
-
+#include "raylib.h"
 #include "AttackJump.h"
 #include "../../../cooldown.h"
 #include "../../../player/schaden/schaden.h"
@@ -30,9 +30,8 @@ Vector2 AttackJump::getPos() {
 }
 
 void AttackJump::setPos(Vector2 playerPos) {
-    this->pos.x = playerPos.x + 30;
-    this->pos.y = playerPos.y + 35;
-
+    // Wir speichern EXAKT die Mitte des Spielers (ohne +30 Schätzung)
+    this->pos = playerPos;
 }
 
 bool AttackJump::hitPlayer(Rectangle playerRect) {
@@ -44,77 +43,78 @@ bool AttackJump::hitPlayer(Rectangle playerRect) {
 }
 
 void AttackJump::attack(Vector2 playerPos, Rectangle playerRect, float dt, Player &schadensSystem, Enemy &golem) {
-    if (startAttackCD.Ready() && !this->isStartAttackActive()) {
+    // 1. Phase: Start (Warnkreis erscheint)
+    if (startAttackCD.Ready() && !this->isActive()) {
         startAttack(playerPos);
-        startAttackCD.Trigger(); // Verhindert sofortigen Neustart
+        startAttackCD.Trigger();
     }
 
-    if (this->isStartAttackActive()) {
-        if (doAttackCD.Ready())
-            if (!isDoAttackActive()) {
-                setDoAttackActive(true);
-                doAttack(playerRect, playerPos, schadensSystem, golem);
-            }
+    if (this->isActive()) {
+        // 2. Phase: Einschlag (Boss springt)
+        if (doAttackCD.Ready() && !isDoAttackActive()) {
+            setDoAttackActive(true);
+            setStartAttackActive(false); // Warnkreis aus, wenn Boss landet
+            doAttack(playerRect, schadensSystem, golem);
+        }
 
-        if (stopAttackCD.Ready())
+        // 3. Phase: Ende (Boss macht sich bereit für nächste Aktion)
+        if (stopAttackCD.Ready()) {
             stopAttack();
+        }
     }
 }
 
 void AttackJump::startAttack(Vector2 playerPos) {
-    setRange(100.0f);
+    this->setActive(true);             // <--- Sicherstellen, dass das hier steht!
+    this->setStartAttackActive(true);
     setPos(playerPos);
     doAttackCD.Trigger();
     stopAttackCD.Trigger();
-    this->setStartAttackActive(true);
 }
 
 void AttackJump::startAttackDraw(Vector2 playerPos) {
-    if (startAttackActive)
-        DrawCircleLines(pos.x, pos.y, this->getAttackRange(),RED);
-}
-
-void AttackJump::upadteAttackCD(float dt) {
-    startAttackCD.Update(dt);
-    doAttackCD.Update(dt);
-    stopAttackCD.Update(dt);
-}
-
-// Füge einen Parameter vom Typ deiner Schadens-Klasse hinzu (z.B. Player)
-void AttackJump::doAttack(Rectangle playerRect, Vector2 playerPos, Player &player, Enemy &golem) {
-
-    golem.setPos(getPos());
-/*
-    if (hitPlayer(player.)) {
-        player.TakeDamage(20); // Jetzt klappt der Zugriff!
+    if (startAttackActive) {
+        // Falls du den Kreis am Ziel zeichnest (da wo er landen wird):
+        DrawCircleLines((int)this->pos.x, (int)this->pos.y, this->getAttackRange(), RED);
+        DrawCircle((int)this->pos.x, (int)this->pos.y, this->getAttackRange(), Fade(RED, 0.4f));
     }
-    */
+}
 
+void AttackJump::doAttack(Rectangle playerRect, Player &player, Enemy &boss) {
+    Rectangle bossRect = boss.GetRect();
+
+    // Wir zentrieren den Boss auf den Punkt, wo der Spieler stand
+    // Wir ziehen die HALBE Breite des Bosses ab
+    boss.pos.x = this->pos.x - (0.0f);
+    boss.pos.y = this->pos.y - (0.0f);
+
+    if (hitPlayer(playerRect)) {
+        player.TakeDamage(20);
+    }
 }
 
 void AttackJump::doAttackDraw(Vector2 playerPos) {
-    if (doAttackActive && doAttackCD.Ready()) {
-
-        DrawCircle(playerPos.x, playerPos.y, this->getAttackRange(),RED);
+    if (doAttackActive) {
+        // Der eigentliche Einschlag (Solider Kreis)
+        DrawCircle((int)this->pos.x, (int)this->pos.y, this->getAttackRange(), RED);
     }
-    if (stopAttackCD.Ready())
-        stopAttack();
 }
 
 void AttackJump::stopAttack() {
     this->setDoAttackActive(false);
     this->setStartAttackActive(false);
+    this->setActive(false); // <--- DAS hier verhindert den Dauer-Sprung!
 }
 
-void AttackJump::jumpAttackCD(float duration, float dt) {
-    timer = duration;
-    if (timer > 0) timer - dt;
-    DrawText(TextFormat("Cooldown %.2f", timer), 500, 600, 24,BLUE);
-    if (timer == 0) timer == duration;
+void AttackJump::updateAttackCD(float dt) {
+    // Die drei Cooldown-Objekte brauchen das dt, um abzulaufen
+    startAttackCD.Update(dt);
+    doAttackCD.Update(dt);
+    stopAttackCD.Update(dt);
 }
 
-void AttackJump::setActive(bool active) {
-    this->active = active;
+void AttackJump::setActive(bool val) {
+    this->active = val;
 }
 
 bool AttackJump::isActive() {
@@ -129,12 +129,12 @@ bool AttackJump::isStartAttackActive() {
     return startAttackActive;
 }
 
-void AttackJump::setDoAttackActive(bool active) {
-    this->doAttackActive = active;
+void AttackJump::setDoAttackActive(bool val) {
+    this->doAttackActive = val;
 }
 
-void AttackJump::setStartAttackActive(bool active) {
-    this->startAttackActive = active;
+void AttackJump::setStartAttackActive(bool val) {
+    this->startAttackActive = val;
 }
 
 void AttackJump::DrawCD() {

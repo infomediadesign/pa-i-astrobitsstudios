@@ -34,6 +34,9 @@ add_executable(${PROJECT_NAME} main.cpp
         enviroment/background.h
         boss/golem/boss_Angriff.cpp
         boss/golem/boss_Angriff.h
+        boss/golem/AttackMeteor/AttackMeteor.cpp
+        boss/golem/AttackSwing/AttackSwing.cpp
+        boss/golem/AttackRing/AttackRing.cpp
 
 )
 

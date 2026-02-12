@@ -10,7 +10,7 @@
 
 class AttackJump {
 public:
-    Texture2D texture = LoadTexture("assets/graphics/BossJumpAttackRange");
+    //Texture2D texture = LoadTexture("assets/graphics/BossJumpAttackRange");
     Vector2 pos;
 
     Rectangle dstH;

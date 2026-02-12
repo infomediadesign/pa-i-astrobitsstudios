@@ -10,10 +10,12 @@ public:
     // Health
     int hp;
     int maxHp;
-
+    bool takeDamage;
     // Damage cooldown
     float invincibleTimer;
     float invincibleDuration;
+    float takeDamageTimer;
+    float takeDamageDuration;
 
     // Basic functions
     void Init();

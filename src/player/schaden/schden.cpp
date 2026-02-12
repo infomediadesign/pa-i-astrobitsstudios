@@ -10,25 +10,38 @@ void Player::Init() {
 
     invincibleDuration = 0.8f; // 0.8s hit cooldown
     invincibleTimer = 0.0f;
+    takeDamage = false;
+    takeDamageDuration = 0.2f;
+    takeDamageTimer = 0.0f;
 }
 
 void Player::Update(float dt) {
     // reduce invincibility timer
     if (invincibleTimer > 0.0f) {
         invincibleTimer -= dt;
-        if (invincibleTimer < 0.0f) invincibleTimer = 0.0f;
+        if (invincibleTimer < 0.0f){
+            invincibleTimer = 0.0f;
+        }
+    }
+    if (takeDamageTimer > 0.0f) {
+        takeDamageTimer -= dt;
+        if (takeDamageTimer < 0.0f){
+            takeDamageTimer = 0.0f;
+            takeDamage = false;
+        }
     }
 }
 
 void Player::TakeDamage(int dmg) {
     // if still invincible, ignore hit
     if (invincibleTimer > 0.0f) return;
-
+    takeDamage = true;
     hp -= dmg;
     hp = std::clamp(hp, 0, maxHp);
 
     // start invincibility
     invincibleTimer = invincibleDuration;
+    takeDamageTimer = takeDamageDuration;
 }
 
 bool Player::IsDead() const {

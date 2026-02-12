@@ -33,32 +33,25 @@ void plattack::Update(float dt, Vector2 playerPos, Rectangle playerSize) {
     float pH = fabsf(playerSize.height);
 
     Vector2 attackStart;
-    if (rotation == 0) {
-        // Rechts
-        attackStart = {playerPos.x + pW, playerPos.y + pH / 2.0f};
-        hitBox = {
-            attackStart.x, attackStart.y - (float) texture.height / 2.0f, (float) texture.width, (float) texture.height
-        };
-    } else if (rotation == 180) {
-        // Links
-        attackStart = {playerPos.x, playerPos.y + pH / 2.0f};
-        hitBox = {
-            attackStart.x - (float) texture.width, attackStart.y - (float) texture.height / 2.0f, (float) texture.width,
-            (float) texture.height
-        };
-    } else if (rotation == 270) {
-        // Oben
-        attackStart = {playerPos.x + pW / 2.0f, playerPos.y};
-        hitBox = {
-            attackStart.x - (float) texture.height / 2.0f, attackStart.y - (float) texture.width,
-            (float) texture.height, (float) texture.width
-        };
-    } else if (rotation == 90) {
-        // Unten
-        attackStart = {playerPos.x + pW / 2.0f, playerPos.y + pH};
-        hitBox = {
-            attackStart.x - (float) texture.height / 2.0f, attackStart.y, (float) texture.height, (float) texture.width
-        };
+    if (rotation == 0) { // Rechts
+        attackStart = { playerPos.x + pW, playerPos.y + pH / 2.0f };
+        //(x,y-textureHeight/2, textureWidth,TextureHeight)
+        hitBox = { attackStart.x, attackStart.y - 64.0f, 128.0f, 128.0f };
+    }
+    else if (rotation == 180) { // Links
+        attackStart = { playerPos.x, playerPos.y + pH / 2.0f };
+        //(x-textureWidth, y-textureHeight/2,textureWidth,TextureHeight)
+        hitBox = { attackStart.x - 128.0f, attackStart.y - 64.0f, 128.0f, 128.0f };
+    }
+    else if (rotation == 270) { // Oben
+        attackStart = { playerPos.x + pW / 2.0f, playerPos.y };
+        //(x-textureHeight/2, y-textureWidth,textureHeight,TextureWidth)
+        hitBox = { attackStart.x - 64.0f, attackStart.y - 128.0f, 128.0f, 128.0f };
+    }
+    else if (rotation == 90) { // Unten
+        attackStart = { playerPos.x + pW / 2.0f, playerPos.y + pH };
+        //(x-textureHeight/2, y,textureHeight,TextureWidth)
+        hitBox = { attackStart.x - 64.0f, attackStart.y, 128.0f, 128.0f };
     }
 
     dstH.x = attackStart.x;

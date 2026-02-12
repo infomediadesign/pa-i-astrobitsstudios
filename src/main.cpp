@@ -294,6 +294,7 @@ int main() {
 
                 if (melee.active) {
                     melee.Draw();
+                    DrawRectangleRec(melee.hitBox,WHITE);
                 }
                 if (dashCD.Ready())
                     DrawText("Ready", 150, 20, 10, BLUE);

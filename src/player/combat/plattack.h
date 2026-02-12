@@ -16,6 +16,7 @@ struct plattack {
     int rotation;
     Rectangle dstH;
     Rectangle srcH;
+    Rectangle hitBox;
     bool active = false;
     float lifeTime = 0.0f;
 
@@ -29,7 +30,7 @@ struct plattack {
 
     void Update(float dt, Vector2 playerPos, Rectangle playerSize);
 
-    void Damage();
+    void UpdateDirection();
 
     void Start(Vector2 playerPos, Rectangle playerSize);
 

@@ -16,7 +16,7 @@ public:
     bool IsActive() const;
 
     // config
-    float swingAngularSpeed = 7.0f;
+    float swingAngularSpeed = 5.0f;
     float swingArmLen = 200.0f;
     float swingBallRadius = 18.0f;
     float swingDuration = 2.0f;

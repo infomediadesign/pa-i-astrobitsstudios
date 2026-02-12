@@ -96,12 +96,12 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
         case MODE_REST_AFTER_SWING:
             if (modeTimer >= waitBetweenRings / spd && !AnyAttackActive()) {
                 int r = GetRandomValue(0,99);
-                if (r < 70) {
+                if (r < 50) {
                     StopAllAttacks(*this);
                     jumpAttack.startAttack(playerPos);
                     mode = MODE_JUMP;
                 }
-                else if (r < 85) {
+                else if (r < 75) {
                     mode = MODE_RING1_TELE;
                 }
                 else {

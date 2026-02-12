@@ -159,12 +159,14 @@ int main() {
                     dashCD.Trigger();
                 }
                 melee.UpdateDirection();
+
                 if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
                     melee.Start(player.GetPos(), player.GetSize());
                     attackCD.Trigger();
-                    if (CheckCollisionRecs(melee.hitBox, golem.GetRect())) {
+                    if (CheckCollisionRecs(melee.hitBox, golem.GetDmgBox())) {
                         golem.TakeDamage(melee.damage);
                     }
+
                 }
                 melee.Update(dt, player.GetPos(), player.GetSize());
 
@@ -281,26 +283,27 @@ int main() {
 
             else if (currentState == STATE_PLAYING) {
                 Rectangle br = golem.GetRect();
+                Rectangle hb = golem.GetDmgBox();
                 Vector2 bossPosForDraw = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
 
                 DrawTexture(background, 0, 0, WHITE);
                 DrawRectangle(380,30,200,45,Fade(BLACK,0.6));
-                // Jump attack drawing is handled inside bossAtk.Draw()
 
                 bossAtk.Draw(bossPosForDraw);
 
                 player.Draw();
                 golem.Draw();
-                // attack jump cooldown display removed (handled by boss or UI)
 
                 //Hitboxen Zeichnen
-                DrawRectangleRec(br, YELLOW);
-                DrawRectangleRec(player.GetHitbox(), GREEN);
+                DrawRectangleRec(hb, YELLOW);
+                DrawRectangleRec(br, BLUE);
+
+                //DrawRectangleRec(player.GetHitbox(), GREEN);
+
 
 
                 if (melee.active) {
                     melee.Draw();
-                   // DrawRectangleRec(melee.hitBox,WHITE);
                 }
                 if (dashCD.Ready())
                     DrawText("Ready", 150, 20, 10, BLUE);
@@ -309,7 +312,6 @@ int main() {
                 if (attackCD.Ready())
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
-                // jump attack cooldown display removed
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);
@@ -318,9 +320,7 @@ int main() {
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                  395, 40, 24, WHITE);
 
-                //Hitboxen Zeichnen
-                DrawRectangleRec(golem.GetRect(), YELLOW);
-                DrawRectangleRec(player.GetHitbox(), GREEN);
+
 
 
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {

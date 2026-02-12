@@ -86,8 +86,8 @@ void AttackJump::doAttack(Rectangle playerRect, Player &player, Enemy &boss) {
 
     // Wir zentrieren den Boss auf den Punkt, wo der Spieler stand
     // Wir ziehen die HALBE Breite des Bosses ab
-    boss.pos.x = this->pos.x - (0.0f);
-    boss.pos.y = this->pos.y - (0.0f);
+    boss.pos.x = this->pos.x - (-10.0f);
+    boss.pos.y = this->pos.y - (-35.0f);
 
     if (hitPlayer(playerRect)) {
         player.TakeDamage(20);

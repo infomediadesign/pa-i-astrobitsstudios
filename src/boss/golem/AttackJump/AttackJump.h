@@ -19,7 +19,7 @@ public:
 
     void startAttack(Vector2 playerPos);
 
-    void attack(Vector2, Rectangle, float dt,Player &schadensSystem, Enemy &golem);
+    void attack(Vector2, Rectangle, float dt, Player &schadensSystem, Enemy &golem);
 
     void stopAttack();
 
@@ -35,13 +35,13 @@ public:
 
     void setPos(Vector2 pos);
 
-    void jumpAttackCD(float duration,float dt);
+    void jumpAttackCD(float duration, float dt);
 
     void setActive(bool active);
 
     void startAttackDraw(Vector2 playerPos);
 
-    void doAttack(Rectangle playerRect,Player &player, Enemy &boss);
+    void doAttack(Rectangle playerRect, Player &player, Enemy &boss);
 
     void doAttackDraw(Vector2);
 
@@ -55,7 +55,7 @@ public:
 
     void setStartAttackActive(bool active);
 
-    void updateAttackCD( float dt);
+    void updateAttackCD(float dt);
 
     void DrawCD();
 

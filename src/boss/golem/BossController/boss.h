@@ -6,7 +6,6 @@
 #include "raylib.h"
 
 class Enemy {
-
 public:
     Texture2D texture;
     Vector2 pos;
@@ -37,5 +36,4 @@ public:
 
     // Hitbox, damit der Spieler schaden machen kann
     Rectangle GetDmgBox();
-
 };

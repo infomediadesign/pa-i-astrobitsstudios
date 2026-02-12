@@ -62,8 +62,11 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
     this ->lastPlayerPos = playerPos;
     dmgTimer -= dt; if (dmgTimer < 0) dmgTimer = 0;
 
-    TryTriggerMeteorStorm();
-    if (mode == MODE_METEOR_STORM) { UpdateMeteorStorm(dt); return; }
+    //TryTriggerMeteorStorm(); für diesen Boss nicht vorgesehen
+    if (mode == MODE_METEOR_STORM) {
+        mode = MODE_RING1_TELE;
+        return;
+    }
 
     modeTimer += dt;
     float spd = SpeedMultiplier();

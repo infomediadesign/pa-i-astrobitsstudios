@@ -9,15 +9,16 @@
 #include "config.h"
 
 void plattack::Init() {
-     texture =LoadTexture("assets/graphics/Player/shot.png");
-      srcH = {0,0,(float)texture.width,(float)texture.height};
-     Reset();
+    texture = LoadTexture("assets/graphics/Player/shot.png");
+    srcH = {0, 0, (float) texture.width, (float) texture.height};
+    Reset();
 }
+
 void plattack::Unload() {
-     UnloadTexture(texture);
+    UnloadTexture(texture);
 }
-void plattack::Update(float dt, Vector2 playerPos, Rectangle playerSize)
-{
+
+void plattack::Update(float dt, Vector2 playerPos, Rectangle playerSize) {
     if (!active) return;
 
     lifeTime -= dt;
@@ -55,27 +56,27 @@ void plattack::Update(float dt, Vector2 playerPos, Rectangle playerSize)
 
     dstH.x = attackStart.x;
     dstH.y = attackStart.y;
-    dstH.width = (float)texture.width;
-    dstH.height = (float)texture.height;
+    dstH.width = (float) texture.width;
+    dstH.height = (float) texture.height;
 }
 
 void plattack::UpdateDirection() {
-     if (IsKeyDown(KEY_A)) rotation = 180;
-     else if (IsKeyDown(KEY_D)) rotation = 0;
-     else if (IsKeyDown(KEY_W)) rotation = 270;
-     else if (IsKeyDown(KEY_S)) rotation = 90;
+    if (IsKeyDown(KEY_A)) rotation = 180;
+    else if (IsKeyDown(KEY_D)) rotation = 0;
+    else if (IsKeyDown(KEY_W)) rotation = 270;
+    else if (IsKeyDown(KEY_S)) rotation = 90;
 }
-void plattack::Start(Vector2 playerPos, Rectangle playerSize)
-{
-     active = true;
-     lifeTime = 0.1f;
-     if (IsKeyDown(KEY_A)) rotation = 180;
-     else if (IsKeyDown(KEY_D))rotation = 0;
-     else if (IsKeyDown(KEY_W)) rotation = 270;
-     else if (IsKeyDown(KEY_S)) rotation = 90;
-     dstH.width = (float)texture.width;
-     dstH.height = (float)texture.height;
-     Update(0, playerPos, playerSize);
+
+void plattack::Start(Vector2 playerPos, Rectangle playerSize) {
+    active = true;
+    lifeTime = 0.1f;
+    if (IsKeyDown(KEY_A)) rotation = 180;
+    else if (IsKeyDown(KEY_D))rotation = 0;
+    else if (IsKeyDown(KEY_W)) rotation = 270;
+    else if (IsKeyDown(KEY_S)) rotation = 90;
+    dstH.width = (float) texture.width;
+    dstH.height = (float) texture.height;
+    Update(0, playerPos, playerSize);
 }
 
 
@@ -83,20 +84,20 @@ void plattack::Draw() {
     if (!active) return;
 
     // Origin ist die Mitte der linken Seite der Textur (das "Heft" des Schwerts)
-    Vector2 origin = { 0, (float)texture.height / 2.0f };
+    Vector2 origin = {0, (float) texture.height / 2.0f};
 
     // DrawTexturePro nutzt dstH.x/y als Drehpunkt
-    DrawTexturePro(texture, srcH, dstH, origin, (float)rotation, WHITE);
-}
-void plattack::Reset() {
-     pos = {0,0};
-     damage=10;
-     active = false;
-     int frames;
-     float frameSpeed;
-     int frameCount;
-     rotation =0;
-     dstH = {0,0,(float)texture.width,(float)texture.height};
-     hitBox={0,0,0,0};
+    DrawTexturePro(texture, srcH, dstH, origin, (float) rotation, WHITE);
 }
 
+void plattack::Reset() {
+    pos = {0, 0};
+    damage = 10;
+    active = false;
+    int frames;
+    float frameSpeed;
+    int frameCount;
+    rotation = 0;
+    dstH = {0, 0, (float) texture.width, (float) texture.height};
+    hitBox = {0, 0, 0, 0};
+}

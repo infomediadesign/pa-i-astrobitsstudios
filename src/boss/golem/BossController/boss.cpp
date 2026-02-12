@@ -52,7 +52,6 @@ void Enemy::TakeDamage(float amount) {
     }
 }
 
-
 void Enemy::Unload() {
     UnloadTexture(texture);
 }

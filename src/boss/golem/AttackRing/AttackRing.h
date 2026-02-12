@@ -9,13 +9,17 @@ public:
     AttackRing();
 
     void Init();
+
     void Reset();
 
     // tele and burst
     void StartTele(Vector2 bossPos, float teleInner, float teleOuter);
-    void StartBurst(Vector2 bossPos, float innerStart, float outerStart, float innerEnd, float outerEnd, float duration, bool instant=false);
+
+    void StartBurst(Vector2 bossPos, float innerStart, float outerStart, float innerEnd, float outerEnd, float duration,
+                    bool instant = false);
 
     void Update(float dt, Vector2 bossPos, Vector2 playerPos);
+
     void Draw(Vector2 bossPos) const;
 
     // returns damage or 0.0f (or marker) when hit
@@ -30,7 +34,7 @@ public:
 private:
     bool teleActive = false;
     bool burstActive = false;
-    Vector2 center{0,0};
+    Vector2 center{0, 0};
 
     float teleInnerR = 0.0f;
     float teleOuterR = 0.0f;
@@ -43,4 +47,3 @@ private:
     float burstTimer = 0.0f;
     float teleTimer = 0.0f;
 };
-

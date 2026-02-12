@@ -38,9 +38,10 @@ void Enemy::Draw() {
     DrawTexture(texture, pos.x - (texture.width / 2), pos.y - (texture.width / 2), tint);
 
     // OPTIONAL: Lebensbalken zeichnen
-    float barWidth = 60.0f;
-    DrawRectangle(pos.x + (texture.width / 2) - (barWidth / 2), pos.y - 15, barWidth, 6, DARKGRAY);
-    DrawRectangle(pos.x + (texture.width / 2) - (barWidth / 2), pos.y - 15, barWidth * (health / maxHealth), 6, GREEN);
+    float barWidth = 400.0f;
+    DrawText("Titty Frutti der Zweite",(float) Game::ScreenWidth/2.45,(float) Game::ScreenHeight-45, 16,WHITE);
+    DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth, 20, DARKGRAY);
+    DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth * (health / maxHealth), 20, GREEN);
 }
 
 void Enemy::TakeDamage(float amount) {

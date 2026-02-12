@@ -26,7 +26,7 @@ void BossAngriff::Init()
     ringAttack.Init();
     swingAttack.Init();
     meteorAttack.Init();
-    jumpAttack.setRange(90.0f);
+    jumpAttack.setRange(150.0f);
     StopAllAttacks(*this);
     dmgTimer = 0.0f;
     meteorStormTriggered = false;

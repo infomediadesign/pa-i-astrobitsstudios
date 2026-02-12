@@ -123,7 +123,7 @@ int main() {
                 hp.Update(dt);
                 attackCD.Update(dt);
                 dashCD.Update(dt);
-                // attack_jump.upadteAttackCD(dt); removed
+
 
                 player.Animate(dt);
                 runTimer.Update(dt);

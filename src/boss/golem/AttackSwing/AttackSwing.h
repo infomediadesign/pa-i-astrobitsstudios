@@ -16,11 +16,11 @@ public:
     bool IsActive() const;
 
     // config
-    float swingAngularSpeed = 5.0f;
-    float swingArmLen = 145.0f;
+    float swingAngularSpeed = 7.0f;
+    float swingArmLen = 200.0f;
     float swingBallRadius = 18.0f;
-    float swingDuration = 2.2f;
-    float swingDamage = 8.0f;
+    float swingDuration = 2.0f;
+    float swingDamage = 10.0f;
 
     Vector2 GetBallPos() const;
 

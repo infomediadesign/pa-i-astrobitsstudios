@@ -65,8 +65,8 @@ void AttackRing::Update(float dt, Vector2 bossPos, Vector2 playerPos) {
 void AttackRing::Draw(Vector2 bossPos) const {
     (void)bossPos;
     if (teleActive) {
-        DrawRingLines(center, teleInnerR, teleOuterR, 0.0f, 360.0f, 72, Fade(YELLOW, 0.8f));
-        DrawCircleLines((int)center.x, (int)center.y, teleOuterR, Fade(YELLOW, 0.8f));
+        DrawRingLines(center, teleInnerR, teleOuterR, 0.0f, 360.0f, 72, Fade(RED, 0.8f));
+        DrawCircleLines((int)center.x, (int)center.y, teleOuterR, Fade(RED, 0.8f));
     }
 
     if (burstActive) {

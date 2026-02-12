@@ -28,7 +28,7 @@ int main() {
     //Cooldown jumpAttackCD(1.75f);
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT| FLAG_WINDOW_UNDECORATED);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
@@ -102,14 +102,12 @@ int main() {
                     pauseMenu.ResetChoice();
                     runTimer.Start();
                     currentState = STATE_PLAYING;
-                }
-                else if (pauseMenu.GetChoice() == 1) {
+                } else if (pauseMenu.GetChoice() == 1) {
                     pauseMenu.ResetChoice();
                     pauseMenu.Open();
                     previousState = STATE_PAUSE;
                     currentState = STATE_OPTIONS;
-                }
-                else if (pauseMenu.GetChoice() == 2) {
+                } else if (pauseMenu.GetChoice() == 2) {
                     pauseMenu.ResetChoice();
                     pauseMenu.Open();
                     runTimer.Reset();
@@ -117,13 +115,13 @@ int main() {
                 }
                 break;
 
-            case STATE_PLAYING:{
+            case STATE_PLAYING: {
                 player.Update(dt, walls);
                 golem.Update(dt);
                 hp.Update(dt);
                 attackCD.Update(dt);
                 dashCD.Update(dt);
-                // attack_jump.upadteAttackCD(dt); removed
+
 
                 player.Animate(dt);
                 runTimer.Update(dt);
@@ -131,7 +129,7 @@ int main() {
 
                 //==========================
                 Rectangle br = golem.GetRect();
-                Vector2 bossPos = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
+                Vector2 bossPos = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
                 bossAtk.SetBossHP(golem.health, golem.maxHealth);
 
                 bossAtk.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
@@ -159,10 +157,11 @@ int main() {
                     dashCD.Trigger();
                 }
                 melee.UpdateDirection();
+
                 if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
                     melee.Start(player.GetPos(), player.GetSize());
                     attackCD.Trigger();
-                    if (CheckCollisionRecs(melee.hitBox, golem.GetRect())) {
+                    if (CheckCollisionRecs(melee.hitBox, golem.GetDmgBox())) {
                         golem.TakeDamage(melee.damage);
                     }
                 }
@@ -178,91 +177,87 @@ int main() {
                     currentState = STATE_NAME_ENTRY;
                 }
                 break;
-        }
+            }
             case STATE_OPTIONS:
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     currentState = previousState;
                 }
                 break;
 
-    case STATE_MENU:
-        mainMenu.Update();
-        if (mainMenu.GetChoice() == 0) {
-            hp.Init();
-            melee.Reset();
-            player.Reset();
-            golem.Init();
-            bossAtk.Init();
-            runTimer.Reset();
-            runTimer.Start();
-            currentState = STATE_PLAYING;
-            hp.invincibleTimer = hp.invincibleDuration;
-            mainMenu.ResetChoice();
-        }
-        else if (mainMenu.GetChoice() == 1) {
-            previousState = STATE_MENU;
-            currentState = STATE_OPTIONS;
-            mainMenu.ResetChoice();
-        }
-        else if (mainMenu.GetChoice() == 3) {
-            currentState = STATE_EXIT;
-        }
-        else if (mainMenu.GetChoice() == 2) {
-            previousState = STATE_MENU;
-            currentState = STATE_HIGHSCORES;
-            mainMenu.ResetChoice();
-        }
-        break;
+            case STATE_MENU:
+                mainMenu.Update();
+                if (mainMenu.GetChoice() == 0) {
+                    hp.Init();
+                    melee.Reset();
+                    player.Reset();
+                    golem.Init();
+                    bossAtk.Init();
+                    runTimer.Reset();
+                    runTimer.Start();
+                    currentState = STATE_PLAYING;
+                    hp.invincibleTimer = hp.invincibleDuration;
+                    mainMenu.ResetChoice();
+                } else if (mainMenu.GetChoice() == 1) {
+                    previousState = STATE_MENU;
+                    currentState = STATE_OPTIONS;
+                    mainMenu.ResetChoice();
+                } else if (mainMenu.GetChoice() == 3) {
+                    currentState = STATE_EXIT;
+                } else if (mainMenu.GetChoice() == 2) {
+                    previousState = STATE_MENU;
+                    currentState = STATE_HIGHSCORES;
+                    mainMenu.ResetChoice();
+                }
+                break;
 
-    case STATE_DEATH:
-        deathScreen.Update();
-        if (deathScreen.GetChoice() == 0) {
-            hp.Init();
-            player.Reset();
-            melee.Reset();
-            golem.Init();
-            bossAtk.Init();
-            hp.invincibleTimer = hp.invincibleDuration;
-            runTimer.Reset();
-            runTimer.Start();
+            case STATE_DEATH:
+                deathScreen.Update();
+                if (deathScreen.GetChoice() == 0) {
+                    hp.Init();
+                    player.Reset();
+                    melee.Reset();
+                    golem.Init();
+                    bossAtk.Init();
+                    hp.invincibleTimer = hp.invincibleDuration;
+                    runTimer.Reset();
+                    runTimer.Start();
 
-            deathScreen.ResetChoice();
-            currentState = STATE_PLAYING;
-        }
-        else if (deathScreen.GetChoice() == 1) {
-            deathScreen.ResetChoice();
-            mainMenu.ResetChoice();
-            runTimer.Reset();
-            currentState = STATE_MENU;
-        }
-        break;
+                    deathScreen.ResetChoice();
+                    currentState = STATE_PLAYING;
+                } else if (deathScreen.GetChoice() == 1) {
+                    deathScreen.ResetChoice();
+                    mainMenu.ResetChoice();
+                    runTimer.Reset();
+                    currentState = STATE_MENU;
+                }
+                break;
 
-    case STATE_NAME_ENTRY:
-        nameInput.Update();
-        if (IsKeyPressed(KEY_ENTER)) {
-            std::string finalName = nameInput.text.empty() ? "Player" : nameInput.text;
-            HighscoreEntry e{ finalName, runTimer.elapsedMs };
-            board.AddAndPersist(SCORE_FILE, e, 10);     //
-            currentState = STATE_HIGHSCORES;
-        }
-        // Optional: Drücken Sie ESC, um das Speichern abzubrechen (dies führt dazu, dass Sie den Level abschließen,
-        // ohne ihn an die Bestenliste zu übermitteln).
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            runTimer.Reset();
-            currentState = STATE_MENU;
-        }
-        break;
+            case STATE_NAME_ENTRY:
+                nameInput.Update();
+                if (IsKeyPressed(KEY_ENTER)) {
+                    std::string finalName = nameInput.text.empty() ? "Player" : nameInput.text;
+                    HighscoreEntry e{finalName, runTimer.elapsedMs};
+                    board.AddAndPersist(SCORE_FILE, e, 10); //
+                    currentState = STATE_HIGHSCORES;
+                }
+                // Optional: Drücken Sie ESC, um das Speichern abzubrechen (dies führt dazu, dass Sie den Level abschließen,
+                // ohne ihn an die Bestenliste zu übermitteln).
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    runTimer.Reset();
+                    currentState = STATE_MENU;
+                }
+                break;
 
-    case STATE_HIGHSCORES:
-        if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER)) {
-            currentState = STATE_MENU;
-        }
-        break;
+            case STATE_HIGHSCORES:
+                if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER)) {
+                    currentState = STATE_MENU;
+                }
+                break;
 
-        default:
-            // Unhandled states: do nothing
-            break;
-}
+            default:
+                // Unhandled states: do nothing
+                break;
+        }
 
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
@@ -277,30 +272,29 @@ int main() {
                 options.Draw();
             } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
-            }
-
-            else if (currentState == STATE_PLAYING) {
+            } else if (currentState == STATE_PLAYING) {
                 Rectangle br = golem.GetRect();
-                Vector2 bossPosForDraw = { br.x + br.width / 2.0f, br.y + br.height / 2.0f };
+                Rectangle hb = golem.GetDmgBox();
+                Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
                 DrawTexture(background, 0, 0, WHITE);
-                DrawRectangle(380,30,200,45,Fade(BLACK,0.6));
-                // Jump attack drawing is handled inside bossAtk.Draw()
+                DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
 
                 bossAtk.Draw(bossPosForDraw);
 
                 player.Draw();
                 golem.Draw();
-                // attack jump cooldown display removed (handled by boss or UI)
 
                 //Hitboxen Zeichnen
-                DrawRectangleRec(br, YELLOW);
-                DrawRectangleRec(player.GetHitbox(), GREEN);
+                DrawRectangleRec(hb, YELLOW);
+                DrawRectangleRec(br, BLUE);
+
+                //DrawRectangleRec(player.GetHitbox(), GREEN);
 
 
                 if (melee.active) {
                     melee.Draw();
-                   // DrawRectangleRec(melee.hitBox,WHITE);
+                    DrawRectangleRec(melee.hitBox,WHITE);
                 }
                 if (dashCD.Ready())
                     DrawText("Ready", 150, 20, 10, BLUE);
@@ -309,22 +303,14 @@ int main() {
                 if (attackCD.Ready())
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
-                // jump attack cooldown display removed
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
                     hp.TakeDamage(10);
                 }
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
-                 395, 40, 24, WHITE);
-
-                //Hitboxen Zeichnen
-                DrawRectangleRec(golem.GetRect(), YELLOW);
-                DrawRectangleRec(player.GetHitbox(), GREEN);
-
-
+                         395, 40, 24, WHITE);
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
-
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
@@ -338,16 +324,13 @@ int main() {
                 } else if (currentState == STATE_DEATH) {
                     deathScreen.Draw();
                 }
-            }
-
-            else if (currentState == STATE_NAME_ENTRY) {
+            } else if (currentState == STATE_NAME_ENTRY) {
                 ClearBackground(BLACK);
                 DrawText("VICTORY!", 60, 60, 50, GREEN);
                 DrawText(("Your time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                          60, 130, 28, RAYWHITE);
                 nameInput.Draw(60, 200);
-            }
-            else if (currentState == STATE_HIGHSCORES) {
+            } else if (currentState == STATE_HIGHSCORES) {
                 ClearBackground(BLACK);
                 board.Draw(60, 60);
                 DrawText("ENTER/ESC: Back", 60, 520, 22, GRAY);
@@ -378,22 +361,19 @@ int main() {
             DrawText(TextFormat("Render scale: %.0f", renderScale), 10, 10, 20, LIGHTGRAY);
         }
         EndDrawing();
+    }
+    // De-initialization here
+    // ...
+    // ...
+    melee.Unload();
+    golem.Unload();
+    player.Unload();
 
-}
-        // De-initialization here
-        // ...
-        // ...
-        melee.Unload();
-        golem.Unload();
-        player.Unload();
-
-        UnloadRenderTexture(canvas);
+    UnloadRenderTexture(canvas);
 
 
-        // Close window and OpenGL context
-        CloseWindow();
+    // Close window and OpenGL context
+    CloseWindow();
 
-        return EXIT_SUCCESS;
-
+    return EXIT_SUCCESS;
 };
-

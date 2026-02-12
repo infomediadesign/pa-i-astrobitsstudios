@@ -6,7 +6,6 @@
 #include "raylib.h"
 
 class Enemy {
-
 public:
     Texture2D texture;
     Vector2 pos;
@@ -32,6 +31,9 @@ public:
     // Funktion, um Schaden zu verursachen
     void TakeDamage(float amount);
 
-    // Hilfsfunktion für die Hitbox (für Kollisionen mit Schüssen)
+    // Hitbox, damit Spieler Schaden erleiden bei Kollision
     Rectangle GetRect();
+
+    // Hitbox, damit der Spieler schaden machen kann
+    Rectangle GetDmgBox();
 };

@@ -189,7 +189,7 @@ void HighscoreBoard::Draw(int x, int y)
 
 NameInput::NameInput()
 {
-    minLength = 1;
+
     maxLength = 12;
 }
 
@@ -207,7 +207,7 @@ void NameInput::Update()
     {
         if (text.size() < maxLength)
         {
-            if (key >= 32 && key <= 126)
+            if (key >= 33 && key <= 126)
             {
                 text.push_back((char)key);
             }

@@ -235,11 +235,16 @@ int main() {
             case STATE_NAME_ENTRY:
                 nameInput.Update();
                 if (IsKeyPressed(KEY_ENTER)) {
-                    std::string finalName = nameInput.text.empty() ? "Player" : nameInput.text;
-                    HighscoreEntry e{finalName, runTimer.elapsedMs};
-                    board.AddAndPersist(SCORE_FILE, e, 10); //
-                    currentState = STATE_HIGHSCORES;
+                    if (!nameInput.text.empty()) {
+
+                        HighscoreEntry e{nameInput.text, runTimer.elapsedMs};
+                        board.AddAndPersist(SCORE_FILE, e, 10); //
+                        currentState = STATE_HIGHSCORES;
+                    } else {
+                    }
                 }
+
+
                 // Optional: Drücken Sie ESC, um das Speichern abzubrechen (dies führt dazu, dass Sie den Level abschließen,
                 // ohne ihn an die Bestenliste zu übermitteln).
                 if (IsKeyPressed(KEY_ESCAPE)) {
@@ -338,6 +343,10 @@ int main() {
                 DrawText(("Your time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                          60, 130, 28, RAYWHITE);
                 nameInput.Draw(60, 200);
+
+                if (nameInput.text.empty()) {
+                    DrawText("Please enter at least one character!", 60, 320, 20, RED);
+                }
             } else if (currentState == STATE_HIGHSCORES) {
                 ClearBackground(BLACK);
                 board.Draw(60, 60);

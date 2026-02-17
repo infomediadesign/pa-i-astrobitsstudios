@@ -1,14 +1,10 @@
 //
 // Created by Ben on 13.01.2026.
 #include "raylib.h"
-
-#include "config.h"
 //
 #include <vector>
 #include "controller.h"
 #include <cmath>
-
-
 #include "../../enviroment/walls.h"
 
 Rectangle controller::GetHitbox() const

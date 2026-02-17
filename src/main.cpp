@@ -121,8 +121,7 @@ int main() {
                 hp.Update(dt);
                 attackCD.Update(dt);
                 dashCD.Update(dt);
-
-
+                pauseMenu.Open();
                 player.Animate(dt);
                 runTimer.Update(dt);
 

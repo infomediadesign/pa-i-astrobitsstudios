@@ -22,5 +22,5 @@ void Options::Draw() {
 
     DrawText("Bewegung  - W/A/S/D", x, y + 45, 25, RED);
     DrawText("Angriff   - SPACE", x, y + 95, 25, RED);
-    DrawText("Rollen    - SHIFT", x, y + 145, 25, RED);
+    DrawText("Dash    - SHIFT", x, y + 145, 25, RED);
 }

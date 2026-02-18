@@ -9,10 +9,11 @@ static void StopAllAttacks(BossAngriff &b) {
     b.jumpAttack.setDoAttackActive(false);
     b.jumpAttack.setStartAttackActive(false);
     b.jumpAttack.setActive(false);
+    if (b.slamAttack.IsActive()) b.slamAttack.Init();
 }
 
 bool BossAngriff::AnyAttackActive() {
-    return ringAttack.IsActive() || swingAttack.IsActive() || meteorAttack.IsActive() || jumpAttack.isActive();
+    return ringAttack.IsActive() || swingAttack.IsActive() || meteorAttack.IsActive() || jumpAttack.isActive() || slamAttack.IsActive();
 }
 
 void BossAngriff::Init() {
@@ -23,6 +24,12 @@ void BossAngriff::Init() {
     ringAttack.Init();
     swingAttack.Init();
     meteorAttack.Init();
+
+    slamAttack.Init();
+    slamAttack.markDuration = slamTeleDuration;
+    slamAttack.slamDuration = slamHitDuration;
+    slamAttack.cooldownDuration = restAfterSlam;
+
     jumpAttack.setRange(150.0f);
     StopAllAttacks(*this);
     dmgTimer = 0.0f;
@@ -99,16 +106,28 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
         case MODE_REST_AFTER_SWING:
             if (modeTimer >= waitBetweenRings / spd && !AnyAttackActive()) {
                 int r = GetRandomValue(0, 99);
-                if (r < 50) {
+                if (r < 40) {
                     StopAllAttacks(*this);
                     jumpAttack.startAttack(playerPos);
                     mode = MODE_JUMP;
-                } else if (r < 75) {
+                }
+                else if (r < 60) {
                     mode = MODE_RING1_TELE;
-                } else {
+                }
+                else if (r < 75) {
                     mode = MODE_SWING;
                     StartSwing(bossPos, playerPos);
                 }
+                else {
+                    // Slam
+                    StopAllAttacks(*this);
+                    slamAttack.markDuration = slamTeleDuration;
+                    slamAttack.slamDuration = slamHitDuration;
+                    slamAttack.cooldownDuration = restAfterSlam;
+                    slamAttack.Start(bossPos);
+                    mode = MODE_SLAM_TELE;
+                }
+
                 modeTimer = 0.0f;
             }
             break;
@@ -132,6 +151,29 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
             }
             break;
 
+        case MODE_SLAM_TELE:
+            slamAttack.Update(dt,bossPos, playerPos);
+            if (modeTimer >= slamTeleDuration / spd) {
+                mode = MODE_SLAM_HIT;
+                modeTimer = 0.0f;
+            }
+            break;
+
+        case MODE_SLAM_HIT:
+            slamAttack.Update(dt,bossPos,playerPos);
+            if (modeTimer >= slamHitDuration / spd) {
+                mode = MODE_REST_AFTER_SLAM;
+                modeTimer = 0.0f;
+            }
+            break;
+
+        case MODE_REST_AFTER_SLAM:
+            slamAttack.Update(dt,bossPos,playerPos);
+            if (modeTimer >= restAfterSlam / spd && !AnyAttackActive()) {
+                mode = MODE_WAIT_BETWEEN_RINGS;  // 或者直接回 MODE_RING1_TELE 都行
+                modeTimer = 0.0f;
+            }
+            break;
         default: mode = MODE_RING1_TELE;
             break;
     }
@@ -141,6 +183,9 @@ void BossAngriff::Draw(Vector2 bossPos) const {
     if (ringAttack.IsActive()) ringAttack.Draw(bossPos);
     if (swingAttack.IsActive()) swingAttack.Draw(bossPos);
     if (meteorAttack.IsActive()) meteorAttack.Draw(bossPos);
+
+    if (const_cast<AttackSlam&>(slamAttack).IsActive())
+        const_cast<AttackSlam&>(slamAttack).Draw(bossPos);
 
     if (const_cast<AttackJump &>(jumpAttack).isActive()) {
         // Wir übergeben zwar lastPlayerPos, aber die Funktion in AttackJump
@@ -161,6 +206,12 @@ float BossAngriff::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect) 
     if (swingAttack.CheckDamage(dt, bossPos, playerRect) > 0) {
         dmgTimer = 0.5f;
         return swingDamage * mult;
+    }
+
+    float slamD = slamAttack.CheckDamage(dt, bossPos, playerRect);
+    if (slamD > 0.0f) {
+        dmgTimer = 0.5f;
+        return slamD;
     }
 
     if (const_cast<AttackJump &>(jumpAttack).isActive() && const_cast<AttackJump &>(jumpAttack).hitPlayer(playerRect)) {

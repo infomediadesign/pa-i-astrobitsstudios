@@ -19,7 +19,7 @@
 #include "Menu/Death_Screen.h"
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
-#include "boss/golem/boss_Angriff.h"
+#include "boss/golem/Golem_Angriff.h"
 
 int main() {
     Cooldown attackCD(0.5f);

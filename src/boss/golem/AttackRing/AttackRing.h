@@ -2,7 +2,7 @@
 
 #include "raylib.h"
 #include "../../../player/schaden/schaden.h"
-#include "../BossController/boss.h"
+#include "../../golem/GolemController/GolemController.h"
 
 class AttackRing {
 public:

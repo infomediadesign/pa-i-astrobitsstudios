@@ -1,10 +1,12 @@
 //
 // Created by Ben on 13.01.2026.
 #include "raylib.h"
+
+#include "config.h"
 //
 #include <vector>
 #include "controller.h"
-#include <cmath>
+
 #include "../../enviroment/walls.h"
 
 Rectangle controller::GetHitbox() const
@@ -20,24 +22,17 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 {
     Vector2 velocity = {0, 0};
 
-    if (IsKeyDown(KEY_W)){ velocity.y = -1;
+    if (IsKeyDown(KEY_W)){ velocity.y -= speed;
         setMoving(true); }
-    if (IsKeyDown(KEY_S)) {velocity.y = 1;
+    if (IsKeyDown(KEY_S)) {velocity.y += speed;
         setMoving(true); }
-    if (IsKeyDown(KEY_A)) {velocity.x = -1;
+    if (IsKeyDown(KEY_A)) {velocity.x -= speed;
         setMoving(true); }
-    if (IsKeyDown(KEY_D)) {velocity.x = 1;
+    if (IsKeyDown(KEY_D)) {velocity.x += speed;
         setMoving(true); }
     if (!IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)&&!IsKeyDown(KEY_A)&&!IsKeyDown(KEY_D)) {
         setMoving(false);
     }
-    float normal = std::sqrt(velocity.x*velocity.x + velocity.y*velocity.y);
-    if (normal >0) {
-            velocity.x /= normal;
-            velocity.y /= normal;
-    }
-    velocity.x = velocity.x *speed * dt;
-    velocity.y = velocity.y *speed * dt;
     // --- X ACHSE ---
     Rectangle nextX = {
         pos.x + velocity.x,
@@ -72,7 +67,13 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 void controller::Init()
 {
     texture =LoadTexture("assets/graphics/Player/player.png");
-    Reset();
+    pos = {10, 100};
+    speed = 7;
+    frames=0;
+    frameCount=0;
+    frameSpeed = 8;
+    size={0.0f,0.0f, (float)texture.width/8,(float)texture.height/2};
+
 }
 void controller::Draw()
 {
@@ -151,7 +152,7 @@ bool controller::Collides(const Rectangle& box, const std::vector<Wall>& walls)
 }
 void controller::Reset() {
     pos = {10, 100};
-    speed = 245; //minimum 200 aber das wäre sehr langsam. langsamer würde ich auf keinen fall empfehlen
+    speed = 7;
     frames=0;
     frameCount=0;
     frameSpeed = 8;

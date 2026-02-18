@@ -6,7 +6,7 @@
 #define PA_I_ASTROBITSSTUDIOS_ATTACKJUMP_H
 #include "raylib.h"
 #include "../../../player/schaden/schaden.h"
-#include "../BossController/boss.h"
+#include "../../golem/GolemController/GolemController.h"
 
 class AttackJump {
 public:
@@ -19,7 +19,7 @@ public:
 
     void startAttack(Vector2 playerPos);
 
-    void attack(Vector2, Rectangle, float dt, Player &schadensSystem, Enemy &golem);
+    void attack(Vector2, Rectangle, float dt, Player &schadensSystem, GolemController &golem);
 
     void stopAttack();
 
@@ -41,7 +41,7 @@ public:
 
     void startAttackDraw(Vector2 playerPos);
 
-    void doAttack(Rectangle playerRect, Player &player, Enemy &boss);
+    void doAttack(Rectangle playerRect, Player &player, GolemController &boss);
 
     void doAttackDraw(Vector2);
 

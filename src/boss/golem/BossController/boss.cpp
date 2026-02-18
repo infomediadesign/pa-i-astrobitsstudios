@@ -10,7 +10,7 @@ void Enemy::Init() {
     texture = LoadTexture("assets/graphics/Boss/Boss1_Base_Sprite.png");
     pos = {Game::ScreenWidth / 2, Game::ScreenHeight / 2};
 
-    health = 100.0f;
+    health = 200.0f;
     maxHealth = 100.0f;
     hitTimer = 0.0f;
     active = true;

@@ -9,6 +9,7 @@
 #include "AttackRing/AttackRing.h"
 #include "AttackSwing/AttackSwing.h"
 #include "AttackMeteor/AttackMeteor.h"
+#include "AttackSlam/AttackSlam.h"
 
 struct BossAngriff {
     enum Mode {
@@ -19,6 +20,9 @@ struct BossAngriff {
         MODE_SWING = 4,
         MODE_REST_AFTER_SWING = 5,
         MODE_JUMP = 6,
+        MODE_SLAM_TELE = 7,
+        MODE_SLAM_HIT  = 8,
+        MODE_REST_AFTER_SLAM = 9,
         MODE_METEOR_STORM = 100
     };
 
@@ -45,6 +49,11 @@ struct BossAngriff {
     float ring1InnerEnd = 300.0f;
     float ring1OuterEnd = 350.0f;
 
+    float slamTeleDuration = 1.2f;
+    float slamHitDuration  = 0.45f;
+    float restAfterSlam    = 1.0f;
+
+    float slamDamage = 12.0f;
     float ring1Damage = 5.0f;
     float swingDamage = 8.0f;
     float meteorDamage = 10.0f;
@@ -62,6 +71,7 @@ struct BossAngriff {
     AttackSwing swingAttack;
     AttackMeteor meteorAttack;
     AttackJump jumpAttack;
+    AttackSlam slamAttack;
 
     void Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player, Enemy &boss);
 

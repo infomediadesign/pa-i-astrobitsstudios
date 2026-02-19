@@ -10,6 +10,7 @@
 #include "AttackSwing/AttackSwing.h"
 #include "AttackMeteor/AttackMeteor.h"
 #include "AttackSlam/AttackSlam.h"
+#include "GolemController/GolemController.h"
 
 struct BossAngriff {
     enum Mode {
@@ -73,7 +74,7 @@ struct BossAngriff {
     AttackJump jumpAttack;
     AttackSlam slamAttack;
 
-    void Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player, Enemy &boss);
+    void Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player, GolemController &boss);
 
     void Init();
 

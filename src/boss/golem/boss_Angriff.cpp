@@ -68,7 +68,7 @@ void BossAngriff::StartSwing(Vector2 bossPos, Vector2 playerPos) {
 }
 
 void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
-                         Enemy &boss) {
+                         GolemController &boss) {
     this->lastPlayerPos = playerPos;
     dmgTimer -= dt;
     if (dmgTimer < 0) dmgTimer = 0;

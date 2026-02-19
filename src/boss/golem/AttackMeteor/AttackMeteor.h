@@ -3,7 +3,7 @@
 #include "raylib.h"
 #include <vector>
 #include "../../../player/schaden/schaden.h"
-#include "../BossController/boss.h"
+#include "../../golem/GolemController/GolemController.h"
 
 class AttackMeteor {
 public:
@@ -41,4 +41,3 @@ private:
 
     void SpawnMeteor();
 };
-

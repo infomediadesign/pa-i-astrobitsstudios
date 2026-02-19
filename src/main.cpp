@@ -7,7 +7,7 @@
 #include <vector>
 #include "Sprite.h"
 // #include "boss/golem/AttackJump/AttackJump.h" // removed: jump handled by BossAngriff
-#include "boss/golem/BossController/boss.h"
+#include "boss/golem/GolemController/GolemController.h"
 
 #include "enviroment/background.h"
 #include "player/movement/controller.h"
@@ -20,6 +20,7 @@
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
 #include "boss/golem/boss_Angriff.h"
+
 
 int main() {
     Cooldown attackCD(0.5f);
@@ -61,7 +62,7 @@ int main() {
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);
     Player hp;
-    Enemy golem;
+    GolemController golem;
     controller player;
     plattack melee;
     // AttackJump attack_jump;  // removed: jump handled by BossAngriff
@@ -130,7 +131,7 @@ int main() {
                 //==========================
                 Rectangle br = golem.GetRect();
                 Vector2 bossPos = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
-                bossAtk.SetBossHP(golem.health, golem.maxHealth);
+                bossAtk.SetBossHP(golem.getHealth(), golem.getMaxHealth());
 
                 bossAtk.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
 
@@ -162,7 +163,7 @@ int main() {
                     melee.Start(player.GetPos(), player.GetSize());
                     attackCD.Trigger();
                     if (CheckCollisionRecs(melee.hitBox, golem.GetDmgBox())) {
-                        golem.TakeDamage(melee.damage);
+                        golem.takeDamage(melee.damage);
                     }
                 }
                 melee.Update(dt, player.GetPos(), player.GetSize());
@@ -171,7 +172,7 @@ int main() {
                     runTimer.Reset();
                     currentState = STATE_DEATH;
                 }
-                if (!golem.active) {
+                if (!golem.isAlive()) {
                     runTimer.Stop();
                     nameInput.Clear();
                     currentState = STATE_NAME_ENTRY;
@@ -313,7 +314,7 @@ int main() {
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
 
-                if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.active) {
+                if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);
                  //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                 }

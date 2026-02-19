@@ -18,24 +18,24 @@ Rectangle controller::GetHitbox() const
 }
 void controller::Update(float dt, const std::vector<Wall>& walls)
 {
-    Vector2 velocity = {0, 0};
-
-    if (IsKeyDown(KEY_W)){ velocity.y = -1;
-        setMoving(true); }
-    if (IsKeyDown(KEY_S)) {velocity.y = 1;
-        setMoving(true); }
-    if (IsKeyDown(KEY_A)) {velocity.x = -1;
-        setMoving(true); }
-    if (IsKeyDown(KEY_D)) {velocity.x = 1;
-        setMoving(true); }
-    if (!IsKeyDown(KEY_W) && !IsKeyDown(KEY_S)&&!IsKeyDown(KEY_A)&&!IsKeyDown(KEY_D)) {
-        setMoving(false);
-    }
+    velocity = {0, 0};
+    if (IsKeyDown(KEY_W)){ velocity.y -= 1;
+         }
+    if (IsKeyDown(KEY_S)) {velocity.y += 1;
+         }
+    if (IsKeyDown(KEY_A)) {velocity.x -= 1;
+         }
+    if (IsKeyDown(KEY_D)) {velocity.x += 1;
+         }
     float normal = std::sqrt(velocity.x*velocity.x + velocity.y*velocity.y);
     if (normal >0) {
             velocity.x /= normal;
             velocity.y /= normal;
+            setMoving(true);
     }
+    else setMoving(false);
+    gehx = velocity.x;
+    gehy = velocity.y;
     velocity.x = velocity.x *speed * dt;
     velocity.y = velocity.y *speed * dt;
     // --- X ACHSE ---
@@ -76,12 +76,14 @@ void controller::Init()
 }
 void controller::Draw()
 {
-    if (IsKeyDown(KEY_A))
+    if (gehx<0)
     {
         size ={size.x,0.0f, (float)-texture.width/8,(float)texture.height/2};
-    }else if (IsKeyDown(KEY_D))
+    }else if (gehx>0) {
         size ={size.x,0.0f, (float)texture.width/8,(float)texture.height/2};
+    }else if (gehx ==0) {
 
+    }
     DrawTextureRec(texture, size, pos, WHITE);
 }
 void controller::Animate(float dt)
@@ -107,13 +109,17 @@ void controller::Dash(const std::vector<Wall>& walls,float dt)
     Rectangle testBox = plcollision;
     Vector2 dashDir = {0, 0};
 
-    if (IsKeyDown(KEY_D)) dashDir = {1, 0};
-    if (IsKeyDown(KEY_A)) dashDir = {-1, 0};
-    if (IsKeyDown(KEY_W)) dashDir = {0, -1};
-    if (IsKeyDown(KEY_S)) dashDir = {0, 1};
-
+    if (IsKeyDown(KEY_D)) dashDir.x += 1;
+    if (IsKeyDown(KEY_A)) dashDir.x -= 1;
+    if (IsKeyDown(KEY_W)) dashDir.y -= 1;
+    if (IsKeyDown(KEY_S)) dashDir.y += 1;
+    float norm = std::sqrt(dashDir.x*dashDir.x + dashDir.y*dashDir.y);
+    if (norm>0) {
+        dashDir.x /= norm;
+        dashDir.y /= norm;
+    }
     float dashDistance = 125;
-    float step = 10;
+    float step = 5;
 
     for (float i = 0; i < dashDistance; i += step)
     {

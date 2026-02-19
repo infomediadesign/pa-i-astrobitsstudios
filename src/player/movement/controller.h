@@ -14,9 +14,12 @@ struct controller
     int frames;
     Rectangle plcollision;
     Rectangle size;
+    Vector2 velocity = {0, 0};
     int frameSpeed;
     int frameCount;
     bool moving;
+    float gehy;
+    float gehx;
     Rectangle GetHitbox() const;
     bool getMoving(){return moving;}
     void setMoving(bool moving){this->moving = moving;}

@@ -25,7 +25,7 @@
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
-    // Jump attack is now handled by the boss system; removed standalone cooldown
+    // Jumpattack is now handled by the boss system; removed standalone cooldown
     //Cooldown jumpAttackCD(1.75f);
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file

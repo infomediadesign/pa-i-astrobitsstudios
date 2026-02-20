@@ -25,7 +25,7 @@
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
-    // Jump attack is now handled by the boss system; removed standalone cooldown
+    // Jumpattack is now handled by the boss system; removed standalone cooldown
     //Cooldown jumpAttackCD(1.75f);
     // Raylib initialization
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
@@ -46,7 +46,8 @@ int main() {
         STATE_PAUSE = 4,
         STATE_VICTORY = 5,
         STATE_NAME_ENTRY = 6,
-        STATE_HIGHSCORES = 7
+        STATE_HIGHSCORES = 7,
+        STATE_LOADING = 8
     };
 
     MainMenu mainMenu;
@@ -175,7 +176,8 @@ int main() {
                 if (!golem.isAlive()) {
                     runTimer.Stop();
                     nameInput.Clear();
-                    currentState = STATE_NAME_ENTRY;
+                    currentState = STATE_LOADING;
+
                 }
                 break;
             }
@@ -262,6 +264,25 @@ int main() {
                     board.Reset("scores.csv");
                 }
 
+                break;
+case STATE_LOADING:
+            Image GenImageColor (int Screenwidth, int Screenheight, Color color);
+                // Hier könntest du einen Ladebildschirm anzeigen oder eine kurze Verzögerung einbauen
+                // Zum Beispiel:
+                ClearBackground(BLACK);
+                DrawText("Loading...", 60, 60, 50, GREEN);
+                DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
+                EndDrawing();
+                // Simuliere Ladezeit
+                for (int i = 0; i < 120; i++) { // etwa 2 Sekunden bei 60 FPS
+                    BeginDrawing();
+                    ClearBackground(BLACK);
+                    DrawText("Loading...", 60, 60, 50, GREEN);
+                    DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
+                    EndDrawing();
+                    WaitTime(1.0f / 60.0f); // Warte auf den nächsten Frame
+                    currentState = STATE_NAME_ENTRY;
+                }
                 break;
 
             default:

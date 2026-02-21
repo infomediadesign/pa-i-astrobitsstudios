@@ -39,7 +39,7 @@ int main() {
 #endif
     enum GameState {
         STATE_MENU = -1,
-        STATE_PLAYING = 0,
+        STATE_BOSS_1 = 0,
         STATE_OPTIONS = 1,
         STATE_EXIT = 2,
         STATE_DEATH = 3,
@@ -47,14 +47,15 @@ int main() {
         STATE_VICTORY = 5,
         STATE_NAME_ENTRY = 6,
         STATE_HIGHSCORES = 7,
-        STATE_LOADING = 8
+        STATE_LOADING = 8,
+        STATE_BOSS_2 = 9
     };
 
     MainMenu mainMenu;
     Options options;
     pauseMenu pauseMenu;
     GameState currentState = STATE_MENU;
-    GameState previousState = STATE_PLAYING;
+    GameState previousState = STATE_BOSS_1;
     Death_Screen deathScreen;
     RunTimer runTimer;
     HighscoreBoard board;
@@ -103,7 +104,7 @@ int main() {
                 if (IsKeyPressed(KEY_ESCAPE) || pauseMenu.GetChoice() == 0) {
                     pauseMenu.ResetChoice();
                     runTimer.Start();
-                    currentState = STATE_PLAYING;
+                    currentState = STATE_BOSS_1;
                 } else if (pauseMenu.GetChoice() == 1) {
                     pauseMenu.ResetChoice();
                     pauseMenu.Open();
@@ -117,7 +118,7 @@ int main() {
                 }
                 break;
 
-            case STATE_PLAYING: {
+            case STATE_BOSS_1: {
                 player.Update(dt, walls);
                 golem.Update(dt);
                 hp.Update(dt);
@@ -146,11 +147,6 @@ int main() {
                     currentState = STATE_PAUSE;
                 }
 
-                // removed manual jump attack trigger; boss controls its own jumps now
-                // Pause aktivieren
-                if (IsKeyPressed(KEY_ESCAPE)) {
-                    currentState = STATE_PAUSE;
-                }
 
                 // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
                 if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
@@ -177,7 +173,6 @@ int main() {
                     runTimer.Stop();
                     nameInput.Clear();
                     currentState = STATE_LOADING;
-
                 }
                 break;
             }
@@ -197,7 +192,8 @@ int main() {
                     bossAtk.Init();
                     runTimer.Reset();
                     runTimer.Start();
-                    currentState = STATE_PLAYING;
+                    previousState = STATE_MENU;
+                    currentState = STATE_BOSS_1;
                     hp.invincibleTimer = hp.invincibleDuration;
                     mainMenu.ResetChoice();
                 } else if (mainMenu.GetChoice() == 1) {
@@ -226,7 +222,7 @@ int main() {
                     runTimer.Start();
 
                     deathScreen.ResetChoice();
-                    currentState = STATE_PLAYING;
+                    currentState = STATE_BOSS_1;
                 } else if (deathScreen.GetChoice() == 1) {
                     deathScreen.ResetChoice();
                     mainMenu.ResetChoice();
@@ -239,7 +235,6 @@ int main() {
                 nameInput.Update();
                 if (IsKeyPressed(KEY_ENTER)) {
                     if (!nameInput.text.empty()) {
-
                         HighscoreEntry e{nameInput.text, runTimer.elapsedMs};
                         board.AddAndPersist(SCORE_FILE, e, 10); //
                         currentState = STATE_HIGHSCORES;
@@ -260,13 +255,14 @@ int main() {
                 if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER)) {
                     currentState = STATE_MENU;
                 }
-                 if (IsKeyPressed(KEY_L)) {
+                if (IsKeyPressed(KEY_L)) {
                     board.Reset("scores.csv");
                 }
 
                 break;
-case STATE_LOADING:
-            Image GenImageColor (int Screenwidth, int Screenheight, Color color);
+            case STATE_LOADING:
+                runTimer.Stop();
+                Image GenImageColor(int Screenwidth, int Screenheight, Color color);
                 // Hier könntest du einen Ladebildschirm anzeigen oder eine kurze Verzögerung einbauen
                 // Zum Beispiel:
                 ClearBackground(BLACK);
@@ -274,17 +270,37 @@ case STATE_LOADING:
                 DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
                 EndDrawing();
                 // Simuliere Ladezeit
-                for (int i = 0; i < 120; i++) { // etwa 2 Sekunden bei 60 FPS
+                for (int i = 0; i < 120; i++) {
+                    // etwa 2 Sekunden bei 60 FPS
                     BeginDrawing();
                     ClearBackground(BLACK);
                     DrawText("Loading...", 60, 60, 50, GREEN);
                     DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
                     EndDrawing();
                     WaitTime(1.0f / 60.0f); // Warte auf den nächsten Frame
-                    currentState = STATE_NAME_ENTRY;
+                    currentState = STATE_BOSS_2; // Wechsel zum nächsten Zustand nach der Ladezei
                 }
                 break;
-
+            case STATE_BOSS_2:
+                // Hier könntest du den nächsten Bosskampf oder das nächste Level starten
+                if (IsKeyPressed(KEY_ESCAPE)) {
+                    runTimer.Stop();
+                    previousState = STATE_BOSS_2;
+                    currentState = STATE_PAUSE;
+                }
+                // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
+                if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
+                    player.Dash(walls, dt);
+                    hp.invincibleTimer = hp.invincibleDuration;
+                    dashCD.Trigger();
+                }
+                melee.UpdateDirection();
+                if (hp.Gethealth() <= 0) {
+                    runTimer.Reset();
+                    currentState = STATE_DEATH;
+                }
+                currentState = STATE_NAME_ENTRY;
+                break;
             default:
                 // Unhandled states: do nothing
                 break;
@@ -303,7 +319,7 @@ case STATE_LOADING:
                 options.Draw();
             } else if (currentState == STATE_MENU) {
                 mainMenu.Draw();
-            } else if (currentState == STATE_PLAYING) {
+            } else if (currentState == STATE_BOSS_1) {
                 Rectangle br = golem.GetRect();
                 Rectangle hb = golem.GetDmgBox();
                 Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
@@ -317,7 +333,7 @@ case STATE_LOADING:
                 golem.Draw();
 
                 //Hitboxen Zeichnen
-               // DrawRectangleRec(hb, YELLOW);
+                // DrawRectangleRec(hb, YELLOW);
                 //DrawRectangleRec(br, BLUE);
 
                 //DrawRectangleRec(player.GetHitbox(), GREEN);
@@ -337,13 +353,13 @@ case STATE_LOADING:
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);
-                 //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
+                    //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                 }
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                          395, 40, 24, WHITE);
                 if (hp.takeDamage) {
-                  //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
+                    //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                 }
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht

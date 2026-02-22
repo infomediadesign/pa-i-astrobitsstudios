@@ -13,8 +13,8 @@ add_executable(${PROJECT_NAME} main.cpp
         player/movement/controller.h
         player/combat/plattack.cpp
         player/combat/plattack.h
-        boss/golem/BossController/boss.cpp
-        boss/golem/BossController/boss.h
+        boss/golem/GolemController/GolemController.cpp
+        boss/golem/GolemController/GolemController.h
         enviroment/walls.h
         enviroment/walls.cpp
         player/schaden/schden.cpp
@@ -39,6 +39,9 @@ add_executable(${PROJECT_NAME} main.cpp
         boss/golem/AttackRing/AttackRing.cpp
         boss/golem/AttackSlam/AttackSlam.cpp
         boss/golem/AttackSlam/AttackSlam.h
+        # Basis-Boss-Klasse (für Ableitung durch z.B. Golem)
+        boss/Boss.cpp
+        # boss/Boss.h (Header, zur Übersicht)
 
 )
 
@@ -46,6 +49,7 @@ add_executable(${PROJECT_NAME} main.cpp
 configure_file(config.h config.h)
 target_include_directories(${PROJECT_NAME} PUBLIC
         "${PROJECT_BINARY_DIR}"
+        "${CMAKE_SOURCE_DIR}/src"
         )
 
 #  Link to Raylib

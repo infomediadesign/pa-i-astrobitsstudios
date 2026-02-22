@@ -5,7 +5,7 @@
 #include "AttackJump.h"
 #include "../../../cooldown.h"
 #include "../../../player/schaden/schaden.h"
-#include "../BossController/boss.h"
+#include "../GolemController/GolemController.h"
 #include "config.h"
 
 
@@ -43,7 +43,7 @@ bool AttackJump::hitPlayer(Rectangle playerRect) {
     }
 }
 
-void AttackJump::attack(Vector2 playerPos, Rectangle playerRect, float dt, Player &schadensSystem, Enemy &golem) {
+void AttackJump::attack(Vector2 playerPos, Rectangle playerRect, float dt, Player &schadensSystem, GolemController &golem) {
     // 1. Phase: Start (Warnkreis erscheint)
     if (startAttackCD.Ready() && !this->isActive()) {
         startAttack(playerPos);
@@ -81,13 +81,12 @@ void AttackJump::startAttackDraw(Vector2 playerPos) {
     }
 }
 
-void AttackJump::doAttack(Rectangle playerRect, Player &player, Enemy &boss) {
+void AttackJump::doAttack(Rectangle playerRect, Player &player, GolemController &boss) {
     Rectangle bossRect = boss.GetRect();
 
     // Wir zentrieren den Boss auf den Punkt, wo der Spieler stand
     // Wir ziehen die HALBE Breite des Bosses ab
-    boss.pos.x = this->pos.x - (-10.0f);
-    boss.pos.y = this->pos.y - (-35.0f);
+    boss.setPos({ this->pos.x - (-10.0f), this->pos.y - (-35.0f) });
 
     if (hitPlayer(playerRect)) {
         player.TakeDamage(20);
@@ -149,4 +148,3 @@ void AttackJump::DrawCD() {
         DrawText("Ready", 500, 20, 10, GREEN);
     else DrawText(TextFormat("stop; Cooldown %.2f", stopAttackCD.Remaining()), 500, 20, 10, GREEN);
 }
-

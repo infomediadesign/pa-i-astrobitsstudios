@@ -32,13 +32,14 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/highscore.h
         enviroment/background.cpp
         enviroment/background.h
-        boss/golem/boss_Angriff.cpp
-        boss/golem/boss_Angriff.h
+        boss/golem/Golem_Angriff.cpp
+        boss/golem/Golem_Angriff.h
         boss/golem/AttackMeteor/AttackMeteor.cpp
         boss/golem/AttackSwing/AttackSwing.cpp
         boss/golem/AttackRing/AttackRing.cpp
         boss/golem/AttackSlam/AttackSlam.cpp
         boss/golem/AttackSlam/AttackSlam.h
+        boss/BossKlasse.h
         # Basis-Boss-Klasse (für Ableitung durch z.B. Golem)
         boss/Boss.cpp
         # boss/Boss.h (Header, zur Übersicht)

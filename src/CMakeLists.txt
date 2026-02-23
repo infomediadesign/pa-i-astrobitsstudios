@@ -41,6 +41,8 @@ add_executable(${PROJECT_NAME} main.cpp
         boss/golem/AttackSlam/AttackSlam.h
         # Basis-Boss-Klasse (für Ableitung durch z.B. Golem)
         boss/Boss.cpp
+        Menu/UpgradeScreen.cpp
+        Menu/UpgradeScreen.h
         # boss/Boss.h (Header, zur Übersicht)
 
 )

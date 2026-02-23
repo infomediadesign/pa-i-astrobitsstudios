@@ -2,14 +2,12 @@
 #include <algorithm>
 #include "raylib.h"
 #include "config.h"
-#include <math.h>
+#include <cmath>
 #include"cooldown.h"
 #include <vector>
-#include "Sprite.h"
-// #include "boss/golem/AttackJump/AttackJump.h" // removed: jump handled by BossAngriff
 #include "boss/golem/GolemController/GolemController.h"
 
-#include "enviroment/background.h"
+
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
 #include "player/combat/plattack.h"
@@ -20,6 +18,8 @@
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
 #include "boss/golem/boss_Angriff.h"
+#include "Menu/UpgradeScreen.h"
+
 
 
 int main() {
@@ -47,7 +47,7 @@ int main() {
         STATE_VICTORY = 5,
         STATE_NAME_ENTRY = 6,
         STATE_HIGHSCORES = 7,
-        STATE_LOADING = 8,
+        STATE_UPGRADES = 8,
         STATE_BOSS_2 = 9
     };
 
@@ -60,14 +60,14 @@ int main() {
     RunTimer runTimer;
     HighscoreBoard board;
     NameInput nameInput;
+    UpgradeScreen upgradeScreen;
 
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);
-    Player hp;
+    Player hp{}; // value-initialize to remove uninitialized warnings
     GolemController golem;
     controller player;
     plattack melee;
-    // AttackJump attack_jump;  // removed: jump handled by BossAngriff
     melee.Init();
     golem.Init();
     player.Init();
@@ -138,7 +138,7 @@ int main() {
                 bossAtk.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
 
                 float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
-                if (dmg > 0) hp.TakeDamage(dmg);
+                if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
 
 
                 // Pause aktivieren
@@ -172,7 +172,7 @@ int main() {
                 if (!golem.isAlive()) {
                     runTimer.Stop();
                     nameInput.Clear();
-                    currentState = STATE_LOADING;
+                    currentState = STATE_UPGRADES;
                 }
                 break;
             }
@@ -260,26 +260,13 @@ int main() {
                 }
 
                 break;
-            case STATE_LOADING:
+            case STATE_UPGRADES:
                 runTimer.Stop();
-                Image GenImageColor(int Screenwidth, int Screenheight, Color color);
-                // Hier könntest du einen Ladebildschirm anzeigen oder eine kurze Verzögerung einbauen
-                // Zum Beispiel:
-                ClearBackground(BLACK);
-                DrawText("Loading...", 60, 60, 50, GREEN);
-                DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
-                EndDrawing();
-                // Simuliere Ladezeit
-                for (int i = 0; i < 120; i++) {
-                    // etwa 2 Sekunden bei 60 FPS
-                    BeginDrawing();
-                    ClearBackground(BLACK);
-                    DrawText("Loading...", 60, 60, 50, GREEN);
-                    DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
-                    EndDrawing();
-                    WaitTime(1.0f / 60.0f); // Warte auf den nächsten Frame
+                upgradeScreen.Update();
+                if (upgradeScreen.GetChoice() != -1)
+
                     currentState = STATE_BOSS_2; // Wechsel zum nächsten Zustand nach der Ladezei
-                }
+
                 break;
             case STATE_BOSS_2:
                 // Hier könntest du den nächsten Bosskampf oder das nächste Level starten
@@ -299,16 +286,15 @@ int main() {
                     runTimer.Reset();
                     currentState = STATE_DEATH;
                 }
-                currentState = STATE_NAME_ENTRY;
+                //currentState = STATE_NAME_ENTRY;
                 break;
-            default:
-                // Unhandled states: do nothing
-                break;
+
         }
 
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
         // For the letterbox we draw on canvas instead
+
         BeginTextureMode(canvas);
         {
             //Within this block is where we draw our app to the canvas and YOUR code goes.
@@ -321,7 +307,6 @@ int main() {
                 mainMenu.Draw();
             } else if (currentState == STATE_BOSS_1) {
                 Rectangle br = golem.GetRect();
-                Rectangle hb = golem.GetDmgBox();
                 Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
                 DrawTexture(background, 0, 0, WHITE);
@@ -331,13 +316,6 @@ int main() {
 
                 player.Draw();
                 golem.Draw();
-
-                //Hitboxen Zeichnen
-                // DrawRectangleRec(hb, YELLOW);
-                //DrawRectangleRec(br, BLUE);
-
-                //DrawRectangleRec(player.GetHitbox(), GREEN);
-
 
                 if (melee.active) {
                     melee.Draw();
@@ -353,15 +331,19 @@ int main() {
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);
-                    //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                 }
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                          395, 40, 24, WHITE);
-                if (hp.takeDamage) {
-                    //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
-                }
-            } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
+
+            } else if (currentState == STATE_BOSS_2) {
+                ClearBackground(BLACK);
+                DrawText("Boss 2 Kampf (noch nicht implementiert)", 60, 60, 30, RED);
+                DrawText("Drücke ESC, um zu pausieren", 60, 120, 20, GRAY);
+            }
+
+
+            else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
@@ -369,10 +351,11 @@ int main() {
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
 
-                // Jetzt den roten Text drüber zeichnen
+                // Zeichne das passende Menü
                 if (currentState == STATE_PAUSE) {
                     pauseMenu.Draw();
-                } else if (currentState == STATE_DEATH) {
+                }
+                if (currentState == STATE_DEATH) {
                     deathScreen.Draw();
                 }
             } else if (currentState == STATE_NAME_ENTRY) {
@@ -389,26 +372,28 @@ int main() {
                 ClearBackground(BLACK);
                 board.Draw(60, 60);
                 DrawText("ENTER/ESC: Back", 60, 520, 22, GRAY);
+            } else if (currentState == STATE_UPGRADES) {
+                upgradeScreen.Draw();
             }
         }
         EndTextureMode();
+
         //The following lines put the canvas in the middle of the window and have the negative as black
         ClearBackground(BLACK); // If you want something else than a black void in the background
-        // then you can add stuff here.
 
-
-        renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
+        renderScale = std::min(static_cast<float>(GetScreenHeight()) / static_cast<float>(canvas.texture.height),
                                // Calculates how big or small the canvas has to be rendered.
-                               GetScreenWidth() / (float) canvas.texture.width);
+                               static_cast<float>(GetScreenWidth()) / static_cast<float>(canvas.texture.width));
         // Priority is given to the smaller side.
         renderScale = floorf(renderScale);
         if (renderScale < 1) renderScale = 1; // Ensure that scale is at least 1.
-        renderRec.width = canvas.texture.width * renderScale;
-        renderRec.height = canvas.texture.height * renderScale;
-        renderRec.x = (GetScreenWidth() - renderRec.width) / 2.0f;
-        renderRec.y = (GetScreenHeight() - renderRec.height) / 2.0f;
+        renderRec.width = static_cast<float>(canvas.texture.width) * renderScale;
+        renderRec.height = static_cast<float>(canvas.texture.height) * renderScale;
+        renderRec.x = (static_cast<float>(GetScreenWidth()) - renderRec.width) / 2.0f;
+        renderRec.y = (static_cast<float>(GetScreenHeight()) - renderRec.height) / 2.0f;
+
         DrawTexturePro(canvas.texture,
-                       Rectangle{0, 0, (float) canvas.texture.width, (float) -canvas.texture.height},
+                       Rectangle{0, 0, static_cast<float>(canvas.texture.width), static_cast<float>(-canvas.texture.height)},
                        renderRec,
                        {}, 0, WHITE);
 

@@ -43,6 +43,10 @@ add_executable(${PROJECT_NAME} main.cpp
         boss/Boss.cpp
         Menu/UpgradeScreen.cpp
         Menu/UpgradeScreen.h
+        SFX/Background_Music.cpp
+        SFX/Background_Music.h
+        SFX/Music.h
+        SFX/Music.hpp
         # boss/Boss.h (Header, zur Übersicht)
 
 )

@@ -19,7 +19,7 @@
 #include "Menu/highscore.h"
 #include "boss/golem/boss_Angriff.h"
 #include "Menu/UpgradeScreen.h"
-
+#include "SFX/Background_Music.h"
 
 
 int main() {
@@ -31,6 +31,16 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
+
+    // Initialize audio device for raylib audio playback
+    InitAudioDevice();
+    if (!IsAudioDeviceReady()) {
+        TraceLog(LOG_WARNING, "Audio device not ready - background music will not play.");
+    } else {
+        // Optional: set master volume to full
+        SetMasterVolume(1.0f);
+    }
+
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -75,6 +85,21 @@ int main() {
     BossAngriff bossAtk;
     bossAtk.Init();
 
+    // Background music instance (loads a file and plays it)
+    Background_Music bgm;
+    bool bgmStarted = false;
+    // NOTE: Passe den Pfad zur vorhandenen Audiodatei in deinem Projekt an.
+    bgm.Init("assets/audio/sfx/Thememusic.mp3");
+    if (IsAudioDeviceReady() && bgm.IsLoaded()) {
+        bgm.Play();
+        bgmStarted = true;
+        TraceLog(LOG_INFO, "Background music started successfully");
+    } else if (!bgm.IsLoaded()) {
+        TraceLog(LOG_WARNING, "Background music could not be loaded: %s", "assets/audio/sfx/Thememusic.mp3");
+    } else {
+        TraceLog(LOG_WARNING, "Audio device not ready - music will not play immediately");
+    }
+
     std::vector<Wall> walls = {
         {0, 0, 1, (float) Game::ScreenHeight}, // Links
         {(float) Game::ScreenWidth - 5, 0, 1, (float) Game::ScreenHeight}, // Rechts
@@ -94,6 +119,39 @@ int main() {
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
         float dt = GetFrameTime();
 
+        // Wenn wir im Options-Menü sind, erlauben A/D/M direkt die Lautstärke zu steuern
+        if (currentState == STATE_OPTIONS) {
+            // A = leiser, D = lauter (holdable), M = mute toggle (single press)
+            float vol = options.GetMasterVolume();
+            const float rate = 0.5f; // fraction per second
+            if (IsKeyDown(KEY_A)) {
+                vol -= rate * dt;
+                options.SetMasterVolume(vol);
+            }
+            if (IsKeyDown(KEY_D)) {
+                vol += rate * dt;
+                options.SetMasterVolume(vol);
+            }
+            if (IsKeyPressed(KEY_M)) {
+                options.ToggleMute();
+            }
+        }
+
+        // Apply global volume from Options and update music stream
+        float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();
+        if (IsAudioDeviceReady()) {
+            SetMasterVolume(currentVolume);
+            if (bgm.IsLoaded()) SetMusicVolume(bgm.GetStream(), currentVolume);
+
+            if (bgm.IsLoaded()) {
+                if (!bgmStarted) {
+                    bgm.Play();
+                    bgmStarted = true;
+                    TraceLog(LOG_INFO, "Background music started in loop after audio became ready");
+                }
+                bgm.Update();
+            }
+        }
 
         // --- 1. LOGIK UPDATE ---
         switch (currentState) {
@@ -177,6 +235,8 @@ int main() {
                 break;
             }
             case STATE_OPTIONS:
+                // Options menu logic
+                options.Update();
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     currentState = previousState;
                 }
@@ -289,6 +349,10 @@ int main() {
                 //currentState = STATE_NAME_ENTRY;
                 break;
 
+            default:
+                // Fallback: nichts tun. Dies verhindert statische Analyse-Warnungen
+                break;
+
         }
 
         BeginDrawing();
@@ -328,6 +392,23 @@ int main() {
                 if (attackCD.Ready())
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
+
+                // Music status (debug) - zeigt an, ob Audio verfügbar, geladen und spielend ist
+                const char* musicStatus = "Music: N/A";
+                if (IsAudioDeviceReady()) {
+                    if (bgm.IsLoaded()) {
+                        if (IsMusicStreamPlaying(bgm.GetStream())) musicStatus = "Music: Playing";
+                        else musicStatus = "Music: Loaded (stopped)";
+                    } else {
+                        musicStatus = "Music: Not loaded";
+                    }
+                } else {
+                    musicStatus = "Music: Audio device not ready";
+                }
+                DrawText(musicStatus, 10, 40, 14, YELLOW);
+                // Volume display and controls hint (Options uses A/D)
+                DrawText(TextFormat("Volume: %.0f%% %s", currentVolume * 100.0f, (options.IsMuted()?"(muted)":"")), 10, 60, 14, YELLOW);
+                DrawText("Options: A/D = vol, M = mute", 10, 76, 12, LIGHTGRAY);
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);
@@ -411,6 +492,14 @@ int main() {
 
     UnloadRenderTexture(canvas);
 
+    // Unload background music and close audio
+    if (IsAudioDeviceReady()) {
+        bgm.Unload();
+        CloseAudioDevice();
+    } else {
+        // Ensure resources are still released safely
+        bgm.Unload();
+    }
 
     // Close window and OpenGL context
     CloseWindow();

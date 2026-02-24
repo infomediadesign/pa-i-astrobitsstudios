@@ -35,14 +35,6 @@ void Boss::takeDamage(float amount) {
         onDeath();
     }
 }
-void Boss::reset() {
-    health = maxHealth;
-    alive = true;
-    hitTimer = 0.0f;
-    wasHit = false;
-    attackActive = false;
-}
-
 
 bool Boss::isAlive() const { return alive; }
 

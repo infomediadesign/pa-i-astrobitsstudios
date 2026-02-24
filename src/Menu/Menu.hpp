@@ -1,6 +1,3 @@
-//
-// Created by benco on 20.01.2026.
-//
 
 #ifndef RAYLIBSTARTER_MENU_HPP
 #define RAYLIBSTARTER_MENU_HPP

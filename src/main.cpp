@@ -187,7 +187,7 @@ int main() {
                     hp.Init();
                     melee.Reset();
                     player.Reset();
-                    golem.Init();
+                    golem.reset();
                     bossAtk.Init();
                     runTimer.Reset();
                     runTimer.Start();
@@ -214,7 +214,7 @@ int main() {
                     hp.Init();
                     player.Reset();
                     melee.Reset();
-                    golem.Init();
+                    golem.reset();
                     bossAtk.Init();
                     hp.invincibleTimer = hp.invincibleDuration;
                     runTimer.Reset();
@@ -365,7 +365,6 @@ int main() {
                 DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
                 golem.Draw();
-                hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
 
                 // Jetzt den roten Text drüber zeichnen

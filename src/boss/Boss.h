@@ -14,7 +14,7 @@ public:
     virtual void update(float dt);   // Spiel-Logik pro Frame
     virtual void draw() const;       // Zeichnen
     virtual void Unload();
-
+    virtual void reset();
     // Backwards-compatible wrappers (some legacy code uses Update/Draw)
     virtual void Update(float dt) { update(dt); }
     virtual void Draw() { draw(); }

@@ -46,6 +46,8 @@ add_executable(${PROJECT_NAME} main.cpp
         SFX/Background_Music.cpp
         SFX/Background_Music.h
         SFX/Music.hpp
+        player/PlayerUpgrades/Upgrades.cpp
+        player/PlayerUpgrades/Upgrades.h
         # boss/Boss.h (Header, zur Übersicht)
 
 )

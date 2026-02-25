@@ -11,7 +11,7 @@ class Upgrades {
 public:
     void Upgrade1(Player &schadensSystem, plattack &plattack);
     void Upgrade2(Player &schadensSystem, controller &movement);
-    void Upgrade3();
+    void Upgrade3(plattack &plattack, controller &movement);
 private:
     double prozentWert = 10;
 

@@ -331,15 +331,18 @@ int main() {
                     golem.Init();
                     currentState = STATE_BOSS_1;
                 }
-                if (upgradeScreen.GetChoice() != 1) {
+                if (upgradeScreen.GetChoice() == 1) {
                     Upgrades.Upgrade2(hp,player);
                     upgradeScreen.ResetChoice();
                     golem.Init();
                     currentState = STATE_BOSS_1;
                 }
-                /*if (upgradeScreen.GetChoice() != 2) {
-                    Upgrade3();
-                }*/
+                if (upgradeScreen.GetChoice() == 2) {
+                    Upgrades.Upgrade3(melee,player);
+                    upgradeScreen.ResetChoice();
+                    golem.Init();
+                    currentState = STATE_BOSS_1;
+                }
                     //currentState = STATE_BOSS_2;
 
                 break;
@@ -420,8 +423,9 @@ int main() {
                 } else {
                     musicStatus = "Music: Audio device not ready";
                 }
-                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,WHITE);
-                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,WHITE);
+                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
+                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
+                DrawText(TextFormat("Der Wert hp ist: %.2f", player.speed),600,200,10,RED);
                 DrawText(musicStatus, 10, 40, 14, YELLOW);
                 // Volume display and controls hint (Options uses A/D)
                 DrawText(TextFormat("Volume: %.0f%% %s", currentVolume * 100.0f, (options.IsMuted()?"(muted)":"")), 10, 60, 14, YELLOW);

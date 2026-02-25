@@ -19,6 +19,8 @@ void Upgrades:: Upgrade2(Player &schadensSystem, controller &movement){
     schadensSystem.hp = schadensSystem.maxHp;
     movement.speed = (int) round(movement.speed * (1 + prozentWert / 100));
 }
-void Upgrades:: Upgrade3() {
+void Upgrades:: Upgrade3(plattack &plattack, controller &movement) {
+    plattack.damage = (int) round(plattack.damage * (1 + prozentWert / 100));
+    movement.speed = (int) round(movement.speed * (1 - prozentWert / 100));
 
 }

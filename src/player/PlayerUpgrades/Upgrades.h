@@ -4,12 +4,13 @@
 
 #ifndef RAYLIBSTARTER_UPGRADES_H
 #define RAYLIBSTARTER_UPGRADES_H
-#include "player/schaden/schaden.h"
-#include "player/combat/plattack.h"
+class Player;
+class plattack;
+struct controller;
 class Upgrades {
 public:
     void Upgrade1(Player &schadensSystem, plattack &plattack);
-    void Upgrade2();
+    void Upgrade2(Player &schadensSystem, controller &movement);
     void Upgrade3();
 private:
     double prozentWert = 10;

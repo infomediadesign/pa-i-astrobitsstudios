@@ -331,10 +331,13 @@ int main() {
                     golem.Init();
                     currentState = STATE_BOSS_1;
                 }
-                /*if (upgradeScreen.GetChoice() != 0) {
-                    Upgrade2
-                }
                 if (upgradeScreen.GetChoice() != 1) {
+                    Upgrades.Upgrade2(hp,player);
+                    upgradeScreen.ResetChoice();
+                    golem.Init();
+                    currentState = STATE_BOSS_1;
+                }
+                /*if (upgradeScreen.GetChoice() != 2) {
                     Upgrade3();
                 }*/
                     //currentState = STATE_BOSS_2;

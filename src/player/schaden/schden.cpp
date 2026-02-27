@@ -37,7 +37,7 @@ void Player::TakeDamage(int dmg) {
     if (invincibleTimer > 0.0f) return;
     takeDamage = true;
     hp -= dmg;
-    hp = std::clamp(hp, 0, maxHp);
+    hp = std::clamp(hp, 0.0f, maxHp);
 
     // start invincibility
     invincibleTimer = invincibleDuration;

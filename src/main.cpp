@@ -20,6 +20,7 @@
 #include "boss/golem/boss_Angriff.h"
 #include "Menu/UpgradeScreen.h"
 #include "SFX/Background_Music.h"
+#include "player/PlayerUpgrades/Upgrades.h"
 
 
 int main() {
@@ -84,6 +85,7 @@ int main() {
     hp.Init();
     BossAngriff bossAtk;
     bossAtk.Init();
+    Upgrades Upgrades;
 
     // Background music instance (loads a file and plays it)
     Background_Music bgm;
@@ -304,7 +306,7 @@ int main() {
 
                     deathScreen.ResetChoice();
                     currentState = STATE_BOSS_1;
-                } else if (deathScreen.GetChoice() == 1) {
+                } else if (deathScreen.GetChoice() == 0) {
                     deathScreen.ResetChoice();
                     mainMenu.ResetChoice();
                     runTimer.Reset();
@@ -344,9 +346,25 @@ int main() {
             case STATE_UPGRADES:
                 runTimer.Stop();
                 upgradeScreen.Update();
-                if (upgradeScreen.GetChoice() != -1)
-
-                    currentState = STATE_BOSS_2; // Wechsel zum nächsten Zustand nach der Ladezei
+                if (upgradeScreen.GetChoice() == 0) {
+                    Upgrades.Upgrade1(hp,melee);
+                    upgradeScreen.ResetChoice();
+                    golem.Init();
+                    currentState = STATE_BOSS_1;
+                }
+                if (upgradeScreen.GetChoice() == 1) {
+                    Upgrades.Upgrade2(hp,player);
+                    upgradeScreen.ResetChoice();
+                    golem.Init();
+                    currentState = STATE_BOSS_1;
+                }
+                if (upgradeScreen.GetChoice() == 2) {
+                    Upgrades.Upgrade3(melee,player);
+                    upgradeScreen.ResetChoice();
+                    golem.Init();
+                    currentState = STATE_BOSS_1;
+                }
+                    //currentState = STATE_BOSS_2;
 
                 break;
             case STATE_BOSS_2:
@@ -429,6 +447,8 @@ int main() {
                 ClearBackground(BLACK);
                 DrawText("Boss 2 Kampf (noch nicht implementiert)", 60, 60, 30, RED);
                 DrawText("Drücke ESC, um zu pausieren", 60, 120, 20, GRAY);
+                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,20,WHITE);
+                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,20,WHITE);
             }
 
 

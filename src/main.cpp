@@ -119,24 +119,6 @@ int main() {
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
         float dt = GetFrameTime();
 
-        // Wenn wir im Options-Menü sind, erlauben A/D/M direkt die Lautstärke zu steuern
-        if (currentState == STATE_OPTIONS) {
-            // A = leiser, D = lauter (holdable), M = mute toggle (single press)
-            float vol = options.GetMasterVolume();
-            const float rate = 0.5f; // fraction per second
-            if (IsKeyDown(KEY_A)) {
-                vol -= rate * dt;
-                options.SetMasterVolume(vol);
-            }
-            if (IsKeyDown(KEY_D)) {
-                vol += rate * dt;
-                options.SetMasterVolume(vol);
-            }
-            if (IsKeyPressed(KEY_M)) {
-                options.ToggleMute();
-            }
-        }
-
         // Apply global volume from Options and update music stream
         float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();
         if (IsAudioDeviceReady()) {
@@ -237,6 +219,45 @@ int main() {
             case STATE_OPTIONS:
                 // Options menu logic
                 options.Update();
+
+                if (IsAudioDeviceReady()) {
+                    if (bgm.IsLoaded()) {
+
+
+                        // Lautstärke per Schritt ändern (einmaliger Tastendruck)
+                        float volOpt = options.GetMasterVolume();
+                        const float volStep = 0.05f;
+                        if (IsKeyPressed(KEY_D)) {
+                            volOpt = std::min(1.0f, volOpt + volStep);
+                            options.SetMasterVolume(volOpt);
+                        }
+                        if (IsKeyPressed(KEY_A)) {
+                            volOpt = std::max(0.0f, volOpt - volStep);
+                            options.SetMasterVolume(volOpt);
+                        }
+
+                        // Muten (Options bereits unterstützt, hier nur Shortcut)
+                        if (IsKeyPressed(KEY_M)) {
+                            options.ToggleMute();
+                        }
+
+                        // Sicherstellen, dass die Musik-Lautstärke dem Options-Wert folgt
+                        float currentVolFromOptions = options.IsMuted() ? 0.0f : options.GetMasterVolume();
+                        SetMusicVolume(bgm.GetStream(), currentVolFromOptions);
+
+                    } else {
+                        // Kein Track geladen: kurze Info-Trace auf Taste P
+                        if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O)) {
+                            TraceLog(LOG_WARNING, "No background music loaded to control from Options");
+                        }
+                    }
+                } else {
+                    // Audiogerät nicht bereit: informieren
+                    if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN)) {
+                        TraceLog(LOG_WARNING, "Audio device not ready - cannot control music from Options");
+                    }
+                }
+
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     currentState = previousState;
                 }

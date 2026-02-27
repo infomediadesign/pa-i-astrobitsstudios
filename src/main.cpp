@@ -414,22 +414,9 @@ int main() {
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
 
-                // Music status (debug) - zeigt an, ob Audio verfügbar, geladen und spielend ist
-                const char* musicStatus = "Music: N/A";
-                if (IsAudioDeviceReady()) {
-                    if (bgm.IsLoaded()) {
-                        if (IsMusicStreamPlaying(bgm.GetStream())) musicStatus = "Music: Playing";
-                        else musicStatus = "Music: Loaded (stopped)";
-                    } else {
-                        musicStatus = "Music: Not loaded";
-                    }
-                } else {
-                    musicStatus = "Music: Audio device not ready";
-                }
-                DrawText(musicStatus, 10, 40, 14, YELLOW);
-                // Volume display and controls hint (Options uses A/D)
-                DrawText(TextFormat("Volume: %.0f%% %s", currentVolume * 100.0f, (options.IsMuted()?"(muted)":"")), 10, 60, 14, YELLOW);
-                DrawText("Options: A/D = vol, M = mute", 10, 76, 12, LIGHTGRAY);
+
+
+
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);

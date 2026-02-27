@@ -2,7 +2,7 @@
 #include "config.h"
 
 UpgradeScreen::UpgradeScreen() {
-    options = {"Upgrade 1", "Upgrade 2", "Upgrade 3"};
+    options = {"HP+10%/ATK-10%", "HP-10%/SPEED+10%", "ATK+10%/SPEED-10%"};
     selectedItem = 0;
     choice = -1;
 }
@@ -25,7 +25,7 @@ void UpgradeScreen::Draw() {
     DrawText("Upgrade Screen", 100, 100, 40, BLACK);
     DrawText("Hier kannst du deine Upgrades auswählen!", 100, 150, 30, DARKGRAY);
     for (int i = 0; i < options.size(); ++i) {
-        Color color = (i == selectedItem) ? RED : RAYWHITE;
+        Color color = (i == selectedItem) ? RED : BLACK;
         int textWidth = MeasureText(options[i].c_str(), 25);
         int x = Game::ScreenWidth/2 - textWidth/2;
         DrawText(options[i].c_str(), x, 250 + i*50, 25, color);

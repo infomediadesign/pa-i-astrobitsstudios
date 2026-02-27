@@ -432,7 +432,9 @@ int main() {
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
 
-
+                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
+                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
+                DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
 
 
 

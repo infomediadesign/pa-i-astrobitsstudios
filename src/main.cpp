@@ -271,7 +271,7 @@ int main() {
                     hp.Init();
                     melee.Reset();
                     player.Reset();
-                    golem.Init();
+                    golem.Reset();
                     bossAtk.Init();
                     runTimer.Reset();
                     runTimer.Start();
@@ -298,7 +298,7 @@ int main() {
                     hp.Init();
                     player.Reset();
                     melee.Reset();
-                    golem.Init();
+                    golem.Reset();
                     bossAtk.Init();
                     hp.invincibleTimer = hp.invincibleDuration;
                     runTimer.Reset();
@@ -349,19 +349,19 @@ int main() {
                 if (upgradeScreen.GetChoice() == 0) {
                     Upgrades.Upgrade1(hp,melee);
                     upgradeScreen.ResetChoice();
-                    golem.Init();
+                    golem.Reset();
                     currentState = STATE_BOSS_1;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
                     Upgrades.Upgrade2(hp,player);
                     upgradeScreen.ResetChoice();
-                    golem.Init();
+                    golem.Reset();
                     currentState = STATE_BOSS_1;
                 }
                 if (upgradeScreen.GetChoice() == 2) {
                     Upgrades.Upgrade3(melee,player);
                     upgradeScreen.ResetChoice();
-                    golem.Init();
+                    golem.Reset();
                     currentState = STATE_BOSS_1;
                 }
                     //currentState = STATE_BOSS_2;
@@ -459,7 +459,6 @@ int main() {
                 DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
                 golem.Draw();
-                hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
 
                 // Zeichne das passende Menü

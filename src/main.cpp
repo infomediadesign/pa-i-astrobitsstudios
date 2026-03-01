@@ -306,7 +306,7 @@ int main() {
 
                     deathScreen.ResetChoice();
                     currentState = STATE_BOSS_1;
-                } else if (deathScreen.GetChoice() == 0) {
+                } else if (deathScreen.GetChoice() == 1) {
                     deathScreen.ResetChoice();
                     mainMenu.ResetChoice();
                     runTimer.Reset();

@@ -20,7 +20,6 @@
 #include "boss/golem/boss_Angriff.h"
 #include "Menu/UpgradeScreen.h"
 #include "SFX/Background_Music.h"
-#include "player/PlayerUpgrades/Upgrades.h"
 
 
 int main() {
@@ -32,6 +31,16 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
+
+    // Initialize audio device for raylib audio playback
+    InitAudioDevice();
+    if (!IsAudioDeviceReady()) {
+        TraceLog(LOG_WARNING, "Audio device not ready - background music will not play.");
+    } else {
+        // Optional: set master volume to full
+        SetMasterVolume(1.0f);
+    }
+
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -75,7 +84,6 @@ int main() {
     hp.Init();
     BossAngriff bossAtk;
     bossAtk.Init();
-    Upgrades Upgrades;
 
     // Background music instance (loads a file and plays it)
     Background_Music bgm;
@@ -111,6 +119,7 @@ int main() {
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
         float dt = GetFrameTime();
 
+        // Wenn wir im Options-Menü sind, erlauben A/D/M direkt die Lautstärke zu steuern
         if (currentState == STATE_OPTIONS) {
             // A = leiser, D = lauter (holdable), M = mute toggle (single press)
             float vol = options.GetMasterVolume();
@@ -228,45 +237,6 @@ int main() {
             case STATE_OPTIONS:
                 // Options menu logic
                 options.Update();
-
-                if (IsAudioDeviceReady()) {
-                    if (bgm.IsLoaded()) {
-
-
-                        // Lautstärke per Schritt ändern (einmaliger Tastendruck)
-                        float volOpt = options.GetMasterVolume();
-                        const float volStep = 0.05f;
-                        if (IsKeyPressed(KEY_D)) {
-                            volOpt = std::min(1.0f, volOpt + volStep);
-                            options.SetMasterVolume(volOpt);
-                        }
-                        if (IsKeyPressed(KEY_A)) {
-                            volOpt = std::max(0.0f, volOpt - volStep);
-                            options.SetMasterVolume(volOpt);
-                        }
-
-                        // Muten (Options bereits unterstützt, hier nur Shortcut)
-                        if (IsKeyPressed(KEY_M)) {
-                            options.ToggleMute();
-                        }
-
-                        // Sicherstellen, dass die Musik-Lautstärke dem Options-Wert folgt
-                        float currentVolFromOptions = options.IsMuted() ? 0.0f : options.GetMasterVolume();
-                        SetMusicVolume(bgm.GetStream(), currentVolFromOptions);
-
-                    } else {
-                        // Kein Track geladen: kurze Info-Trace auf Taste P
-                        if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O)) {
-                            TraceLog(LOG_WARNING, "No background music loaded to control from Options");
-                        }
-                    }
-                } else {
-                    // Audiogerät nicht bereit: informieren
-                    if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN)) {
-                        TraceLog(LOG_WARNING, "Audio device not ready - cannot control music from Options");
-                    }
-                }
-
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     currentState = previousState;
                 }
@@ -278,7 +248,7 @@ int main() {
                     hp.Init();
                     melee.Reset();
                     player.Reset();
-                    golem.Reset();
+                    golem.Init();
                     bossAtk.Init();
                     runTimer.Reset();
                     runTimer.Start();
@@ -305,7 +275,7 @@ int main() {
                     hp.Init();
                     player.Reset();
                     melee.Reset();
-                    golem.Reset();
+                    golem.Init();
                     bossAtk.Init();
                     hp.invincibleTimer = hp.invincibleDuration;
                     runTimer.Reset();
@@ -353,25 +323,9 @@ int main() {
             case STATE_UPGRADES:
                 runTimer.Stop();
                 upgradeScreen.Update();
-                if (upgradeScreen.GetChoice() == 0) {
-                    Upgrades.Upgrade1(hp,melee);
-                    upgradeScreen.ResetChoice();
-                    golem.Reset();
-                    currentState = STATE_BOSS_1;
-                }
-                if (upgradeScreen.GetChoice() == 1) {
-                    Upgrades.Upgrade2(hp,player);
-                    upgradeScreen.ResetChoice();
-                    golem.Reset();
-                    currentState = STATE_BOSS_1;
-                }
-                if (upgradeScreen.GetChoice() == 2) {
-                    Upgrades.Upgrade3(melee,player);
-                    upgradeScreen.ResetChoice();
-                    golem.Reset();
-                    currentState = STATE_BOSS_1;
-                }
-                    //currentState = STATE_BOSS_2;
+                if (upgradeScreen.GetChoice() != -1)
+
+                    currentState = STATE_BOSS_2; // Wechsel zum nächsten Zustand nach der Ladezei
 
                 break;
             case STATE_BOSS_2:
@@ -439,9 +393,22 @@ int main() {
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
 
-
-
-
+                // Music status (debug) - zeigt an, ob Audio verfügbar, geladen und spielend ist
+                const char* musicStatus = "Music: N/A";
+                if (IsAudioDeviceReady()) {
+                    if (bgm.IsLoaded()) {
+                        if (IsMusicStreamPlaying(bgm.GetStream())) musicStatus = "Music: Playing";
+                        else musicStatus = "Music: Loaded (stopped)";
+                    } else {
+                        musicStatus = "Music: Not loaded";
+                    }
+                } else {
+                    musicStatus = "Music: Audio device not ready";
+                }
+                DrawText(musicStatus, 10, 40, 14, YELLOW);
+                // Volume display and controls hint (Options uses A/D)
+                DrawText(TextFormat("Volume: %.0f%% %s", currentVolume * 100.0f, (options.IsMuted()?"(muted)":"")), 10, 60, 14, YELLOW);
+                DrawText("Options: A/D = vol, M = mute", 10, 76, 12, LIGHTGRAY);
 
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);
@@ -462,6 +429,7 @@ int main() {
                 DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
                 golem.Draw();
+                hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
 
                 // Zeichne das passende Menü

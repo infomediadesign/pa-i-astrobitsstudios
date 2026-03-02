@@ -15,10 +15,8 @@ public:
     void Draw() override;   // implementiert die pure-virtual from Menu
     void Open();
 
-    int GetChoice() const { return choice; }
-    void ResetChoice() { choice = -1; }
 protected:
-    int choice = -1; // Hinweis: 'choice', 'selectedItem' und 'options' werden von Menu bereitgestellt.
+    // Hinweis: 'choice', 'selectedItem' und 'options' werden von Menu bereitgestellt.
 };
 
 

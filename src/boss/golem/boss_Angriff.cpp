@@ -81,11 +81,11 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
 
     modeTimer += dt;
     float spd = SpeedMultiplier();
-    float scaleDt = dt * spd;
+
     switch (mode) {
         case MODE_RING1_TELE:
             if (!ringAttack.IsActive()) StartRingTele(bossPos, ring1InnerTele, ring1OuterTele);
-            ringAttack.Update(scaleDt, bossPos, playerPos);
+            ringAttack.Update(dt, bossPos, playerPos);
             if (modeTimer >= ringTeleDuration / spd) {
                 mode = MODE_RING1_BURST;
                 modeTimer = 0.0f;
@@ -94,7 +94,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
             break;
 
         case MODE_RING1_BURST:
-            ringAttack.Update(scaleDt, bossPos, playerPos);
+            ringAttack.Update(dt, bossPos, playerPos);
             if (modeTimer >= ring1BurstDuration / spd) {
                 mode = MODE_WAIT_BETWEEN_RINGS;
                 modeTimer = 0.0f;
@@ -133,8 +133,8 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
             break;
 
         case MODE_JUMP:
-            jumpAttack.updateAttackCD(scaleDt);
-            jumpAttack.attack(playerPos, playerRect, scaleDt, player, boss);
+            jumpAttack.updateAttackCD(dt);
+            jumpAttack.attack(playerPos, playerRect, dt, player, boss);
 
             // Sobald die Attacke nicht mehr aktiv ist (stopAttack wurde gerufen)
             if (!jumpAttack.isActive()) {
@@ -144,7 +144,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
             break;
 
         case MODE_SWING:
-            swingAttack.Update(scaleDt, bossPos, playerPos);
+            swingAttack.Update(dt, bossPos, playerPos);
             if (modeTimer >= swingDuration / spd) {
                 mode = MODE_REST_AFTER_SWING;
                 modeTimer = 0.0f;
@@ -152,7 +152,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
             break;
 
         case MODE_SLAM_TELE:
-            slamAttack.Update(scaleDt,bossPos, playerPos);
+            slamAttack.Update(dt,bossPos, playerPos);
             if (modeTimer >= slamTeleDuration / spd) {
                 mode = MODE_SLAM_HIT;
                 modeTimer = 0.0f;
@@ -160,7 +160,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
             break;
 
         case MODE_SLAM_HIT:
-            slamAttack.Update(scaleDt,bossPos,playerPos);
+            slamAttack.Update(dt,bossPos,playerPos);
             if (modeTimer >= slamHitDuration / spd) {
                 mode = MODE_REST_AFTER_SLAM;
                 modeTimer = 0.0f;
@@ -168,7 +168,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
             break;
 
         case MODE_REST_AFTER_SLAM:
-            slamAttack.Update(scaleDt,bossPos,playerPos);
+            slamAttack.Update(dt,bossPos,playerPos);
             if (modeTimer >= restAfterSlam / spd && !AnyAttackActive()) {
                 mode = MODE_WAIT_BETWEEN_RINGS;  // 或者直接回 MODE_RING1_TELE 都行
                 modeTimer = 0.0f;

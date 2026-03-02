@@ -20,7 +20,7 @@
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
 #include "boss/golem/boss_Angriff.h"
-
+#include "difficulty/difficulty.h"
 
 int main() {
     Cooldown attackCD(0.5f);
@@ -60,6 +60,7 @@ int main() {
     RunTimer runTimer;
     HighscoreBoard board;
     NameInput nameInput;
+    difficulty difficulty;
 
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);

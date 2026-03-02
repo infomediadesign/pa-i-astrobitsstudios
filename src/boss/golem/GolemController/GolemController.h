@@ -14,6 +14,8 @@ public:
     void draw() const override;
     void Unload() override;
 
+
+
     void setPos(Vector2 position);
     void takeDamage(float amount) override;
 

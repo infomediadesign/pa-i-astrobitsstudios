@@ -43,3 +43,6 @@ void GolemController::Unload() {
 void GolemController::setPos(Vector2 position) {
     this->position = position;
 }
+
+
+

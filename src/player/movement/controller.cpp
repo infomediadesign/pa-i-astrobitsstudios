@@ -71,7 +71,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 
 void controller::Init()
 {
-    texture =LoadTexture("assets/graphics/Player/player.png");
+    texture =LoadTexture("assets/graphics/Player/Ixirath_Sprites.png");
     Reset();
 }
 void controller::Draw()
@@ -157,7 +157,7 @@ bool controller::Collides(const Rectangle& box, const std::vector<Wall>& walls)
 }
 void controller::Reset() {
     pos = {10, 100};
-    speed = 245; //minimum 200 aber das wäre sehr langsam. langsamer würde ich auf keinen fall empfehlen
+    speed = 250; //minimum 200 aber das wäre sehr langsam. langsamer würde ich auf keinen fall empfehlen
     frames=0;
     frameCount=0;
     frameSpeed = 8;

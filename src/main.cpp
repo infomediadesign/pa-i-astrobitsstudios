@@ -32,16 +32,6 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
-
-    // Initialize audio device for raylib audio playback
-    InitAudioDevice();
-    if (!IsAudioDeviceReady()) {
-        TraceLog(LOG_WARNING, "Audio device not ready - background music will not play.");
-    } else {
-        // Optional: set master volume to full
-        SetMasterVolume(1.0f);
-    }
-
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -120,6 +110,23 @@ int main() {
     // Main game loop
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
         float dt = GetFrameTime();
+
+        if (currentState == STATE_OPTIONS) {
+            // A = leiser, D = lauter (holdable), M = mute toggle (single press)
+            float vol = options.GetMasterVolume();
+            const float rate = 0.5f; // fraction per second
+            if (IsKeyDown(KEY_A)) {
+                vol -= rate * dt;
+                options.SetMasterVolume(vol);
+            }
+            if (IsKeyDown(KEY_D)) {
+                vol += rate * dt;
+                options.SetMasterVolume(vol);
+            }
+            if (IsKeyPressed(KEY_M)) {
+                options.ToggleMute();
+            }
+        }
 
         // Apply global volume from Options and update music stream
         float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();
@@ -449,8 +456,6 @@ int main() {
                 ClearBackground(BLACK);
                 DrawText("Boss 2 Kampf (noch nicht implementiert)", 60, 60, 30, RED);
                 DrawText("Drücke ESC, um zu pausieren", 60, 120, 20, GRAY);
-                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,20,WHITE);
-                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,20,WHITE);
             }
 
 

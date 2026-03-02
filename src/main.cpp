@@ -24,6 +24,30 @@
 
 #include "difficulty/difficulty.h"
 
+// Helper: wendet die ausgewählte Difficulty aus Options auf Player und Boss an
+static void applyDifficulty(const Options &options, Player &player, GolemController &golem) {
+    difficulty diff;
+    int idx = options.GetDifficultyIndex();
+    switch (idx) {
+        case 0:
+            diff.setDifficultyEasy(player, golem);
+            TraceLog(LOG_INFO, "Applied difficulty: Easy");
+            break;
+        case 1:
+            diff.setDifficultyNormal(player, golem);
+            TraceLog(LOG_INFO, "Applied difficulty: Normal");
+            break;
+        case 2:
+            diff.setDifficultyHard(player, golem);
+            TraceLog(LOG_INFO, "Applied difficulty: Hard");
+            break;
+        default:
+            diff.setDifficultyNormal(player, golem);
+            TraceLog(LOG_WARNING, "Unknown difficulty index %d - defaulting to Normal", idx);
+            break;
+    }
+}
+
 int main() {
     Cooldown attackCD(0.5f);
     Cooldown dashCD(3.0f);
@@ -56,6 +80,8 @@ InitAudioDevice();
 
     MainMenu mainMenu;
     Options options;
+    // Load persistent settings (difficulty, volume, muted) if present
+    options.LoadSettings("settings.txt");
     pauseMenu pauseMenu;
     GameState currentState = STATE_MENU;
     GameState previousState = STATE_BOSS_1;
@@ -78,6 +104,9 @@ InitAudioDevice();
     BossAngriff bossAtk;
     bossAtk.Init();
     Upgrades Upgrades;
+
+    // Ensure difficulty settings are applied at initial run (if player immediately starts)
+    applyDifficulty(options, hp, golem);
 
     // Background music instance (loads a file and plays it)
     Background_Music bgm;
@@ -242,16 +271,6 @@ InitAudioDevice();
                         float currentVolFromOptions = options.IsMuted() ? 0.0f : options.GetMasterVolume();
                         SetMusicVolume(bgm.GetStream(), currentVolFromOptions);
 
-                    } else {
-                        // Kein Track geladen: kurze Info-Trace auf Taste P
-                        if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O)) {
-                            TraceLog(LOG_WARNING, "No background music loaded to control from Options");
-                        }
-                    }
-                } else {
-                    // Audiogerät nicht bereit: informieren
-                    if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN)) {
-                        TraceLog(LOG_WARNING, "Audio device not ready - cannot control music from Options");
                     }
                 }
 
@@ -267,6 +286,8 @@ InitAudioDevice();
                     melee.Reset();
                     player.Reset();
                     golem.Reset();
+                    // Apply difficulty before starting the run
+                    applyDifficulty(options, hp, golem);
                     bossAtk.Init();
                     runTimer.Reset();
                     runTimer.Start();
@@ -294,6 +315,8 @@ InitAudioDevice();
                     player.Reset();
                     melee.Reset();
                     golem.Reset();
+                    // Apply difficulty when restarting after death
+                    applyDifficulty(options, hp, golem);
                     bossAtk.Init();
                     hp.invincibleTimer = hp.invincibleDuration;
                     runTimer.Reset();
@@ -345,6 +368,8 @@ InitAudioDevice();
                     Upgrades.Upgrade1(hp,melee);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
+                    // Apply difficulty when returning from upgrade screen (new run)
+                    applyDifficulty(options, hp, golem);
                     currentState = STATE_BOSS_1;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
@@ -433,6 +458,10 @@ InitAudioDevice();
                     DrawText("Ready", 20, 20, 10, GREEN);
                 else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
 
+                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
+                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
+                DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
+
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);
                     //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
@@ -478,6 +507,8 @@ InitAudioDevice();
         ClearBackground(BLACK); // If you want something else than a black void in the background
         // then you can add stuff here.
 
+    // Save settings on exit
+    options.SaveSettings("settings.txt");
 
         renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
                                // Calculates how big or small the canvas has to be rendered.

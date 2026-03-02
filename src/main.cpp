@@ -32,6 +32,7 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
+InitAudioDevice();
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -111,22 +112,8 @@ int main() {
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
         float dt = GetFrameTime();
 
-        if (currentState == STATE_OPTIONS) {
-            // A = leiser, D = lauter (holdable), M = mute toggle (single press)
-            float vol = options.GetMasterVolume();
-            const float rate = 0.5f; // fraction per second
-            if (IsKeyDown(KEY_A)) {
-                vol -= rate * dt;
-                options.SetMasterVolume(vol);
-            }
-            if (IsKeyDown(KEY_D)) {
-                vol += rate * dt;
-                options.SetMasterVolume(vol);
-            }
-            if (IsKeyPressed(KEY_M)) {
-                options.ToggleMute();
-            }
-        }
+
+
 
         // Apply global volume from Options and update music stream
         float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();

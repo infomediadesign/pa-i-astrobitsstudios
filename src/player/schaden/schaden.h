@@ -26,6 +26,8 @@ public:
 
     void TakeDamage(int damage);
 
+    void setInvincibleDuration(float duration);
+
     const void DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp);
 
     // State check

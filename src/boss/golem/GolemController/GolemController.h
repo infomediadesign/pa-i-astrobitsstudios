@@ -15,6 +15,8 @@ public:
     void Unload() override;
     void Reset() override;
 
+
+
     void setPos(Vector2 position);
     void takeDamage(float amount) override;
 

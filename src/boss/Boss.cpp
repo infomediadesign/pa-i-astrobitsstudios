@@ -61,3 +61,7 @@ void Boss::stopCurrentAttack() { attackActive = false; }
 void Boss::onDeath() {
     // Default: nichts
 }
+
+void Boss::setMaxHealth(int health) {
+    this->maxHealth = health;
+}

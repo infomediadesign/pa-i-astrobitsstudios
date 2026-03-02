@@ -22,6 +22,7 @@ public:
     // Schaden / Leben
     virtual void takeDamage(float amount);
     bool isAlive() const;
+    void setMaxHealth(int health);
 
     // Getter für Kompatibilität
     float getHealth() const;

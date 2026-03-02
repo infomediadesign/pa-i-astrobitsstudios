@@ -13,6 +13,7 @@ public:
     void update(float dt) override;
     void draw() const override;
     void Unload() override;
+    void Reset() override;
 
     void setPos(Vector2 position);
     void takeDamage(float amount) override;

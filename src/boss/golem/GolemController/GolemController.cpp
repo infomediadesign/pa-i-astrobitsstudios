@@ -6,20 +6,22 @@ GolemController::~GolemController() = default;
 
 void GolemController::Init() {
     texture = LoadTexture("assets/graphics/Boss/Boss1_Base_Sprite.png");
-    position = {Game::ScreenWidth / 2.0f, Game::ScreenHeight / 2.0f};
-
-    health = 200.0f;
-    maxHealth = 200.0f;
-    hitTimer = 0.0f;
-    alive = true;
-    wasHit = false;
+    Reset();
 }
 
 void GolemController::update(float dt) {
     if (!alive) return;
     if (hitTimer > 0.0f) hitTimer -= dt;
 }
-
+void GolemController::Reset() {
+    Boss::Reset();
+    position = {Game::ScreenWidth / 2.0f, Game::ScreenHeight / 2.0f};
+    health=200;
+    maxHealth=200;
+    hitTimer = 0.0f;
+    wasHit = false;
+    alive = true;
+}
 void GolemController::draw() const {
     if (!alive) return;
 

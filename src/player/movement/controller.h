@@ -4,6 +4,7 @@
 
 #pragma once
 #include "raylib.h"
+#include <vector>
 
 struct Wall;
 struct controller

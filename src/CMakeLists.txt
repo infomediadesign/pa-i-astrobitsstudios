@@ -43,6 +43,13 @@ add_executable(${PROJECT_NAME} main.cpp
         boss/Boss.cpp
         difficulty/difficulty.cpp
         difficulty/difficulty.h
+        Menu/UpgradeScreen.cpp
+        Menu/UpgradeScreen.h
+        SFX/Background_Music.cpp
+        SFX/Background_Music.h
+        SFX/Music.hpp
+        player/PlayerUpgrades/Upgrades.cpp
+        player/PlayerUpgrades/Upgrades.h
         # boss/Boss.h (Header, zur Übersicht)
 
 )

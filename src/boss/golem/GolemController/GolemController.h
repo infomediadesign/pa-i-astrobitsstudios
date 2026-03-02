@@ -13,6 +13,7 @@ public:
     void update(float dt) override;
     void draw() const override;
     void Unload() override;
+    void Reset() override;
 
 
 

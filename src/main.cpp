@@ -2,14 +2,12 @@
 #include <algorithm>
 #include "raylib.h"
 #include "config.h"
-#include <math.h>
+#include <cmath>
 #include"cooldown.h"
 #include <vector>
-#include "Sprite.h"
-// #include "boss/golem/AttackJump/AttackJump.h" // removed: jump handled by BossAngriff
 #include "boss/golem/GolemController/GolemController.h"
 
-#include "enviroment/background.h"
+
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
 #include "player/combat/plattack.h"
@@ -20,6 +18,10 @@
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
 #include "boss/golem/boss_Angriff.h"
+#include "Menu/UpgradeScreen.h"
+#include "SFX/Background_Music.h"
+#include "player/PlayerUpgrades/Upgrades.h"
+
 #include "difficulty/difficulty.h"
 
 int main() {
@@ -31,6 +33,7 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
+InitAudioDevice();
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -47,7 +50,7 @@ int main() {
         STATE_VICTORY = 5,
         STATE_NAME_ENTRY = 6,
         STATE_HIGHSCORES = 7,
-        STATE_LOADING = 8,
+        STATE_UPGRADES = 8,
         STATE_BOSS_2 = 9
     };
 
@@ -60,21 +63,36 @@ int main() {
     RunTimer runTimer;
     HighscoreBoard board;
     NameInput nameInput;
-    difficulty difficulty;
+    UpgradeScreen upgradeScreen;
 
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);
-    Player hp;
+    Player hp{}; // value-initialize to remove uninitialized warnings
     GolemController golem;
     controller player;
     plattack melee;
-    // AttackJump attack_jump;  // removed: jump handled by BossAngriff
     melee.Init();
     golem.Init();
     player.Init();
     hp.Init();
     BossAngriff bossAtk;
     bossAtk.Init();
+    Upgrades Upgrades;
+
+    // Background music instance (loads a file and plays it)
+    Background_Music bgm;
+    bool bgmStarted = false;
+    // NOTE: Passe den Pfad zur vorhandenen Audiodatei in deinem Projekt an.
+    bgm.Init("assets/audio/sfx/Thememusic.mp3");
+    if (IsAudioDeviceReady() && bgm.IsLoaded()) {
+        bgm.Play();
+        bgmStarted = true;
+        TraceLog(LOG_INFO, "Background music started successfully");
+    } else if (!bgm.IsLoaded()) {
+        TraceLog(LOG_WARNING, "Background music could not be loaded: %s", "assets/audio/sfx/Thememusic.mp3");
+    } else {
+        TraceLog(LOG_WARNING, "Audio device not ready - music will not play immediately");
+    }
 
     std::vector<Wall> walls = {
         {0, 0, 1, (float) Game::ScreenHeight}, // Links
@@ -95,6 +113,24 @@ int main() {
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
         float dt = GetFrameTime();
 
+
+
+
+        // Apply global volume from Options and update music stream
+        float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();
+        if (IsAudioDeviceReady()) {
+            SetMasterVolume(currentVolume);
+            if (bgm.IsLoaded()) SetMusicVolume(bgm.GetStream(), currentVolume);
+
+            if (bgm.IsLoaded()) {
+                if (!bgmStarted) {
+                    bgm.Play();
+                    bgmStarted = true;
+                    TraceLog(LOG_INFO, "Background music started in loop after audio became ready");
+                }
+                bgm.Update();
+            }
+        }
 
         // --- 1. LOGIK UPDATE ---
         switch (currentState) {
@@ -139,7 +175,7 @@ int main() {
                 bossAtk.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
 
                 float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
-                if (dmg > 0) hp.TakeDamage(dmg);
+                if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
 
 
                 // Pause aktivieren
@@ -173,11 +209,52 @@ int main() {
                 if (!golem.isAlive()) {
                     runTimer.Stop();
                     nameInput.Clear();
-                    currentState = STATE_LOADING;
+                    currentState = STATE_UPGRADES;
                 }
                 break;
             }
             case STATE_OPTIONS:
+                // Options menu logic
+                options.Update();
+
+                if (IsAudioDeviceReady()) {
+                    if (bgm.IsLoaded()) {
+
+
+                        // Lautstärke per Schritt ändern (einmaliger Tastendruck)
+                        float volOpt = options.GetMasterVolume();
+                        const float volStep = 0.05f;
+                        if (IsKeyPressed(KEY_D)) {
+                            volOpt = std::min(1.0f, volOpt + volStep);
+                            options.SetMasterVolume(volOpt);
+                        }
+                        if (IsKeyPressed(KEY_A)) {
+                            volOpt = std::max(0.0f, volOpt - volStep);
+                            options.SetMasterVolume(volOpt);
+                        }
+
+                        // Muten (Options bereits unterstützt, hier nur Shortcut)
+                        if (IsKeyPressed(KEY_M)) {
+                            options.ToggleMute();
+                        }
+
+                        // Sicherstellen, dass die Musik-Lautstärke dem Options-Wert folgt
+                        float currentVolFromOptions = options.IsMuted() ? 0.0f : options.GetMasterVolume();
+                        SetMusicVolume(bgm.GetStream(), currentVolFromOptions);
+
+                    } else {
+                        // Kein Track geladen: kurze Info-Trace auf Taste P
+                        if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O)) {
+                            TraceLog(LOG_WARNING, "No background music loaded to control from Options");
+                        }
+                    }
+                } else {
+                    // Audiogerät nicht bereit: informieren
+                    if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN)) {
+                        TraceLog(LOG_WARNING, "Audio device not ready - cannot control music from Options");
+                    }
+                }
+
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     currentState = previousState;
                 }
@@ -189,7 +266,7 @@ int main() {
                     hp.Init();
                     melee.Reset();
                     player.Reset();
-                    golem.Init();
+                    golem.Reset();
                     bossAtk.Init();
                     runTimer.Reset();
                     runTimer.Start();
@@ -216,7 +293,7 @@ int main() {
                     hp.Init();
                     player.Reset();
                     melee.Reset();
-                    golem.Init();
+                    golem.Reset();
                     bossAtk.Init();
                     hp.invincibleTimer = hp.invincibleDuration;
                     runTimer.Reset();
@@ -261,26 +338,29 @@ int main() {
                 }
 
                 break;
-            case STATE_LOADING:
+            case STATE_UPGRADES:
                 runTimer.Stop();
-                Image GenImageColor(int Screenwidth, int Screenheight, Color color);
-                // Hier könntest du einen Ladebildschirm anzeigen oder eine kurze Verzögerung einbauen
-                // Zum Beispiel:
-                ClearBackground(BLACK);
-                DrawText("Loading...", 60, 60, 50, GREEN);
-                DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
-                EndDrawing();
-                // Simuliere Ladezeit
-                for (int i = 0; i < 120; i++) {
-                    // etwa 2 Sekunden bei 60 FPS
-                    BeginDrawing();
-                    ClearBackground(BLACK);
-                    DrawText("Loading...", 60, 60, 50, GREEN);
-                    DrawText("Please wait while we prepare your victory screen.", 60, 130, 28, RAYWHITE);
-                    EndDrawing();
-                    WaitTime(1.0f / 60.0f); // Warte auf den nächsten Frame
-                    currentState = STATE_BOSS_2; // Wechsel zum nächsten Zustand nach der Ladezei
+                upgradeScreen.Update();
+                if (upgradeScreen.GetChoice() == 0) {
+                    Upgrades.Upgrade1(hp,melee);
+                    upgradeScreen.ResetChoice();
+                    golem.Reset();
+                    currentState = STATE_BOSS_1;
                 }
+                if (upgradeScreen.GetChoice() == 1) {
+                    Upgrades.Upgrade2(hp,player);
+                    upgradeScreen.ResetChoice();
+                    golem.Reset();
+                    currentState = STATE_BOSS_1;
+                }
+                if (upgradeScreen.GetChoice() == 2) {
+                    Upgrades.Upgrade3(melee,player);
+                    upgradeScreen.ResetChoice();
+                    golem.Reset();
+                    currentState = STATE_BOSS_1;
+                }
+                    //currentState = STATE_BOSS_2;
+
                 break;
             case STATE_BOSS_2:
                 // Hier könntest du den nächsten Bosskampf oder das nächste Level starten
@@ -300,10 +380,11 @@ int main() {
                     runTimer.Reset();
                     currentState = STATE_DEATH;
                 }
-                currentState = STATE_NAME_ENTRY;
+                //currentState = STATE_NAME_ENTRY;
                 break;
+
             default:
-                // Unhandled states: do nothing
+                // Fallback: nichts tun. Dies verhindert statische Analyse-Warnungen
                 break;
         }
 

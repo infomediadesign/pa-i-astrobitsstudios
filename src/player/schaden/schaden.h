@@ -8,8 +8,8 @@ public:
     int Gethealth() const { return hp; }
 
     // Health
-    int hp;
-    int maxHp;
+    float hp;
+    float maxHp;
     bool takeDamage;
     // Damage cooldown
     float invincibleTimer;

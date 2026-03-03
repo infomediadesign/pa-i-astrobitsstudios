@@ -51,7 +51,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
             frames = 0;
             animTimer = 0.0f;
             // update size to idle frame
-            float fw = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
+            float fw = (texture.width > 0) ? (float)texture.width / 8.0f : 0.0f;
             float fh = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
             size.x = 0.0f;
             size.y = facingRight ? 0.0f : fh;
@@ -70,7 +70,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     Rectangle nextX = {
         pos.x + velocity.x,
         pos.y,
-        (float)texture.width / 9,
+        (float)texture.width / 8,
         (float)texture.height / 2
     };
 
@@ -81,7 +81,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     Rectangle nextY = {
         pos.x,
         pos.y + velocity.y,
-        (float)texture.width / 9,
+        (float)texture.width / 8,
         (float)texture.height / 2
     };
 
@@ -92,7 +92,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     plcollision = {
         pos.x,
         pos.y,
-        (float)texture.width / 9,
+        (float)texture.width / 8,
         (float)texture.height / 2
     };
 }
@@ -105,7 +105,7 @@ void controller::Init()
 void controller::Draw()
 {
     // Ensure size rect uses correct frame width and proper source rectangle
-    float frameWidth = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
+    float frameWidth = (texture.width > 0) ? (float)texture.width / 8.0f : 0.0f;
     float frameHeight = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
 
     // Ensure size contains correct width/height
@@ -126,7 +126,7 @@ void controller::Animate(float dt)
         return;
     }
 
-    float frameWidth = (float)texture.width / 9.0f;
+    float frameWidth = (float)texture.width / 8.0f;
     float frameHeight = (float)texture.height / 2.0f;
 
     // If not moving, stay on idle frame (0)
@@ -148,7 +148,7 @@ void controller::Animate(float dt)
         int advance = static_cast<int>(animTimer / secondsPerFrame);
         animTimer -= static_cast<float>(advance) * secondsPerFrame; // avoid narrowing warning
         frames += advance;
-        const int maxFrames = 9; // total frames in row
+        const int maxFrames = 8; // total frames in row
         if (frames >= maxFrames) frames %= maxFrames;
         // update source x (discrete jump to frame index)
         size.x = (float)frames * frameWidth;
@@ -230,7 +230,7 @@ void controller::Reset() {
     facingRight = true; // default facing right
     float fw = 0.0f;
     float fh = 0.0f;
-    if (texture.width > 0) fw = (float)texture.width / 9.0f;
+    if (texture.width > 0) fw = (float)texture.width / 8.0f;
     if (texture.height > 0) fh = (float)texture.height / 2.0f;
     size = {0.0f, 0.0f, fw, fh};
 

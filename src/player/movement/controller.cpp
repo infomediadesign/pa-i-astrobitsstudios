@@ -51,7 +51,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
             frames = 0;
             animTimer = 0.0f;
             // update size to idle frame
-            float fw = (texture.width > 0) ? (float)texture.width / 8.0f : 0.0f;
+            float fw = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
             float fh = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
             size.x = 0.0f;
             size.y = facingRight ? 0.0f : fh;
@@ -99,13 +99,13 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 
 void controller::Init()
 {
-    texture =LoadTexture("assets/graphics/Player/Ixirath_Sprites.png");
+    texture =LoadTexture("assets/graphics/Player/Ixirath.png");
     Reset();
 }
 void controller::Draw()
 {
     // Ensure size rect uses correct frame width and proper source rectangle
-    float frameWidth = (texture.width > 0) ? (float)texture.width / 8.0f : 0.0f;
+    float frameWidth = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
     float frameHeight = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
 
     // Ensure size contains correct width/height
@@ -126,7 +126,7 @@ void controller::Animate(float dt)
         return;
     }
 
-    float frameWidth = (float)texture.width / 8.0f;
+    float frameWidth = (float)texture.width / 9.0f;
     float frameHeight = (float)texture.height / 2.0f;
 
     // If not moving, stay on idle frame (0)
@@ -230,7 +230,7 @@ void controller::Reset() {
     facingRight = true; // default facing right
     float fw = 0.0f;
     float fh = 0.0f;
-    if (texture.width > 0) fw = (float)texture.width / 8.0f;
+    if (texture.width > 0) fw = (float)texture.width / 9.0f;
     if (texture.height > 0) fh = (float)texture.height / 2.0f;
     size = {0.0f, 0.0f, fw, fh};
 

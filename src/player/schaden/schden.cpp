@@ -78,3 +78,8 @@ const void Player::DrawHealthBar(int x, int y, int width, int height, int hp, in
     // border
     DrawRectangleLines(x, y, width, height, BLACK);
 }
+
+void Player::setInvincibleDuration(float duration) {
+    invincibleDuration = duration;
+}
+

@@ -71,7 +71,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 
 void controller::Init()
 {
-    texture =LoadTexture("assets/graphics/Player/player.png");
+    texture =LoadTexture("assets/graphics/Player/Ixirath_Sprites.png");
     Reset();
 }
 void controller::Draw()

@@ -22,6 +22,31 @@
 #include "SFX/Background_Music.h"
 #include "player/PlayerUpgrades/Upgrades.h"
 
+#include "difficulty/difficulty.h"
+
+// Helper: wendet die ausgewählte Difficulty aus Options auf Player und Boss an
+static void applyDifficulty(const Options &options, Player &player, GolemController &golem) {
+    difficulty diff;
+    int idx = options.GetDifficultyIndex();
+    switch (idx) {
+        case 0:
+            diff.setDifficultyEasy(player, golem);
+            TraceLog(LOG_INFO, "Applied difficulty: Easy");
+            break;
+        case 1:
+            diff.setDifficultyNormal(player, golem);
+            TraceLog(LOG_INFO, "Applied difficulty: Normal");
+            break;
+        case 2:
+            diff.setDifficultyHard(player, golem);
+            TraceLog(LOG_INFO, "Applied difficulty: Hard");
+            break;
+        default:
+            diff.setDifficultyNormal(player, golem);
+            TraceLog(LOG_WARNING, "Unknown difficulty index %d - defaulting to Normal", idx);
+            break;
+    }
+}
 
 int main() {
     Cooldown attackCD(0.5f);
@@ -32,16 +57,7 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
-
-    // Initialize audio device for raylib audio playback
-    InitAudioDevice();
-    if (!IsAudioDeviceReady()) {
-        TraceLog(LOG_WARNING, "Audio device not ready - background music will not play.");
-    } else {
-        // Optional: set master volume to full
-        SetMasterVolume(1.0f);
-    }
-
+InitAudioDevice();
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -64,6 +80,8 @@ int main() {
 
     MainMenu mainMenu;
     Options options;
+    // Load persistent settings (difficulty, volume, muted) if present
+    options.LoadSettings("settings.txt");
     pauseMenu pauseMenu;
     GameState currentState = STATE_MENU;
     GameState previousState = STATE_BOSS_1;
@@ -91,6 +109,9 @@ int main() {
     BossAngriff bossAtk;
     bossAtk.Init();
     Upgrades Upgrades;
+
+    // Ensure difficulty settings are applied at initial run (if player immediately starts)
+    applyDifficulty(options, hp, golem);
 
     // Background music instance (loads a file and plays it)
     Background_Music bgm;
@@ -125,6 +146,9 @@ int main() {
     // Main game loop
     while (!WindowShouldClose() && currentState != STATE_EXIT) {
         float dt = GetFrameTime();
+
+
+
 
         // Apply global volume from Options and update music stream
         float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();
@@ -247,16 +271,6 @@ int main() {
                         float currentVolFromOptions = options.IsMuted() ? 0.0f : options.GetMasterVolume();
                         SetMusicVolume(bgm.GetStream(), currentVolFromOptions);
 
-                    } else {
-                        // Kein Track geladen: kurze Info-Trace auf Taste P
-                        if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O)) {
-                            TraceLog(LOG_WARNING, "No background music loaded to control from Options");
-                        }
-                    }
-                } else {
-                    // Audiogerät nicht bereit: informieren
-                    if (IsKeyPressed(KEY_P) || IsKeyPressed(KEY_O) || IsKeyPressed(KEY_UP) || IsKeyPressed(KEY_DOWN)) {
-                        TraceLog(LOG_WARNING, "Audio device not ready - cannot control music from Options");
                     }
                 }
 
@@ -272,6 +286,8 @@ int main() {
                     melee.Reset();
                     player.Reset();
                     golem.Reset();
+                    // Apply difficulty before starting the run
+                    applyDifficulty(options, hp, golem);
                     bossAtk.Init();
                     runTimer.Reset();
                     runTimer.Start();
@@ -299,6 +315,8 @@ int main() {
                     player.Reset();
                     melee.Reset();
                     golem.Reset();
+                    // Apply difficulty when restarting after death
+                    applyDifficulty(options, hp, golem);
                     bossAtk.Init();
                     hp.invincibleTimer = hp.invincibleDuration;
                     runTimer.Reset();
@@ -350,6 +368,8 @@ int main() {
                     Upgrades.Upgrade1(hp,melee);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
+                    // Apply difficulty when returning from upgrade screen (new run)
+                    applyDifficulty(options, hp, golem);
                     currentState = STATE_BOSS_1;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
@@ -441,6 +461,7 @@ int main() {
                 mainMenu.Draw();
             } else if (currentState == STATE_BOSS_1) {
                 Rectangle br = golem.GetRect();
+                Rectangle hb = golem.GetDmgBox();
                 Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
                 DrawTexture(background, 0, 0, WHITE);
@@ -450,6 +471,13 @@ int main() {
 
                 player.Draw();
                 golem.Draw();
+
+                //Hitboxen Zeichnen
+                // DrawRectangleRec(hb, YELLOW);
+                //DrawRectangleRec(br, BLUE);
+
+                //DrawRectangleRec(player.GetHitbox(), GREEN);
+
 
                 if (melee.active) {
                     melee.Draw();
@@ -467,36 +495,28 @@ int main() {
                 DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
                 DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
 
-
-
                 if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                     hp.TakeDamage(10);
+                    //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                 }
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
                          395, 40, 24, WHITE);
-
-            } else if (currentState == STATE_BOSS_2) {
-                ClearBackground(BLACK);
-                DrawText("Boss 2 Kampf (noch nicht implementiert)", 60, 60, 30, RED);
-                DrawText("Drücke ESC, um zu pausieren", 60, 120, 20, GRAY);
-                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,20,WHITE);
-                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,20,WHITE);
-            }
-
-
-            else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
+                if (hp.takeDamage) {
+                    //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
+                }
+            } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 DrawTexture(background, 0, 0, GRAY);
                 player.Draw();
                 golem.Draw();
+                hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
 
-                // Zeichne das passende Menü
+                // Jetzt den roten Text drüber zeichnen
                 if (currentState == STATE_PAUSE) {
                     pauseMenu.Draw();
-                }
-                if (currentState == STATE_DEATH) {
+                } else if (currentState == STATE_DEATH) {
                     deathScreen.Draw();
                 }
             } else if (currentState == STATE_NAME_ENTRY) {
@@ -513,28 +533,28 @@ int main() {
                 ClearBackground(BLACK);
                 board.Draw(60, 60);
                 DrawText("ENTER/ESC: Back", 60, 520, 22, GRAY);
-            } else if (currentState == STATE_UPGRADES) {
-                upgradeScreen.Draw();
             }
         }
         EndTextureMode();
-
         //The following lines put the canvas in the middle of the window and have the negative as black
         ClearBackground(BLACK); // If you want something else than a black void in the background
+        // then you can add stuff here.
 
-        renderScale = std::min(static_cast<float>(GetScreenHeight()) / static_cast<float>(canvas.texture.height),
+    // Save settings on exit
+    options.SaveSettings("settings.txt");
+
+        renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
                                // Calculates how big or small the canvas has to be rendered.
-                               static_cast<float>(GetScreenWidth()) / static_cast<float>(canvas.texture.width));
+                               GetScreenWidth() / (float) canvas.texture.width);
         // Priority is given to the smaller side.
         renderScale = floorf(renderScale);
         if (renderScale < 1) renderScale = 1; // Ensure that scale is at least 1.
-        renderRec.width = static_cast<float>(canvas.texture.width) * renderScale;
-        renderRec.height = static_cast<float>(canvas.texture.height) * renderScale;
-        renderRec.x = (static_cast<float>(GetScreenWidth()) - renderRec.width) / 2.0f;
-        renderRec.y = (static_cast<float>(GetScreenHeight()) - renderRec.height) / 2.0f;
-
+        renderRec.width = canvas.texture.width * renderScale;
+        renderRec.height = canvas.texture.height * renderScale;
+        renderRec.x = (GetScreenWidth() - renderRec.width) / 2.0f;
+        renderRec.y = (GetScreenHeight() - renderRec.height) / 2.0f;
         DrawTexturePro(canvas.texture,
-                       Rectangle{0, 0, static_cast<float>(canvas.texture.width), static_cast<float>(-canvas.texture.height)},
+                       Rectangle{0, 0, (float) canvas.texture.width, (float) -canvas.texture.height},
                        renderRec,
                        {}, 0, WHITE);
 
@@ -552,14 +572,6 @@ int main() {
 
     UnloadRenderTexture(canvas);
 
-    // Unload background music and close audio
-    if (IsAudioDeviceReady()) {
-        bgm.Unload();
-        CloseAudioDevice();
-    } else {
-        // Ensure resources are still released safely
-        bgm.Unload();
-    }
 
     // Close window and OpenGL context
     CloseWindow();

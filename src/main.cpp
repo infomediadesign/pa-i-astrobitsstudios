@@ -500,6 +500,9 @@ InitAudioDevice();
                 ClearBackground(BLACK);
                 board.Draw(60, 60);
                 DrawText("ENTER/ESC: Back", 60, 520, 22, GRAY);
+            } else if (currentState == STATE_UPGRADES) {
+                ClearBackground(WHITE);
+                upgradeScreen.Draw();
             }
         }
         EndTextureMode();

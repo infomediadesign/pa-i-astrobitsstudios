@@ -21,6 +21,13 @@ struct controller
     bool moving;
     float gehy;
     float gehx;
+    float animTimer; // added: accumulation timer for dt-based animation
+    bool animateOnlyMovement; // if true, pressing movement cycles frames but does not change pos
+    bool facingRight; // true = looking right (top sprite row), false = looking left (bottom row)
+    void SetAnimateOnlyMovement(bool v){ animateOnlyMovement = v; }
+    bool GetAnimateOnlyMovement() const { return animateOnlyMovement; }
+    void SetFacingRight(bool v){ facingRight = v; }
+    bool IsFacingRight() const { return facingRight; }
     Rectangle GetHitbox() const;
     bool getMoving(){return moving;}
     void setMoving(bool moving){this->moving = moving;}
@@ -37,6 +44,3 @@ struct controller
     Rectangle GetSize() const;
 
 };
-
-
-

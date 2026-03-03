@@ -89,7 +89,7 @@ void AttackJump::doAttack(Rectangle playerRect, Player &player, GolemController 
     boss.setPos({ this->pos.x - (-10.0f), this->pos.y - (-35.0f) });
 
     if (hitPlayer(playerRect)) {
-        player.TakeDamage(20);
+        player.TakeDamage(30);
     }
 }
 

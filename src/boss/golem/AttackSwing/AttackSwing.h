@@ -27,7 +27,7 @@ public:
     float swingArmLen = 200.0f;
     float swingBallRadius = 18.0f;
     float swingDuration = 2.0f;
-    float swingDamage = 10.0f;
+    float swingDamage = 20.0f;
 
     Vector2 GetBallPos() const;
 

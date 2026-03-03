@@ -39,10 +39,6 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     if (rightInput) facingRight = true;
     else if (leftInput) facingRight = false;
 
-    // Precompute integer frame sizes to avoid fractional source rects
-    int fwInt = (texture.width > 0) ? (texture.width / 8) : 0; // integer pixels per frame
-    int fhInt = (texture.height > 0) ? (texture.height / 2) : 0; // integer pixels per row
-
     // Wenn nur die Animation ohne physische Bewegung gewünscht ist,
     // dann erhöhen wir nur die Animation und nicht die Position.
     if (animateOnlyMovement) {
@@ -54,11 +50,13 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
             // When input stops, reset to first frame (idle)
             frames = 0;
             animTimer = 0.0f;
-            // update size to idle frame using integer sizes
+            // update size to idle frame
+            float fw = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
+            float fh = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
             size.x = 0.0f;
-            size.y = facingRight ? 0.0f : (float)fhInt;
-            size.width = (float)fwInt;
-            size.height = (float)fhInt;
+            size.y = facingRight ? 0.0f : fh;
+            size.width = fw;
+            size.height = fh;
         }
         // plcollision bleibt unverändert oder kann an pos gebunden bleiben
         plcollision.x = pos.x;
@@ -72,8 +70,8 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     Rectangle nextX = {
         pos.x + velocity.x,
         pos.y,
-        (float)fwInt,
-        (float)fhInt
+        (float)texture.width / 9,
+        (float)texture.height / 2
     };
 
     if (!Collides(nextX, walls))
@@ -83,19 +81,19 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     Rectangle nextY = {
         pos.x,
         pos.y + velocity.y,
-        (float)fwInt,
-        (float)fhInt
+        (float)texture.width / 9,
+        (float)texture.height / 2
     };
 
     if (!Collides(nextY, walls))
         pos.y += velocity.y;
 
-    // Collisionbox nach Bewegung aktualisieren (ganze Pixel)
+    // Collisionbox nach Bewegung aktualisieren
     plcollision = {
         pos.x,
         pos.y,
-        (float)fwInt,
-        (float)fhInt
+        (float)texture.width / 9,
+        (float)texture.height / 2
     };
 }
 
@@ -106,13 +104,13 @@ void controller::Init()
 }
 void controller::Draw()
 {
-    // Use integer frame size to avoid fractional source coords
-    int fwInt = (texture.width > 0) ? (texture.width / 8) : 0;
-    int fhInt = (texture.height > 0) ? (texture.height / 2) : 0;
+    // Ensure size rect uses correct frame width and proper source rectangle
+    float frameWidth = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
+    float frameHeight = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
 
     // Ensure size contains correct width/height
-    size.width = (float)fwInt;
-    size.height = (float)fhInt;
+    size.width = frameWidth;
+    size.height = frameHeight;
 
     Rectangle src = { size.x, size.y, size.width, size.height };
     DrawTextureRec(texture, src, pos, WHITE);
@@ -123,53 +121,43 @@ void controller::Animate(float dt)
     // Guard: avoid division by zero and invalid texture
     if (frameSpeed <= 0 || texture.width <= 0) {
         // still update facing row so Draw has correct y
-        int fhInt = (texture.height > 0) ? (texture.height / 2) : 0;
-        size.y = facingRight ? 0.0f : (float)fhInt;
+        float fh = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
+        size.y = facingRight ? 0.0f : fh;
         return;
     }
 
-    int fwInt = (texture.width > 0) ? (texture.width / 8) : 0;
-    int fhInt = (texture.height > 0) ? (texture.height / 2) : 0;
+    float frameWidth = (float)texture.width / 9.0f;
+    float frameHeight = (float)texture.height / 2.0f;
 
     // If not moving, stay on idle frame (0)
     if (!moving) {
         frames = 0;
         animTimer = 0.0f;
         size.x = 0.0f;
-        size.y = facingRight ? 0.0f : (float)fhInt;
-        size.width = (float)fwInt;
-        size.height = (float)fhInt;
+        size.y = facingRight ? 0.0f : frameHeight;
+        size.width = frameWidth;
+        size.height = frameHeight;
         return;
     }
 
-    // When input is present, advance a frame immediately on key press to get a crisp jump
-    if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_S) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_D)) {
-        const int maxFramesImmediate = 8;
-        frames = (frames + 1) % maxFramesImmediate;
-        // update size.x using integer frame width
-        size.x = (float)(frames * fwInt);
-        size.width = (float)fwInt;
-        size.y = facingRight ? 0.0f : (float)fhInt;
-        size.height = (float)fhInt;
-    }
-
-    // Use time-based animation to avoid frame sticking when holding keys (still discrete steps)
+    // Use time-based animation to avoid frame sticking
     const float secondsPerFrame = 1.0f / (float)frameSpeed; // frameSpeed frames per second
     animTimer += dt;
     if (animTimer >= secondsPerFrame) {
+        // Advance frames as many as needed (in case of lag)
         int advance = static_cast<int>(animTimer / secondsPerFrame);
-        animTimer -= static_cast<float>(advance) * secondsPerFrame;
+        animTimer -= static_cast<float>(advance) * secondsPerFrame; // avoid narrowing warning
         frames += advance;
-        const int maxFrames = 8; // total frames in row
+        const int maxFrames = 9; // total frames in row
         if (frames >= maxFrames) frames %= maxFrames;
-        // use integer frame width to avoid fractional source x
-        size.x = (float)(frames * fwInt);
-        size.width = (float)fwInt;
+        // update source x (discrete jump to frame index)
+        size.x = (float)frames * frameWidth;
     }
 
-    // Always set the row according to facing direction using integer frame height
-    size.y = facingRight ? 0.0f : (float)fhInt;
-    size.height = (float)fhInt;
+    // Always set the row according to facing direction
+    size.y = facingRight ? 0.0f : frameHeight;
+    size.width = frameWidth;
+    size.height = frameHeight;
 }
 
 void controller::Unload()
@@ -240,9 +228,11 @@ void controller::Reset() {
     animTimer = 0.0f; // reset timer
     animateOnlyMovement = false; // default: physical movement enabled
     facingRight = true; // default facing right
-    int fwInt = (texture.width > 0) ? (texture.width / 8) : 0;
-    int fhInt = (texture.height > 0) ? (texture.height / 2) : 0;
-    size = {0.0f, 0.0f, (float)fwInt, (float)fhInt};
+    float fw = 0.0f;
+    float fh = 0.0f;
+    if (texture.width > 0) fw = (float)texture.width / 9.0f;
+    if (texture.height > 0) fh = (float)texture.height / 2.0f;
+    size = {0.0f, 0.0f, fw, fh};
 
 }
 

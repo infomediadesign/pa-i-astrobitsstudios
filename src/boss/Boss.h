@@ -11,8 +11,10 @@ public:
 
     // Lebenszyklus
     virtual void Init();
+
     virtual void update(float dt);   // Spiel-Logik pro Frame
     virtual void draw() const;       // Zeichnen
+
     virtual void Unload();
     virtual void Reset();
     // Backwards-compatible wrappers (some legacy code uses Update/Draw)

@@ -48,6 +48,12 @@ add_executable(${PROJECT_NAME} main.cpp
         SFX/Music.hpp
         player/PlayerUpgrades/Upgrades.cpp
         player/PlayerUpgrades/Upgrades.h
+        boss/Nightmare/nightmare_Angriff.cpp
+        boss/Nightmare/nightmare_Angriff.h
+        boss/Nightmare/AttackBigDash/AttackBigDash.cpp
+        boss/Nightmare/AttackBigDash/AttackBigDash.h
+        boss/Nightmare/NightmareController/NightmareController.cpp
+        boss/Nightmare/NightmareController/NightmareController.h
         # boss/Boss.h (Header, zur Übersicht)
 
 )

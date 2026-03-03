@@ -6,8 +6,9 @@
 #include"cooldown.h"
 #include <vector>
 #include "boss/golem/GolemController/GolemController.h"
-
-
+#include "boss/golem/boss_Angriff.h"
+#include "boss/Nightmare/NightmareController/NightmareController.h"
+#include "boss/Nightmare/nightmare_Angriff.h"
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
 #include "player/combat/plattack.h"
@@ -17,7 +18,6 @@
 #include "Menu/Death_Screen.h"
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
-#include "boss/golem/boss_Angriff.h"
 #include "Menu/UpgradeScreen.h"
 #include "SFX/Background_Music.h"
 #include "player/PlayerUpgrades/Upgrades.h"
@@ -76,7 +76,12 @@ int main() {
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);
     Player hp{}; // value-initialize to remove uninitialized warnings
+
     GolemController golem;
+    NightmareController nightmare;
+    nightmare_Angriff nightAtk;
+
+
     controller player;
     plattack melee;
     melee.Init();
@@ -166,11 +171,8 @@ int main() {
                 hp.Update(dt);
                 attackCD.Update(dt);
                 dashCD.Update(dt);
-
-
                 player.Animate(dt);
                 runTimer.Update(dt);
-
 
                 //==========================
                 Rectangle br = golem.GetRect();
@@ -182,13 +184,11 @@ int main() {
                 float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
                 if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
 
-
                 // Pause aktivieren
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     runTimer.Stop();
                     currentState = STATE_PAUSE;
                 }
-
 
                 // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
                 if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
@@ -367,13 +367,31 @@ int main() {
                     //currentState = STATE_BOSS_2;
 
                 break;
-            case STATE_BOSS_2:
-                // Hier könntest du den nächsten Bosskampf oder das nächste Level starten
+            case STATE_BOSS_2: {
+                player.Update(dt, walls);
+                nightmare.Update(dt);
+                hp.Update(dt);
+                attackCD.Update(dt);
+                dashCD.Update(dt);
+                player.Animate(dt);
+                runTimer.Update(dt);
+
+                //==========================
+                Rectangle br = nightmare.GetRect();
+                Vector2 bossPos = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
+                nightAtk.SetBossHP(nightmare.getHealth(), nightmare.getMaxHealth());
+
+                nightAtk.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, nightmare);
+
+                float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
+                if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
+
+                // Pause aktivieren
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     runTimer.Stop();
-                    previousState = STATE_BOSS_2;
                     currentState = STATE_PAUSE;
                 }
+
                 // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
                 if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
                     player.Dash(walls, dt);
@@ -381,23 +399,36 @@ int main() {
                     dashCD.Trigger();
                 }
                 melee.UpdateDirection();
+
+                if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
+                    melee.Start(player.GetPos(), player.GetSize());
+                    attackCD.Trigger();
+                    if (CheckCollisionRecs(melee.hitBox, golem.GetDmgBox())) {
+                        golem.takeDamage(melee.damage);
+                    }
+                }
+                melee.Update(dt, player.GetPos(), player.GetSize());
+
                 if (hp.Gethealth() <= 0) {
                     runTimer.Reset();
                     currentState = STATE_DEATH;
                 }
-                //currentState = STATE_NAME_ENTRY;
+                if (!golem.isAlive()) {
+                    runTimer.Stop();
+                    nameInput.Clear();
+                    currentState = STATE_UPGRADES;
+                }
                 break;
+            }
 
             default:
                 // Fallback: nichts tun. Dies verhindert statische Analyse-Warnungen
                 break;
-
         }
 
         BeginDrawing();
         // You can draw on the screen between BeginDrawing() and EndDrawing()
         // For the letterbox we draw on canvas instead
-
         BeginTextureMode(canvas);
         {
             //Within this block is where we draw our app to the canvas and YOUR code goes.

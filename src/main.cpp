@@ -520,7 +520,7 @@ InitAudioDevice();
 
                 //bossAtk2.Draw(bossPosForDraw);
 
-                player.Draw();
+                player.DrawAnimation();
                 golem.Draw();
 
                 if (melee.active) {

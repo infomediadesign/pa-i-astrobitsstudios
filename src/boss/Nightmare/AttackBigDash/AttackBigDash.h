@@ -43,6 +43,12 @@ private:
     // Damage config
     float damage = 20.0f;
     bool hitApplied = false;
+
+    // How long the attack has been active (seconds)
+    float activeTime = 0.0f;
+
+    // Minimum time the attack must be active before it can apply damage
+    float damageDelay = 0.25f;
 };
 
 

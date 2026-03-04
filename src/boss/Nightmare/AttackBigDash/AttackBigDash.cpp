@@ -58,6 +58,15 @@ void AttackBigDash::Update(float dt, Vector2 bossPos, Vector2 playerPos) {
 
         // Angriff ausgeführt, Anfrage zurücksetzen
         wantsToAttack = false;
+
+        // Debug log
+        TraceLog(LOG_INFO, "AttackBigDash: activated. rot=%.2f area=(%.1f,%.1f,%.1f,%.1f)", rotation, attackArea.x, attackArea.y, attackArea.width, attackArea.height);
+
+        activeTime = 0.0f; // reset active time
+    }
+
+    if (active) {
+        activeTime += dt;
     }
 
     if (charging) {
@@ -101,6 +110,9 @@ static bool overlapIntervals(float minA, float maxA, float minB, float maxB) {
 float AttackBigDash::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect) {
     (void) dt;
     if (!active) return 0.0f;
+
+    // don't apply damage until damageDelay has passed to ensure tele is visible
+    if (activeTime < damageDelay) return 0.0f;
 
     // rotation center
     Vector2 rotCenter = { attackArea.x + origin.x, attackArea.y + origin.y };
@@ -166,6 +178,8 @@ float AttackBigDash::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect
         hitApplied = true;
         active = false;
         charging = false;
+        TraceLog(LOG_INFO, "AttackBigDash: hit detected at rotCenter=(%.1f,%.1f) player=(%.1f,%.1f,%.1f,%.1f)", rotCenter.x, rotCenter.y,
+                 playerRect.x, playerRect.y, playerRect.width, playerRect.height);
         return damage;
     }
     return 0.0f;

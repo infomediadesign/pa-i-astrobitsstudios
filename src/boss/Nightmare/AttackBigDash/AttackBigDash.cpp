@@ -58,9 +58,6 @@ void AttackBigDash::Update(float dt, Vector2 bossPos, Vector2 playerPos) {
 
         // Angriff ausgeführt, Anfrage zurücksetzen
         wantsToAttack = false;
-
-        // Debug log
-        TraceLog(LOG_INFO, "AttackBigDash: activated. rot=%.2f area=(%.1f,%.1f,%.1f,%.1f)", rotation, attackArea.x, attackArea.y, attackArea.width, attackArea.height);
     }
 
     if (charging) {
@@ -169,8 +166,6 @@ float AttackBigDash::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect
         hitApplied = true;
         active = false;
         charging = false;
-        TraceLog(LOG_INFO, "AttackBigDash: hit detected at rotCenter=(%.1f,%.1f) player=(%.1f,%.1f,%.1f,%.1f)", rotCenter.x, rotCenter.y,
-                 playerRect.x, playerRect.y, playerRect.width, playerRect.height);
         return damage;
     }
     return 0.0f;
@@ -179,5 +174,4 @@ float AttackBigDash::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect
 // Implementierung des Setters
 void AttackBigDash::SetWantsToAttack(bool val) {
     wantsToAttack = val;
-    TraceLog(LOG_INFO, "AttackBigDash: wantsToAttack set to %d", (int)val);
 }

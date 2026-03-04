@@ -318,6 +318,7 @@ int main() {
                     player.Reset();
                     melee.Reset();
                     golem.Reset();
+                    nightmare.Reset();
                     // Apply difficulty when restarting after death
                     applyDifficulty(options, hp, golem);
                     bossAtk1.Init();
@@ -438,8 +439,8 @@ int main() {
                 if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
                     melee.Start(player.GetPos(), player.GetSize());
                     attackCD.Trigger();
-                    if (CheckCollisionRecs(melee.hitBox, golem.GetDmgBox())) {
-                        golem.takeDamage(melee.damage);
+                    if (CheckCollisionRecs(melee.hitBox, nightmare.GetDmgBox())) {
+                        nightmare.takeDamage(melee.damage);
                     }
                 }
                 melee.Update(dt, player.GetPos(), player.GetSize());
@@ -451,7 +452,7 @@ int main() {
                 //currentState = STATE_NAME_ENTRY;
 
 
-                // Boss2 死了以后你想去哪：比如进入胜利/名字输入
+                // Boss2
                 if (!nightmare.isAlive()) {
                     runTimer.Stop();
                     currentState = STATE_NAME_ENTRY; // 或者 STATE_VICTORY
@@ -531,6 +532,19 @@ int main() {
 
                     player.DrawAnimation();
                     nightmare.Draw();
+
+                    if (melee.active) {
+                        melee.Draw();
+                        DrawRectangleRec(melee.hitBox, WHITE);
+                    }
+
+                    // Debug: draw hitboxes for melee and nightmare
+                    DrawRectangleRec(melee.hitBox, Fade(RED, 0.6f));
+                    DrawRectangleRec(nightmare.GetDmgBox(), Fade(BLUE, 0.6f));
+
+                    DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
+                    DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
+                    DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
 
                     if (melee.active) {
                         melee.Draw();

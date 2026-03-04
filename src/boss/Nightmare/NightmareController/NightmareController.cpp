@@ -41,7 +41,9 @@ void NightmareController::draw() const {
 }
 
 void NightmareController::takeDamage(float amount) {
+    TraceLog(LOG_INFO, "NightmareController::takeDamage called: amount=%.2f, health before=%.2f", amount, health);
     Boss::takeDamage(amount);
+    TraceLog(LOG_INFO, "NightmareController::takeDamage applied: health after=%.2f", health);
 }
 
 void NightmareController::Unload() {

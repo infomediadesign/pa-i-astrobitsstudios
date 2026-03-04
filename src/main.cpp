@@ -6,8 +6,9 @@
 #include"cooldown.h"
 #include <vector>
 #include "boss/golem/GolemController/GolemController.h"
-
-
+#include "boss/golem/boss_Angriff.h"
+#include "boss/Nightmare/NightmareController/NightmareController.h"
+#include "boss/Nightmare/nightmare_Angriff.h"
 #include "player/movement/controller.h"
 #include "enviroment/walls.h"
 #include "player/combat/plattack.h"
@@ -17,7 +18,6 @@
 #include "Menu/Death_Screen.h"
 #include "Menu/pauseMenu.h"
 #include "Menu/highscore.h"
-#include "boss/golem/boss_Angriff.h"
 #include "Menu/UpgradeScreen.h"
 #include "SFX/Background_Music.h"
 #include "player/PlayerUpgrades/Upgrades.h"
@@ -57,7 +57,7 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
-InitAudioDevice();
+    InitAudioDevice();
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
@@ -94,7 +94,12 @@ InitAudioDevice();
     const std::string SCORE_FILE = "highscores.csv";
     board.Load(SCORE_FILE);
     Player hp{}; // value-initialize to remove uninitialized warnings
+
     GolemController golem;
+    NightmareController nightmare;
+    nightmare_Angriff nightAtk;
+
+
     controller player;
     plattack melee;
     melee.Init();
@@ -194,11 +199,8 @@ InitAudioDevice();
                 hp.Update(dt);
                 attackCD.Update(dt);
                 dashCD.Update(dt);
-
-
                 player.Animate(dt);
                 runTimer.Update(dt);
-
 
                 //==========================
                 Rectangle br = golem.GetRect();
@@ -208,13 +210,11 @@ InitAudioDevice();
                 float dmg = bossAtk1.CheckDamage(dt, bossPos, player.GetCollision());
                 if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
 
-
                 // Pause aktivieren
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     runTimer.Stop();
                     currentState = STATE_PAUSE;
                 }
-
 
                 // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
                 if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
@@ -380,7 +380,7 @@ InitAudioDevice();
                     Upgrades.Upgrade2(hp,player);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
-                   // bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
+                    // bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
                     applyDifficulty(options, hp, golem);
                     currentState = STATE_BOSS_1;
                 }
@@ -392,7 +392,7 @@ InitAudioDevice();
                     applyDifficulty(options, hp, golem);
                     currentState = STATE_BOSS_1;
                 }
-                    //currentState = STATE_BOSS_2;
+                //currentState = STATE_BOSS_2;
 
                 break;
             case STATE_BOSS_2: {
@@ -442,6 +442,8 @@ InitAudioDevice();
                     runTimer.Reset();
                     currentState = STATE_DEATH;
                 }
+                //currentState = STATE_NAME_ENTRY;
+                break;
 
                 // Boss2 死了以后你想去哪：比如进入胜利/名字输入
                 if (!golem.isAlive()) {
@@ -450,165 +452,165 @@ InitAudioDevice();
                 }
                 break;
             }
-        }
 
-        BeginDrawing();
-        // You can draw on the screen between BeginDrawing() and EndDrawing()
-        // For the letterbox we draw on canvas instead
-        BeginTextureMode(canvas);
-        {
-            //Within this block is where we draw our app to the canvas and YOUR code goes.
-            ClearBackground(WHITE);
-
-            //Logik-Weiche (Draw) ===
-            if (currentState == STATE_OPTIONS) {
-                options.Draw();
-            } else if (currentState == STATE_MENU) {
-                mainMenu.Draw();
-            } else if (currentState == STATE_BOSS_1) {
-                Rectangle br = golem.GetRect();
-                Rectangle hb = golem.GetDmgBox();
-                Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
-
-                DrawTexture(background, 0, 0, WHITE);
-                DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
-
-                bossAtk1.Draw(bossPosForDraw);
-
-                player.DrawAnimation();
-                golem.Draw();
-
-                //Hitboxen Zeichnen
-                // DrawRectangleRec(hb, YELLOW);
-                //DrawRectangleRec(br, BLUE);
-
-                //DrawRectangleRec(player.GetHitbox(), GREEN);
-
-
-                if (melee.active) {
-                    melee.Draw();
-                    DrawRectangleRec(melee.hitBox,WHITE);
-                }
-                if (dashCD.Ready())
-                    DrawText("Ready", 150, 20, 10, BLUE);
-                else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 10, BLUE);
-
-                if (attackCD.Ready())
-                    DrawText("Ready", 20, 20, 10, GREEN);
-                else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
-
-                DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
-                DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
-                DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
-
-                if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
-                    hp.TakeDamage(10);
-                    //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
-                }
-                hp.Draw(player.GetCollision());
-                DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
-                         395, 40, 24, WHITE);
-                if (hp.takeDamage) {
-                    //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
-                }
-            } else if (currentState == STATE_BOSS_2) {
-                Rectangle br = golem.GetRect();
-                Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
-
-                DrawTexture(background, 0, 0, WHITE);
-                DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
-
-                //bossAtk2.Draw(bossPosForDraw);
-
-                player.DrawAnimation();
-                golem.Draw();
-
-                if (melee.active) {
-                    melee.Draw();
-                    DrawRectangleRec(melee.hitBox, WHITE);
-                }
-
-                hp.Draw(player.GetCollision());
-                DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
-                         395, 40, 24, WHITE);
-            }
-
-
-
-
-            else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
-                // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
-                DrawTexture(background, 0, 0, GRAY);
-                player.DrawAnimation();
-                golem.Draw();
-                hp.Draw(player.GetCollision());
-                DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
-
-                // Jetzt den roten Text drüber zeichnen
-                if (currentState == STATE_PAUSE) {
-                    pauseMenu.Draw();
-                } else if (currentState == STATE_DEATH) {
-                    deathScreen.Draw();
-                }
-            } else if (currentState == STATE_NAME_ENTRY) {
-                ClearBackground(BLACK);
-                DrawText("VICTORY!", 60, 60, 50, GREEN);
-                DrawText(("Your time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
-                         60, 130, 28, RAYWHITE);
-                nameInput.Draw(60, 200);
-
-                if (nameInput.text.empty()) {
-                    DrawText("Please enter at least one character!", 60, 320, 20, RED);
-                }
-            } else if (currentState == STATE_HIGHSCORES) {
-                ClearBackground(BLACK);
-                board.Draw(60, 60);
-                DrawText("ENTER/ESC: Back", 60, 520, 22, GRAY);
-            } else if (currentState == STATE_UPGRADES) {
+                BeginDrawing();
+                // You can draw on the screen between BeginDrawing() and EndDrawing()
+                // For the letterbox we draw on canvas instead
+                BeginTextureMode(canvas);
+            {
+                //Within this block is where we draw our app to the canvas and YOUR code goes.
                 ClearBackground(WHITE);
-                upgradeScreen.Draw();
+
+                //Logik-Weiche (Draw) ===
+                if (currentState == STATE_OPTIONS) {
+                    options.Draw();
+                } else if (currentState == STATE_MENU) {
+                    mainMenu.Draw();
+                } else if (currentState == STATE_BOSS_1) {
+                    Rectangle br = golem.GetRect();
+                    Rectangle hb = golem.GetDmgBox();
+                    Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
+
+                    DrawTexture(background, 0, 0, WHITE);
+                    DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
+
+                    bossAtk1.Draw(bossPosForDraw);
+
+                    player.DrawAnimation();
+                    golem.Draw();
+
+                    //Hitboxen Zeichnen
+                    // DrawRectangleRec(hb, YELLOW);
+                    //DrawRectangleRec(br, BLUE);
+
+                    //DrawRectangleRec(player.GetHitbox(), GREEN);
+
+
+                    if (melee.active) {
+                        melee.Draw();
+                        DrawRectangleRec(melee.hitBox,WHITE);
+                    }
+                    if (dashCD.Ready())
+                        DrawText("Ready", 150, 20, 10, BLUE);
+                    else DrawText(TextFormat("Cooldown %.2f", dashCD.Remaining()), 150, 20, 10, BLUE);
+
+                    if (attackCD.Ready())
+                        DrawText("Ready", 20, 20, 10, GREEN);
+                    else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
+
+                    DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
+                    DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
+                    DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
+
+                    if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
+                        hp.TakeDamage(10);
+                        //   DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
+                    }
+                    hp.Draw(player.GetCollision());
+                    DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
+                             395, 40, 24, WHITE);
+                    if (hp.takeDamage) {
+                        //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
+                    }
+                } else if (currentState == STATE_BOSS_2) {
+                    Rectangle br = golem.GetRect();
+                    Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
+
+                    DrawTexture(background, 0, 0, WHITE);
+                    DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
+
+                    //bossAtk2.Draw(bossPosForDraw);
+
+                    player.DrawAnimation();
+                    golem.Draw();
+
+                    if (melee.active) {
+                        melee.Draw();
+                        DrawRectangleRec(melee.hitBox, WHITE);
+                    }
+
+                    hp.Draw(player.GetCollision());
+                    DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
+                             395, 40, 24, WHITE);
+                }
+
+
+
+
+                else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
+                    // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
+                    DrawTexture(background, 0, 0, GRAY);
+                    player.DrawAnimation();
+                    golem.Draw();
+                    hp.Draw(player.GetCollision());
+                    DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
+
+                    // Jetzt den roten Text drüber zeichnen
+                    if (currentState == STATE_PAUSE) {
+                        pauseMenu.Draw();
+                    } else if (currentState == STATE_DEATH) {
+                        deathScreen.Draw();
+                    }
+                } else if (currentState == STATE_NAME_ENTRY) {
+                    ClearBackground(BLACK);
+                    DrawText("VICTORY!", 60, 60, 50, GREEN);
+                    DrawText(("Your time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
+                             60, 130, 28, RAYWHITE);
+                    nameInput.Draw(60, 200);
+
+                    if (nameInput.text.empty()) {
+                        DrawText("Please enter at least one character!", 60, 320, 20, RED);
+                    }
+                } else if (currentState == STATE_HIGHSCORES) {
+                    ClearBackground(BLACK);
+                    board.Draw(60, 60);
+                    DrawText("ENTER/ESC: Back", 60, 520, 22, GRAY);
+                } else if (currentState == STATE_UPGRADES) {
+                    ClearBackground(WHITE);
+                    upgradeScreen.Draw();
+                }
             }
+                EndTextureMode();
+                //The following lines put the canvas in the middle of the window and have the negative as black
+                ClearBackground(BLACK); // If you want something else than a black void in the background
+                // then you can add stuff here.
+
+                // Save settings on exit
+                options.SaveSettings("settings.txt");
+
+                renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
+                                       // Calculates how big or small the canvas has to be rendered.
+                                       GetScreenWidth() / (float) canvas.texture.width);
+                // Priority is given to the smaller side.
+                renderScale = floorf(renderScale);
+                if (renderScale < 1) renderScale = 1; // Ensure that scale is at least 1.
+                renderRec.width = canvas.texture.width * renderScale;
+                renderRec.height = canvas.texture.height * renderScale;
+                renderRec.x = (GetScreenWidth() - renderRec.width) / 2.0f;
+                renderRec.y = (GetScreenHeight() - renderRec.height) / 2.0f;
+                DrawTexturePro(canvas.texture,
+                               Rectangle{0, 0, (float) canvas.texture.width, (float) -canvas.texture.height},
+                               renderRec,
+                               {}, 0, WHITE);
+
+                if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_S)) {
+                    DrawText(TextFormat("Render scale: %.0f", renderScale), 10, 10, 20, LIGHTGRAY);
+                }
+                EndDrawing();
         }
-        EndTextureMode();
-        //The following lines put the canvas in the middle of the window and have the negative as black
-        ClearBackground(BLACK); // If you want something else than a black void in the background
-        // then you can add stuff here.
+        // De-initialization here
+        // ...
+        // ...
+        melee.Unload();
+        golem.Unload();
+        player.Unload();
 
-    // Save settings on exit
-    options.SaveSettings("settings.txt");
-
-        renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
-                               // Calculates how big or small the canvas has to be rendered.
-                               GetScreenWidth() / (float) canvas.texture.width);
-        // Priority is given to the smaller side.
-        renderScale = floorf(renderScale);
-        if (renderScale < 1) renderScale = 1; // Ensure that scale is at least 1.
-        renderRec.width = canvas.texture.width * renderScale;
-        renderRec.height = canvas.texture.height * renderScale;
-        renderRec.x = (GetScreenWidth() - renderRec.width) / 2.0f;
-        renderRec.y = (GetScreenHeight() - renderRec.height) / 2.0f;
-        DrawTexturePro(canvas.texture,
-                       Rectangle{0, 0, (float) canvas.texture.width, (float) -canvas.texture.height},
-                       renderRec,
-                       {}, 0, WHITE);
-
-        if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyDown(KEY_S)) {
-            DrawText(TextFormat("Render scale: %.0f", renderScale), 10, 10, 20, LIGHTGRAY);
-        }
-        EndDrawing();
-    }
-    // De-initialization here
-    // ...
-    // ...
-    melee.Unload();
-    golem.Unload();
-    player.Unload();
-
-    UnloadRenderTexture(canvas);
+        UnloadRenderTexture(canvas);
 
 
-    // Close window and OpenGL context
-    CloseWindow();
+        // Close window and OpenGL context
+        CloseWindow();
 
-    return EXIT_SUCCESS;
-};
+        return EXIT_SUCCESS;
+    };
+}

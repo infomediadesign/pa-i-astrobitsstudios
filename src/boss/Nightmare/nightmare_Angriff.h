@@ -96,7 +96,7 @@ public:
 
     void SetBossHP(float hp, float maxHp);
 
-    void Draw(Vector2 bossPos) const;
+    void Draw(Vector2 Bosspos) const;
 
     float CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect);
 

@@ -43,165 +43,87 @@ float nightmare_Angriff::ModifyIncomingBossDamage(float rawDamage) const {
 void nightmare_Angriff::StartBigDash(Vector2 bossPos, Vector2 playerPos) {
     StopAllAttacks(*this);
     BigDashAttack.StartBigDash(bossPos, playerPos);
+    BigDashAttack.SetWantsToAttack(true);
 }
 
+void nightmare_Angriff::Draw(Vector2 BossPos) const {
+    switch (mode) {
+        case Mode_BigDashAttack_Tele:
+            // Tele-visuals could go here
+            break;
+        case MODE_BigDashAttack_Dash:
+            BigDashAttack.Draw(BossPos);
+            break;
+        default:
+            break;
+    }
+}
 
-/*void nightmare_Angriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
-                         NightmareController &boss) {
+void nightmare_Angriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
+                               NightmareController &boss) {
+    (void) player; (void) boss; (void) playerRect;
     this->lastPlayerPos = playerPos;
+
+    // dmg cooldown
     dmgTimer -= dt;
     if (dmgTimer < 0) dmgTimer = 0;
-
-    //TryTriggerMeteorStorm(); für diesen Boss nicht vorgesehen
-    if (mode == MODE_METEOR_STORM) {
-        mode = Mode_BigDashAttack_Tele;
-        return;
-    }
 
     modeTimer += dt;
     float spd = SpeedMultiplier();
     float scaleDt = dt * spd;
+
     switch (mode) {
-        case Mode_BigDashAttack_Tele:
-            if (!BigDashAttack.isActive())
-                StartRingTele(bossPos, ring1InnerTele, ring1OuterTele);
-
-            BigDashAttack.Update(scaleDt, bossPos, playerPos);
-
+        case Mode_BigDashAttack_Tele: {
+            if (modeTimer >= ringTeleDuration / spd) {
+                StartBigDash(bossPos, playerPos);
+                mode = MODE_BigDashAttack_Dash;
+                modeTimer = 0.0f;
+            }
             break;
+        }
 
-        case MODE_BigDashAttack_Dash:
-            ringAttack.Update(scaleDt, bossPos, playerPos);
-            if (modeTimer >= ring1BurstDuration / spd) {
+        case MODE_BigDashAttack_Dash: {
+            BigDashAttack.Update(scaleDt, bossPos, playerPos);
+            if (!BigDashAttack.isActive()) {
                 mode = MODE_WAIT_BETWEEN_RINGS;
                 modeTimer = 0.0f;
             }
             break;
+        }
 
-        case MODE_WAIT_BETWEEN_RINGS:
-        case MODE_REST_AFTER_RINGS:
-        case MODE_REST_AFTER_SWING:
+        case MODE_WAIT_BETWEEN_RINGS: {
             if (modeTimer >= waitBetweenRings / spd && !AnyAttackActive()) {
-                int r = GetRandomValue(0, 99);
-                if (r < 40) {
-                    StopAllAttacks(*this);
-                    jumpAttack.startAttack(playerPos);
-                    mode = MODE_JUMP;
-                }
-                else if (r < 60) {
-                    mode = MODE_RING1_TELE;
-                }
-                else if (r < 75) {
-                    mode = MODE_SWING;
-                    StartSwing(bossPos, playerPos);
-                }
-                else {
-                    // Slam
-                    StopAllAttacks(*this);
-                    slamAttack.markDuration = slamTeleDuration;
-                    slamAttack.slamDuration = slamHitDuration;
-                    slamAttack.cooldownDuration = restAfterSlam;
-                    slamAttack.Start(bossPos);
-                    mode = MODE_SLAM_TELE;
-                }
-
+                mode = Mode_BigDashAttack_Tele;
                 modeTimer = 0.0f;
             }
             break;
+        }
 
-        case MODE_JUMP:
-            jumpAttack.updateAttackCD(scaleDt);
-            jumpAttack.attack(playerPos, playerRect, scaleDt, player, boss);
-
-            // Sobald die Attacke nicht mehr aktiv ist (stopAttack wurde gerufen)
-            if (!jumpAttack.isActive()) {
-                mode = MODE_REST_AFTER_RINGS; // Wechsel in die Pause
-                modeTimer = 0.0f; // WICHTIG: Timer resetten!
-            }
-            break;
-
-        case MODE_SWING:
-            swingAttack.Update(scaleDt, bossPos, playerPos);
-            if (modeTimer >= swingDuration / spd) {
-                mode = MODE_REST_AFTER_SWING;
-                modeTimer = 0.0f;
-            }
-            break;
-
-        case MODE_SLAM_TELE:
-            slamAttack.Update(scaleDt,bossPos, playerPos);
-            if (modeTimer >= slamTeleDuration / spd) {
-                mode = MODE_SLAM_HIT;
-                modeTimer = 0.0f;
-            }
-            break;
-
-        case MODE_SLAM_HIT:
-            slamAttack.Update(scaleDt,bossPos,playerPos);
-            if (modeTimer >= slamHitDuration / spd) {
-                mode = MODE_REST_AFTER_SLAM;
-                modeTimer = 0.0f;
-            }
-            break;
-
-        case MODE_REST_AFTER_SLAM:
-            slamAttack.Update(scaleDt,bossPos,playerPos);
-            if (modeTimer >= restAfterSlam / spd && !AnyAttackActive()) {
-                mode = MODE_WAIT_BETWEEN_RINGS;  // 或者直接回 MODE_RING1_TELE 都行
-                modeTimer = 0.0f;
-            }
-            break;
-        default: mode = MODE_RING1_TELE;
+        default:
+            // other modes not implemented for Nightmare
             break;
     }
 }
-
-/*void nightmare_Angriff::Draw(Vector2 bossPos) const {
-    if (ringAttack.IsActive()) ringAttack.Draw(bossPos);
 
 float nightmare_Angriff::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect) {
     if (dmgTimer > 0.0f) return 0.0f;
     float mult = DamageMultiplier();
 
-    if (ringAttack.CheckDamage(dt, bossPos, playerRect) > 0) {
+    float bd = BigDashAttack.CheckDamage(dt, bossPos, playerRect);
+    if (bd > 0.0f) {
         dmgTimer = 0.5f;
-        return ring1Damage * mult;
-    }
-    if (swingAttack.CheckDamage(dt, bossPos, playerRect) > 0) {
-        dmgTimer = 0.5f;
-        return swingDamage * mult;
+        return bd * mult;
     }
 
-    float slamD = slamAttack.CheckDamage(dt, bossPos, playerRect);
-    if (slamD > 0.0f) {
-        dmgTimer = 0.5f;
-        return slamD;
-    }
-
-    if (const_cast<AttackJump &>(jumpAttack).isActive() && const_cast<AttackJump &>(jumpAttack).hitPlayer(playerRect)) {
-        dmgTimer = 0.5f;
-        return (float) const_cast<AttackJump &>(jumpAttack).getDamage() * mult;
-    }
     return 0.0f;
 }
 
 void nightmare_Angriff::TryTriggerMeteorStorm() {
-    float pct = bossHP / bossMaxHP;
-    if (!meteorStormTriggered && pct <= meteorTriggerPct) {
-        meteorStormTriggered = true;
-        meteorStormActive = true;
-        StopAllAttacks(*this);
-        meteorAttack.Start({0, 0}, lastPlayerPos);
-        resumeMode = mode;
-        mode = MODE_METEOR_STORM;
-    }
+    // Not implemented for this boss; left as placeholder
+    (void) meteorTriggerPct;
 }
 
 void nightmare_Angriff::UpdateMeteorStorm(float dt) {
-    meteorAttack.Update(dt, {0, 0}, lastPlayerPos);
-    if (!meteorAttack.IsActive()) {
-        meteorStormActive = false;
-        mode = resumeMode;
-        modeTimer = 0.0f;
-    }
-}*/
+    (void) dt;
+    // placeholder: no meteor logic implemented for Nightmare
+}

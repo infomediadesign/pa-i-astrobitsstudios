@@ -21,7 +21,7 @@ public:
 
     bool isActive() const;
     // returns damage or 0.0f (or marker) when hit
-    //float CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect);
+    float CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect);
 
     void StartBigDash(Vector2 bossPos, Vector2 playerPos);
 
@@ -39,6 +39,10 @@ private:
 
     // Flag, die angibt, dass ein Angriff angefragt wurde
     bool wantsToAttack = false;
+
+    // Damage config
+    float damage = 20.0f;
+    bool hitApplied = false;
 };
 
 

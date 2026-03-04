@@ -9,7 +9,8 @@ NightmareController::NightmareController() = default;
 NightmareController::~NightmareController() = default;
 
 void NightmareController::Init() {
-    texture = LoadTexture("assets/graphics/Boss/Testimage1.png");
+    // Stelle sicher, dass der richtige Dateiname geladen wird (kleinschreibung auf Windows ist tolerant, aber sauberer so)
+    texture = LoadTexture("assets/graphics/Boss/testimage1.png");
     Reset();
 }
 
@@ -34,7 +35,7 @@ void NightmareController::draw() const {
 
     //Healthbar
     float barWidth = 400.0f;
-    DrawText("Tomb Golem", (int)(Game::ScreenWidth/2.2), (int)(Game::ScreenHeight - 45), 18, LIGHTGRAY);
+    DrawText("Nightmare", (int)(Game::ScreenWidth/2.2), (int)(Game::ScreenHeight - 45), 18, LIGHTGRAY);
     DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth, 20, DARKGRAY);
     DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth * (health / maxHealth), 20, GREEN);
 }

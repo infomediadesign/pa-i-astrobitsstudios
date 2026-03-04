@@ -6,7 +6,7 @@
 #include"cooldown.h"
 #include <vector>
 #include "boss/golem/GolemController/GolemController.h"
-#include "boss/golem/boss_Angriff.h"
+#include "boss/golem/Golem_Angriff.h"
 #include "boss/Nightmare/NightmareController/NightmareController.h"
 #include "boss/Nightmare/nightmare_Angriff.h"
 #include "player/movement/controller.h"
@@ -97,20 +97,21 @@ int main() {
 
     GolemController golem;
     NightmareController nightmare;
-    nightmare_Angriff nightAtk;
 
 
     controller player;
     plattack melee;
     melee.Init();
     golem.Init();
+    // Initialize Nightmare boss controller so its texture (testimage1) is loaded
+    nightmare.Init();
     player.Init();
     hp.Init();
-    BossAngriff bossAtk1;
+    Golem_Angriff bossAtk1;
     bossAtk1.Init();
     // Boss2-Angriffssystem (Als Nächstes erstellen Sie BossAttack2)
-    //BossAngriff2 bossAtk2;
-    //bossAtk2.Init();
+    nightmare_Angriff bossAtk2;
+    bossAtk2.Init();
 
     Upgrades Upgrades;
 
@@ -397,7 +398,7 @@ int main() {
                 break;
             case STATE_BOSS_2: {
                 player.Update(dt, walls);
-                golem.update(dt);
+                nightmare.update(dt);
 
                 hp.Update(dt);
                 attackCD.Update(dt);
@@ -406,14 +407,14 @@ int main() {
                 player.Animate(dt);
                 runTimer.Update(dt);
 
-                Rectangle br = golem.GetRect();
+                Rectangle br = nightmare.GetRect();
                 Vector2 bossPos = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
-                //bossAtk2.SetBossHP(golem.getHealth(), golem.getMaxHealth());
-                //bossAtk2.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
+                bossAtk2.SetBossHP(nightmare.getHealth(), nightmare.getMaxHealth());
+                bossAtk2.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, nightmare);
 
-                //float dmg = bossAtk2.CheckDamage(dt, bossPos, player.GetCollision());
-                //if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
+                float dmg = bossAtk2.CheckDamage(dt, bossPos, player.GetCollision());
+                if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
 
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     runTimer.Stop();
@@ -421,6 +422,11 @@ int main() {
                     currentState = STATE_PAUSE;
                 }
 
+                // Debug: Boss2-Angriff manuell auslösen (Taste B)
+                /*if (IsKeyPressed(KEY_B)) {
+                    bossAtk2.StartBigDash(bossPos, player.GetPos());
+                }
+*/
                 // bit Boss
                 if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
                     player.Dash(walls, dt);
@@ -514,16 +520,17 @@ int main() {
                         //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                     }
                 } else if (currentState == STATE_BOSS_2) {
-                    Rectangle br = golem.GetRect();
+                    Rectangle br = nightmare.GetRect();
                     Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
                     DrawTexture(background, 0, 0, WHITE);
                     DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
 
-                    //bossAtk2.Draw(bossPosForDraw);
+                    // Zeichne bossAtk2 Angriffs-Vorschau
+                    bossAtk2.Draw(bossPosForDraw);
 
                     player.DrawAnimation();
-                    golem.Draw();
+                    nightmare.Draw();
 
                     if (melee.active) {
                         melee.Draw();
@@ -605,6 +612,8 @@ int main() {
         melee.Unload();
         golem.Unload();
         player.Unload();
+        // Unload nightmare boss resources
+        nightmare.Unload();
 
         UnloadRenderTexture(canvas);
 

@@ -12,7 +12,7 @@
 #include "AttackSlam/AttackSlam.h"
 #include "GolemController/GolemController.h"
 
-struct BossAngriff {
+struct Golem_Angriff {
     enum Mode {
         MODE_RING1_TELE = 0,
         MODE_RING1_BURST = 1,

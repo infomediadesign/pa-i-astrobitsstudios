@@ -4,6 +4,7 @@
 
 #include "NightmareController.h"
 #include "config.h"
+#include <cstdio>
 
 NightmareController::NightmareController() = default;
 NightmareController::~NightmareController() = default;
@@ -36,8 +37,21 @@ void NightmareController::draw() const {
     //Healthbar
     float barWidth = 400.0f;
     DrawText("Nightmare", (int)(Game::ScreenWidth/2.2), (int)(Game::ScreenHeight - 45), 18, LIGHTGRAY);
-    DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth, 20, DARKGRAY);
-    DrawRectangle((float) Game::ScreenWidth/2 - (barWidth / 2), (float) Game::ScreenHeight-25, barWidth * (health / maxHealth), 20, GREEN);
+    float barX = (float) Game::ScreenWidth/2 - (barWidth / 2);
+    float barY = (float) Game::ScreenHeight-25;
+    DrawRectangle(barX, barY, barWidth, 20, DARKGRAY);
+
+    // Compute clamped ratio so the filled part never exceeds the bar
+    float ratio = (maxHealth > 0.0f) ? (health / maxHealth) : 0.0f;
+    if (ratio < 0.0f) ratio = 0.0f;
+    if (ratio > 1.0f) ratio = 1.0f;
+    float filledWidth = barWidth * ratio;
+    DrawRectangle(barX, barY, filledWidth, 20, GREEN);
+
+    // Draw numeric HP / MaxHP to the right of the bar
+    char buf[64];
+    snprintf(buf, sizeof(buf), "%d / %d", (int)health, (int)maxHealth);
+    DrawText(buf, (int)(barX + barWidth + 8), (int)(barY - 2), 16, WHITE);
 }
 
 void NightmareController::takeDamage(float amount) {

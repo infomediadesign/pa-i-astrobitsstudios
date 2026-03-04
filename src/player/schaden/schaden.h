@@ -17,6 +17,10 @@ public:
     float takeDamageTimer;
     float takeDamageDuration;
 
+    // Sound: hit SFX
+    Sound hitSound;
+    bool hitSoundLoaded = false;
+
     // Basic functions
     void Init();
 
@@ -29,6 +33,9 @@ public:
     void setInvincibleDuration(float duration);
 
     const void DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp);
+
+    // Resource cleanup
+    void Unload();
 
     // State check
     bool IsDead() const;

@@ -177,7 +177,7 @@ float AttackSlam::CheckDamage(float, Vector2 bossPos, Rectangle playerRect)
         if(CircleHitsTriangle(center,radius,p0,p1,p2))
         {
             hitApplied=true;
-            return 1.0f;
+            return 17.0f;
         }
     }
 

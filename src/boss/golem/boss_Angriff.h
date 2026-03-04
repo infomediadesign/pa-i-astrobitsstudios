@@ -34,7 +34,7 @@ struct BossAngriff {
     float bossHP = 1.0f;
     float bossMaxHP = 1.0f;
     float meteorTriggerPct = 0.40f;
-    float enragedPct = 0.25f;
+    float enragedPct = 0.35f;
 
     float ringTeleDuration = 0.80f;
     float ring1BurstDuration = 1.0f;
@@ -54,9 +54,9 @@ struct BossAngriff {
     float slamHitDuration  = 0.45f;
     float restAfterSlam    = 1.0f;
 
-    float slamDamage = 12.0f;
-    float ring1Damage = 5.0f;
-    float swingDamage = 8.0f;
+    float slamDamage = 17.0f;
+    float ring1Damage = 13.0f;
+    float swingDamage = 20.0f;
     float meteorDamage = 10.0f;
     float dmgTimer = 0.0f;
 

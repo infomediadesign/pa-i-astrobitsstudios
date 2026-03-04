@@ -49,8 +49,8 @@ static void applyDifficulty(const Options &options, Player &player, GolemControl
 }
 
 int main() {
-    Cooldown attackCD(0.5f);
-    Cooldown dashCD(3.0f);
+    Cooldown attackCD(0.6f);
+    Cooldown dashCD(2.0f);
     // Jumpattack is now handled by the boss system; removed standalone cooldown
     //Cooldown jumpAttackCD(1.75f);
     // Raylib initialization

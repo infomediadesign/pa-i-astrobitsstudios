@@ -44,8 +44,8 @@ void BossAngriff::SetBossHP(float hp, float maxHp) {
 }
 
 bool BossAngriff::IsEnraged() const { return (bossHP / bossMaxHP) <= enragedPct; }
-float BossAngriff::DamageMultiplier() const { return IsEnraged() ? 1.20f : 1.0f; }
-float BossAngriff::SpeedMultiplier() const { return IsEnraged() ? 1.45f : 1.0f; }
+float BossAngriff::DamageMultiplier() const { return IsEnraged() ? 1.25f : 1.0f; }
+float BossAngriff::SpeedMultiplier() const { return IsEnraged() ? 1.30f : 1.0f; }
 
 float BossAngriff::ModifyIncomingBossDamage(float rawDamage) const {
     return (mode == MODE_METEOR_STORM) ? 1.0f : rawDamage;

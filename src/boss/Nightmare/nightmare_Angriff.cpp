@@ -46,7 +46,7 @@ void nightmare_Angriff::StartBigDash(Vector2 bossPos, Vector2 playerPos) {
 }
 
 
-void nightmare_Angriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
+/*void nightmare_Angriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
                          NightmareController &boss) {
     this->lastPlayerPos = playerPos;
     dmgTimer -= dt;

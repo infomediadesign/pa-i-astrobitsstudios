@@ -6,20 +6,27 @@
 #include "raylib.h"
 #include "config.h"
 
+AttackBigDash::AttackBigDash()
+    : attackArea{0,0,0,0}, origin{0,0}, rotation(0.0f), charging(false), speed(0.0f), active(false), wantsToAttack(false)
+{
+    // Optional: Init() kann weiterhin genutzt werden, aber die Initializer-Liste reicht aus
+}
+
 void AttackBigDash::Init() {
     attackArea = {0, 0, 0, 0,};
-    Vector2 origin = {0, 0};
+    origin = {0, 0};
     rotation = 0;
     speed = 0;
     active = false;
     charging = false;
+    wantsToAttack = false; // initialisieren
 }
 
 void AttackBigDash::Reset() {
     Init();
 }
 
-bool AttackBigDash::isActive() {
+bool AttackBigDash::isActive() const {
     return active || charging;
 }
 
@@ -35,7 +42,7 @@ void AttackBigDash::StartBigDash(Vector2 bossPos, Vector2 playerPos) {
 }
 
 void AttackBigDash::Update(float dt, Vector2 bossPos, Vector2 playerPos) {
-    if (wantsToAttack && !isActive) {
+    if (wantsToAttack && !isActive()) {
         Vector2 dir = Vector2Subtract(playerPos, bossPos);
 
         active = true;
@@ -47,6 +54,9 @@ void AttackBigDash::Update(float dt, Vector2 bossPos, Vector2 playerPos) {
 
         // Origin setzt den Drehpunkt auf die linke Mitte des Rechtecks
         origin = {0, attackArea.height / 2};
+
+        // Angriff ausgeführt, Anfrage zurücksetzen
+        wantsToAttack = false;
     }
 
     if (charging) {
@@ -101,3 +111,8 @@ void AttackBigDash::Draw(Vector2 bossPos) const {
     }
     return 0.0f;
 }*/
+
+// Implementierung des Setters
+void AttackBigDash::SetWantsToAttack(bool val) {
+    wantsToAttack = val;
+}

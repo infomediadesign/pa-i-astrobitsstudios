@@ -19,11 +19,14 @@ public:
 
     void Draw(Vector2 bossPos) const;
 
-    bool isActive();
+    bool isActive() const;
     // returns damage or 0.0f (or marker) when hit
     //float CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect);
 
     void StartBigDash(Vector2 bossPos, Vector2 playerPos);
+
+    // Setter to request an attack from outside
+    void SetWantsToAttack(bool val);
 
 private:
     Rectangle attackArea;
@@ -33,6 +36,9 @@ private:
     bool charging;
     float speed;
     bool active;
+
+    // Flag, die angibt, dass ein Angriff angefragt wurde
+    bool wantsToAttack = false;
 };
 
 

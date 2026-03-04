@@ -374,7 +374,7 @@ int main() {
                     applyDifficulty(options, hp, golem);
                     // Apply difficulty when returning from upgrade screen (new run)
                     applyDifficulty(options, hp, golem);
-                    currentState = STATE_BOSS_1;
+                    currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
                     Upgrades.Upgrade2(hp,player);
@@ -382,7 +382,7 @@ int main() {
                     golem.Reset();
                     // bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
                     applyDifficulty(options, hp, golem);
-                    currentState = STATE_BOSS_1;
+                    currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 2) {
                     Upgrades.Upgrade3(melee,player);
@@ -390,7 +390,7 @@ int main() {
                     golem.Reset();
                     //bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
                     applyDifficulty(options, hp, golem);
-                    currentState = STATE_BOSS_1;
+                    currentState = STATE_BOSS_2;
                 }
                 //currentState = STATE_BOSS_2;
 
@@ -443,15 +443,16 @@ int main() {
                     currentState = STATE_DEATH;
                 }
                 //currentState = STATE_NAME_ENTRY;
-                break;
+
 
                 // Boss2 死了以后你想去哪：比如进入胜利/名字输入
-                if (!golem.isAlive()) {
+                if (!nightmare.isAlive()) {
                     runTimer.Stop();
                     currentState = STATE_NAME_ENTRY; // 或者 STATE_VICTORY
                 }
                 break;
             }
+        }
 
                 BeginDrawing();
                 // You can draw on the screen between BeginDrawing() and EndDrawing()
@@ -613,4 +614,3 @@ int main() {
 
         return EXIT_SUCCESS;
     };
-}

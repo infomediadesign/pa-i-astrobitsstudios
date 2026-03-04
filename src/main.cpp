@@ -101,8 +101,12 @@ InitAudioDevice();
     golem.Init();
     player.Init();
     hp.Init();
-    BossAngriff bossAtk;
-    bossAtk.Init();
+    BossAngriff bossAtk1;
+    bossAtk1.Init();
+    // Boss2-Angriffssystem (Als Nächstes erstellen Sie BossAttack2)
+    //BossAngriff2 bossAtk2;
+    //bossAtk2.Init();
+
     Upgrades Upgrades;
 
     // Ensure difficulty settings are applied at initial run (if player immediately starts)
@@ -199,11 +203,9 @@ InitAudioDevice();
                 //==========================
                 Rectangle br = golem.GetRect();
                 Vector2 bossPos = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
-                bossAtk.SetBossHP(golem.getHealth(), golem.getMaxHealth());
-
-                bossAtk.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
-
-                float dmg = bossAtk.CheckDamage(dt, bossPos, player.GetCollision());
+                bossAtk1.SetBossHP(golem.getHealth(), golem.getMaxHealth());
+                bossAtk1.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
+                float dmg = bossAtk1.CheckDamage(dt, bossPos, player.GetCollision());
                 if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
 
 
@@ -288,7 +290,7 @@ InitAudioDevice();
                     golem.Reset();
                     // Apply difficulty before starting the run
                     applyDifficulty(options, hp, golem);
-                    bossAtk.Init();
+                    bossAtk1.Init();
                     runTimer.Reset();
                     runTimer.Start();
                     previousState = STATE_MENU;
@@ -317,7 +319,7 @@ InitAudioDevice();
                     golem.Reset();
                     // Apply difficulty when restarting after death
                     applyDifficulty(options, hp, golem);
-                    bossAtk.Init();
+                    bossAtk1.Init();
                     hp.invincibleTimer = hp.invincibleDuration;
                     runTimer.Reset();
                     runTimer.Start();
@@ -368,6 +370,8 @@ InitAudioDevice();
                     Upgrades.Upgrade1(hp,melee);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
+                    //bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
+                    applyDifficulty(options, hp, golem);
                     // Apply difficulty when returning from upgrade screen (new run)
                     applyDifficulty(options, hp, golem);
                     currentState = STATE_BOSS_1;
@@ -376,41 +380,76 @@ InitAudioDevice();
                     Upgrades.Upgrade2(hp,player);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
+                   // bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
+                    applyDifficulty(options, hp, golem);
                     currentState = STATE_BOSS_1;
                 }
                 if (upgradeScreen.GetChoice() == 2) {
                     Upgrades.Upgrade3(melee,player);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
+                    //bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
+                    applyDifficulty(options, hp, golem);
                     currentState = STATE_BOSS_1;
                 }
                     //currentState = STATE_BOSS_2;
 
                 break;
-            case STATE_BOSS_2:
-                // Hier könntest du den nächsten Bosskampf oder das nächste Level starten
+            case STATE_BOSS_2: {
+                player.Update(dt, walls);
+                golem.update(dt);
+
+                hp.Update(dt);
+                attackCD.Update(dt);
+                dashCD.Update(dt);
+
+                player.Animate(dt);
+                runTimer.Update(dt);
+
+                Rectangle br = golem.GetRect();
+                Vector2 bossPos = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
+
+                //bossAtk2.SetBossHP(golem.getHealth(), golem.getMaxHealth());
+                //bossAtk2.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, golem);
+
+                //float dmg = bossAtk2.CheckDamage(dt, bossPos, player.GetCollision());
+                //if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));
+
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     runTimer.Stop();
                     previousState = STATE_BOSS_2;
                     currentState = STATE_PAUSE;
                 }
-                // ... Rest deiner Kampf-Logik (Dash, Melee etc.) ...
+
+                // bit Boss
                 if (dashCD.Ready() && IsKeyPressed(KEY_LEFT_SHIFT) && player.getMoving()) {
                     player.Dash(walls, dt);
                     hp.invincibleTimer = hp.invincibleDuration;
                     dashCD.Trigger();
                 }
+
                 melee.UpdateDirection();
+                if (attackCD.Ready() && IsKeyPressed(KEY_SPACE)) {
+                    melee.Start(player.GetPos(), player.GetSize());
+                    attackCD.Trigger();
+                    if (CheckCollisionRecs(melee.hitBox, golem.GetDmgBox())) {
+                        golem.takeDamage(melee.damage);
+                    }
+                }
+                melee.Update(dt, player.GetPos(), player.GetSize());
+
                 if (hp.Gethealth() <= 0) {
                     runTimer.Reset();
                     currentState = STATE_DEATH;
                 }
-                //currentState = STATE_NAME_ENTRY;
-                break;
 
-            default:
-                // Fallback: nichts tun. Dies verhindert statische Analyse-Warnungen
+                // Boss2 死了以后你想去哪：比如进入胜利/名字输入
+                if (!golem.isAlive()) {
+                    runTimer.Stop();
+                    currentState = STATE_NAME_ENTRY; // 或者 STATE_VICTORY
+                }
                 break;
+            }
         }
 
         BeginDrawing();
@@ -434,7 +473,7 @@ InitAudioDevice();
                 DrawTexture(background, 0, 0, WHITE);
                 DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
 
-                bossAtk.Draw(bossPosForDraw);
+                bossAtk1.Draw(bossPosForDraw);
 
                 player.DrawAnimation();
                 golem.Draw();
@@ -472,7 +511,32 @@ InitAudioDevice();
                 if (hp.takeDamage) {
                     //  DrawRectangle(0,0,Game::ScreenWidth,Game::ScreenHeight,Fade(RED,0.3));
                 }
-            } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
+            } else if (currentState == STATE_BOSS_2) {
+                Rectangle br = golem.GetRect();
+                Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
+
+                DrawTexture(background, 0, 0, WHITE);
+                DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
+
+                //bossAtk2.Draw(bossPosForDraw);
+
+                player.Draw();
+                golem.Draw();
+
+                if (melee.active) {
+                    melee.Draw();
+                    DrawRectangleRec(melee.hitBox, WHITE);
+                }
+
+                hp.Draw(player.GetCollision());
+                DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),
+                         395, 40, 24, WHITE);
+            }
+
+
+
+
+            else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 DrawTexture(background, 0, 0, GRAY);
                 player.DrawAnimation();

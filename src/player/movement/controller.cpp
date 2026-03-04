@@ -31,32 +31,29 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
         velocity.x /= normal;
         velocity.y /= normal;
         setMoving(true);
+        // reset idle index when movement starts so idle and run are independent
+        idleFrame = 0;
     } else setMoving(false);
     gehx = velocity.x;
     gehy = velocity.y;
 
     // Update facing direction based on horizontal input
     if (rightInput) facingRight = true;
-    else if (leftInput) facingRight = false;
+    if (leftInput) facingRight = false;
 
     // Wenn nur die Animation ohne physische Bewegung gewünscht ist,
     // dann erhöhen wir nur die Animation und nicht die Position.
     if (animateOnlyMovement) {
-        // simulate dt-based animation when there is input
         if (input) {
             // advance animation frames while input exists (discrete steps)
             Animate(dt);
         } else {
-            // When input stops, reset to first frame (idle)
-            frames = 0;
-            animTimer = 0.0f;
-            // update size to idle frame
-            float fw = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
-            float fh = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
-            size.x = 0.0f;
-            size.y = facingRight ? 0.0f : fh;
-            size.width = fw;
-            size.height = fh;
+            // Wenn kein Input: idle animation verwenden (zeigt letzte Blickrichtung)
+            // Setze moving temporär auf false damit Animate() den Idle-Zweig ausführt.
+            bool prevMoving = moving;
+            moving = false;
+            Animate(dt);
+            moving = prevMoving;
         }
         // plcollision bleibt unverändert oder kann an pos gebunden bleiben
         plcollision.x = pos.x;
@@ -99,13 +96,30 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 
 void controller::Init()
 {
-    texture =LoadTexture("assets/graphics/Player/Ixirath.png");
+    texture =LoadTexture("assets/graphics/Player/Ixirath_Sprites.png");
+    // load idle texture if available
+    if (FileExists("assets/graphics/Player/p_idle.png")) {
+        idleTexture = LoadTexture("assets/graphics/Player/p_idle.png");
+    } else {
+        idleTexture = {};
+    }
     Reset();
 }
-void controller::Draw()
+void controller::DrawAnimation()
 {
+    // If player is not moving and idle texture is loaded, draw the correct half depending on facingRight
+    if (!moving && idleTexture.height > 0 && idleTexture.width > 0) {
+        float halfH = (float)idleTexture.height / 2.0f;
+        // source rectangle: top half when facing right, bottom half when facing left
+        Rectangle src = { 0.0f, facingRight ? 0.0f : halfH, (float)idleTexture.width, halfH };
+        // destination pos uses same width and half height
+        Vector2 destPos = pos;
+        DrawTextureRec(idleTexture, src, destPos, WHITE);
+        return;
+    }
+
     // Ensure size rect uses correct frame width and proper source rectangle
-    float frameWidth = (texture.width > 0) ? (float)texture.width / 9.0f : 0.0f;
+    float frameWidth = (texture.width > 0) ? (float)texture.width / 8.0f : 0.0f;
     float frameHeight = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
 
     // Ensure size contains correct width/height
@@ -126,27 +140,47 @@ void controller::Animate(float dt)
         return;
     }
 
-    float frameWidth = (float)texture.width / 9.0f;
+    float frameWidth = (float)texture.width / 8.0f;
     float frameHeight = (float)texture.height / 2.0f;
 
-    // If not moving, stay on idle frame (0)
+    // If not moving, show the static idle texture if available, else play idle animation frames
     if (!moving) {
-        frames = 0;
-        animTimer = 0.0f;
-        size.x = 0.0f;
+        if (idleTexture.width > 0 && idleTexture.height > 0) {
+            // When using a separate static idle image which contains two halves (right/left),
+            // use half height so DrawAnimation will render the correct half.
+            size.x = 0.0f;
+            size.y = 0.0f;
+            size.width = (float)idleTexture.width;
+            size.height = (float)idleTexture.height / 2.0f; // use half height
+            // no animation timer needed since it's static texture halves
+            return;
+        }
+
+        // Fallback: if no idleTexture available, revert to the older idle frame cycling
+        const float secondsPerIdleFrame = 1.0f / (float)idleFrameSpeed;
+        animTimer += dt;
+        if (animTimer >= secondsPerIdleFrame) {
+            int advance = static_cast<int>(animTimer / secondsPerIdleFrame);
+            animTimer -= static_cast<float>(advance) * secondsPerIdleFrame;
+            idleFrame += advance;
+            if (idleFrame >= idleFrameCount) idleFrame %= idleFrameCount;
+            size.x = (float)idleFrame * frameWidth;
+        }
+
+        // Keep row according to last facing direction
         size.y = facingRight ? 0.0f : frameHeight;
         size.width = frameWidth;
         size.height = frameHeight;
         return;
     }
 
+    // When movement starts, ensure run-frame index continues independently
     // Use time-based animation to avoid frame sticking
     const float secondsPerFrame = 1.0f / (float)frameSpeed; // frameSpeed frames per second
     animTimer += dt;
     if (animTimer >= secondsPerFrame) {
-        // Advance frames as many as needed (in case of lag)
         int advance = static_cast<int>(animTimer / secondsPerFrame);
-        animTimer -= static_cast<float>(advance) * secondsPerFrame; // avoid narrowing warning
+        animTimer -= static_cast<float>(advance) * secondsPerFrame;
         frames += advance;
         const int maxFrames = 8; // total frames in row
         if (frames >= maxFrames) frames %= maxFrames;
@@ -163,6 +197,7 @@ void controller::Animate(float dt)
 void controller::Unload()
 {
     UnloadTexture(texture);
+    if (idleTexture.width > 0 && idleTexture.height > 0) UnloadTexture(idleTexture);
 }
 void controller::Dash(const std::vector<Wall>& walls,float dt)
 {
@@ -228,9 +263,15 @@ void controller::Reset() {
     animTimer = 0.0f; // reset timer
     animateOnlyMovement = false; // default: physical movement enabled
     facingRight = true; // default facing right
+
+    // Idle defaults
+    idleFrame = 0;
+    idleFrameCount = 4; // default: first 4 frames used for idle
+    idleFrameSpeed = std::max(1, frameSpeed / 2);
+
     float fw = 0.0f;
     float fh = 0.0f;
-    if (texture.width > 0) fw = (float)texture.width / 9.0f;
+    if (texture.width > 0) fw = (float)texture.width / 8.0f;
     if (texture.height > 0) fh = (float)texture.height / 2.0f;
     size = {0.0f, 0.0f, fw, fh};
 

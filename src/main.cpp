@@ -436,7 +436,7 @@ InitAudioDevice();
 
                 bossAtk.Draw(bossPosForDraw);
 
-                player.Draw();
+                player.DrawAnimation();
                 golem.Draw();
 
                 //Hitboxen Zeichnen
@@ -475,7 +475,7 @@ InitAudioDevice();
             } else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                 // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                 DrawTexture(background, 0, 0, GRAY);
-                player.Draw();
+                player.DrawAnimation();
                 golem.Draw();
                 hp.Draw(player.GetCollision());
                 DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);

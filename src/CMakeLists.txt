@@ -17,7 +17,7 @@ add_executable(${PROJECT_NAME} main.cpp
         boss/golem/GolemController/GolemController.h
         enviroment/walls.h
         enviroment/walls.cpp
-        player/schaden/schden.cpp
+        player/schaden/schaden.cpp
         Menu/MainMenu_UI.cpp
         Menu/MainMenu_UI.h
         Menu/Menu.hpp

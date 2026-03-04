@@ -88,6 +88,8 @@ struct BossAngriff {
 
     bool IsEnraged() const;
 
+    void ForceStartMode(Mode newMode, Vector2 bossPos, Vector2 playerPos);
+
 private:
     void StartRingTele(Vector2 bossPos, float teleInner, float teleOuter);
 

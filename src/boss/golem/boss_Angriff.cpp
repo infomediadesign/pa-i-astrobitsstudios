@@ -51,6 +51,59 @@ float BossAngriff::ModifyIncomingBossDamage(float rawDamage) const {
     return (mode == MODE_METEOR_STORM) ? 1.0f : rawDamage;
 }
 
+void BossAngriff::ForceStartMode(Mode newMode, Vector2 bossPos, Vector2 playerPos)
+{
+    //  Alle laufenden Angriffe sofort einstellen.
+    StopAllAttacks(*this);
+
+    //  Erzwungener Umschaltmodus
+    mode = newMode;
+    modeTimer = 0.0f;
+
+    float spd = SpeedMultiplier(); // Behalten Sie die Konsistenz mit Ihrer bestehenden Logik bei.
+
+    switch (newMode)
+    {
+        case MODE_RING1_TELE:
+            StartRingTele(bossPos, ring1InnerTele, ring1OuterTele);
+            break;
+
+        case MODE_RING1_BURST:
+            StartRing1Burst(bossPos);
+            break;
+
+        case MODE_SWING:
+            StartSwing(bossPos, playerPos);
+            break;
+
+        case MODE_JUMP:
+            jumpAttack.startAttack(playerPos);
+            break;
+
+        case MODE_SLAM_TELE:
+            slamAttack.markDuration = slamTeleDuration;
+            slamAttack.slamDuration = slamHitDuration;
+            slamAttack.cooldownDuration = restAfterSlam;
+            slamAttack.Start(bossPos);
+            break;
+
+        case MODE_SLAM_HIT:
+            slamAttack.Start(bossPos);
+            break;
+
+        case MODE_METEOR_STORM:
+            meteorAttack.Start({0, 0}, playerPos);
+            break;
+
+        default:
+            // Wenn ein ungültiger Modus übergeben wird, wird der Standardmodus wiederhergestellt.
+            mode = MODE_RING1_TELE;
+            modeTimer = 0.0f;
+            StartRingTele(bossPos, ring1InnerTele, ring1OuterTele);
+            break;
+    }
+}
+
 void BossAngriff::StartRingTele(Vector2 bossPos, float teleInner, float teleOuter) {
     StopAllAttacks(*this);
     ringAttack.StartTele(bossPos, teleInner, teleOuter);

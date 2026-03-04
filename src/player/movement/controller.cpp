@@ -19,30 +19,55 @@ Rectangle controller::GetHitbox() const
 void controller::Update(float dt, const std::vector<Wall>& walls)
 {
     velocity = {0, 0};
-    if (IsKeyDown(KEY_W)){ velocity.y -= 1;
-         }
-    if (IsKeyDown(KEY_S)) {velocity.y += 1;
-         }
-    if (IsKeyDown(KEY_A)) {velocity.x -= 1;
-         }
-    if (IsKeyDown(KEY_D)) {velocity.x += 1;
-         }
+    bool input = false;
+    bool leftInput = false;
+    bool rightInput = false;
+    if (IsKeyDown(KEY_W)) { velocity.y -= 1; input = true; }
+    if (IsKeyDown(KEY_S)) { velocity.y += 1; input = true; }
+    if (IsKeyDown(KEY_A)) { velocity.x -= 1; input = true; leftInput = true; }
+    if (IsKeyDown(KEY_D)) { velocity.x += 1; input = true; rightInput = true; }
     float normal = std::sqrt(velocity.x*velocity.x + velocity.y*velocity.y);
-    if (normal >0) {
-            velocity.x /= normal;
-            velocity.y /= normal;
-            setMoving(true);
-    }
-    else setMoving(false);
+    if (normal > 0) {
+        velocity.x /= normal;
+        velocity.y /= normal;
+        setMoving(true);
+        // reset idle index when movement starts so idle and run are independent
+        idleFrame = 0;
+    } else setMoving(false);
     gehx = velocity.x;
     gehy = velocity.y;
-    velocity.x = velocity.x *speed * dt;
-    velocity.y = velocity.y *speed * dt;
+
+    // Update facing direction based on horizontal input
+    if (rightInput) facingRight = true;
+    if (leftInput) facingRight = false;
+
+    // Wenn nur die Animation ohne physische Bewegung gewünscht ist,
+    // dann erhöhen wir nur die Animation und nicht die Position.
+    if (animateOnlyMovement) {
+        if (input) {
+            // advance animation frames while input exists (discrete steps)
+            Animate(dt);
+        } else {
+            // Wenn kein Input: idle animation verwenden (zeigt letzte Blickrichtung)
+            // Setze moving temporär auf false damit Animate() den Idle-Zweig ausführt.
+            bool prevMoving = moving;
+            moving = false;
+            Animate(dt);
+            moving = prevMoving;
+        }
+        // plcollision bleibt unverändert oder kann an pos gebunden bleiben
+        plcollision.x = pos.x;
+        plcollision.y = pos.y;
+        return;
+    }
+
+    velocity.x = velocity.x * speed * dt;
+    velocity.y = velocity.y * speed * dt;
     // --- X ACHSE ---
     Rectangle nextX = {
         pos.x + velocity.x,
         pos.y,
-        (float)texture.width / 9,
+        (float)texture.width / 8,
         (float)texture.height / 2
     };
 
@@ -53,7 +78,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     Rectangle nextY = {
         pos.x,
         pos.y + velocity.y,
-        (float)texture.width / 9,
+        (float)texture.width / 8,
         (float)texture.height / 2
     };
 
@@ -64,7 +89,7 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
     plcollision = {
         pos.x,
         pos.y,
-        (float)texture.width / 9,
+        (float)texture.width / 8,
         (float)texture.height / 2
     };
 }
@@ -72,34 +97,107 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 void controller::Init()
 {
     texture =LoadTexture("assets/graphics/Player/Ixirath_Sprites.png");
+    // load idle texture if available
+    if (FileExists("assets/graphics/Player/p_idle.png")) {
+        idleTexture = LoadTexture("assets/graphics/Player/p_idle.png");
+    } else {
+        idleTexture = {};
+    }
     Reset();
 }
-void controller::Draw()
+void controller::DrawAnimation()
 {
-    if (gehx<0)
-    {
-        size ={size.x,0.0f, (float)-texture.width/8,(float)texture.height/2};
-    }else if (gehx>0) {
-        size ={size.x,0.0f, (float)texture.width/8,(float)texture.height/2};
-    }else if (gehx ==0) {
-
+    // If player is not moving and idle texture is loaded, draw the correct half depending on facingRight
+    if (!moving && idleTexture.height > 0 && idleTexture.width > 0) {
+        float halfH = (float)idleTexture.height / 2.0f;
+        // source rectangle: top half when facing right, bottom half when facing left
+        Rectangle src = { 0.0f, facingRight ? 0.0f : halfH, (float)idleTexture.width, halfH };
+        // destination pos uses same width and half height
+        Vector2 destPos = pos;
+        DrawTextureRec(idleTexture, src, destPos, WHITE);
+        return;
     }
-    DrawTextureRec(texture, size, pos, WHITE);
+
+    // Ensure size rect uses correct frame width and proper source rectangle
+    float frameWidth = (texture.width > 0) ? (float)texture.width / 8.0f : 0.0f;
+    float frameHeight = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
+
+    // Ensure size contains correct width/height
+    size.width = frameWidth;
+    size.height = frameHeight;
+
+    Rectangle src = { size.x, size.y, size.width, size.height };
+    DrawTextureRec(texture, src, pos, WHITE);
 }
+
 void controller::Animate(float dt)
 {
-    frameCount++;
-    if (frameCount >=(60/frameSpeed)) {
-        frameCount =0;
-        frames++;
-        if (frames>8) frames=0;
-        size.x = (float) frames*(float)texture.width/8;
+    // Guard: avoid division by zero and invalid texture
+    if (frameSpeed <= 0 || texture.width <= 0) {
+        // still update facing row so Draw has correct y
+        float fh = (texture.height > 0) ? (float)texture.height / 2.0f : 0.0f;
+        size.y = facingRight ? 0.0f : fh;
+        return;
     }
 
+    float frameWidth = (float)texture.width / 8.0f;
+    float frameHeight = (float)texture.height / 2.0f;
+
+    // If not moving, show the static idle texture if available, else play idle animation frames
+    if (!moving) {
+        if (idleTexture.width > 0 && idleTexture.height > 0) {
+            // When using a separate static idle image which contains two halves (right/left),
+            // use half height so DrawAnimation will render the correct half.
+            size.x = 0.0f;
+            size.y = 0.0f;
+            size.width = (float)idleTexture.width;
+            size.height = (float)idleTexture.height / 2.0f; // use half height
+            // no animation timer needed since it's static texture halves
+            return;
+        }
+
+        // Fallback: if no idleTexture available, revert to the older idle frame cycling
+        const float secondsPerIdleFrame = 1.0f / (float)idleFrameSpeed;
+        animTimer += dt;
+        if (animTimer >= secondsPerIdleFrame) {
+            int advance = static_cast<int>(animTimer / secondsPerIdleFrame);
+            animTimer -= static_cast<float>(advance) * secondsPerIdleFrame;
+            idleFrame += advance;
+            if (idleFrame >= idleFrameCount) idleFrame %= idleFrameCount;
+            size.x = (float)idleFrame * frameWidth;
+        }
+
+        // Keep row according to last facing direction
+        size.y = facingRight ? 0.0f : frameHeight;
+        size.width = frameWidth;
+        size.height = frameHeight;
+        return;
+    }
+
+    // When movement starts, ensure run-frame index continues independently
+    // Use time-based animation to avoid frame sticking
+    const float secondsPerFrame = 1.0f / (float)frameSpeed; // frameSpeed frames per second
+    animTimer += dt;
+    if (animTimer >= secondsPerFrame) {
+        int advance = static_cast<int>(animTimer / secondsPerFrame);
+        animTimer -= static_cast<float>(advance) * secondsPerFrame;
+        frames += advance;
+        const int maxFrames = 8; // total frames in row
+        if (frames >= maxFrames) frames %= maxFrames;
+        // update source x (discrete jump to frame index)
+        size.x = (float)frames * frameWidth;
+    }
+
+    // Always set the row according to facing direction
+    size.y = facingRight ? 0.0f : frameHeight;
+    size.width = frameWidth;
+    size.height = frameHeight;
 }
+
 void controller::Unload()
 {
     UnloadTexture(texture);
+    if (idleTexture.width > 0 && idleTexture.height > 0) UnloadTexture(idleTexture);
 }
 void controller::Dash(const std::vector<Wall>& walls,float dt)
 {
@@ -121,7 +219,8 @@ void controller::Dash(const std::vector<Wall>& walls,float dt)
     float dashDistance = 125;
     float step = 5;
 
-    for (float i = 0; i < dashDistance; i += step)
+    int stepsCount = static_cast<int>(dashDistance / step);
+    for (int si = 0; si < stepsCount; ++si)
     {
         testBox.x += dashDir.x * step;
         testBox.y += dashDir.y * step;
@@ -161,7 +260,20 @@ void controller::Reset() {
     frames=0;
     frameCount=0;
     frameSpeed = 8;
-    size={0.0f,0.0f, (float)texture.width/8,(float)texture.height/2};
+    animTimer = 0.0f; // reset timer
+    animateOnlyMovement = false; // default: physical movement enabled
+    facingRight = true; // default facing right
+
+    // Idle defaults
+    idleFrame = 0;
+    idleFrameCount = 4; // default: first 4 frames used for idle
+    idleFrameSpeed = std::max(1, frameSpeed / 2);
+
+    float fw = 0.0f;
+    float fh = 0.0f;
+    if (texture.width > 0) fw = (float)texture.width / 8.0f;
+    if (texture.height > 0) fh = (float)texture.height / 2.0f;
+    size = {0.0f, 0.0f, fw, fh};
 
 }
 

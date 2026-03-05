@@ -1,7 +1,7 @@
 ﻿#include <cstdlib>
 #include <algorithm>
 #include "raylib.h"
-#include "config.h"
+#include <config.h>
 #include <cmath>
 #include"cooldown.h"
 #include <vector>

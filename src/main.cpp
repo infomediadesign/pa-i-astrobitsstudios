@@ -114,6 +114,7 @@ int main() {
     bossAtk2.Init();
 
     Upgrades Upgrades;
+    // removed unused 'difficulty diff' - applyDifficulty() is used directly where needed
 
     // Ensure difficulty settings are applied at initial run (if player immediately starts)
     applyDifficulty(options, hp, golem);
@@ -491,7 +492,7 @@ int main() {
                     mainMenu.Draw();
                 } else if (currentState == STATE_BOSS_1) {
                     Rectangle br = golem.GetRect();
-                    Rectangle hb = golem.GetDmgBox();
+                    // Rectangle hb = golem.GetDmgBox(); // unused; keep available here if needed for debug
                     Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
                     DrawTexture(background, 0, 0, WHITE);
@@ -501,7 +502,15 @@ int main() {
 
                     player.DrawAnimation();
                     golem.Draw();
-
+                    // Draw current difficulty top-right (Boss 1)
+                    {
+                        std::string diffText = std::string("Difficulty: ") + options.GetDifficultyName();
+                        int fontSize = 20;
+                        int textWidth = MeasureText(diffText.c_str(), fontSize);
+                        int x = Game::ScreenWidth - 10 - textWidth; // 10px margin from right
+                        int y = Game::ScreenHeight - fontSize - 10; // bottom-right, 10px margin from bottom
+                        DrawText(diffText.c_str(), x, y, fontSize, RED);
+                    }
                     //Hitboxen Zeichnen
                     // DrawRectangleRec(hb, YELLOW);
                     //DrawRectangleRec(br, BLUE);
@@ -547,6 +556,16 @@ int main() {
 
                     player.DrawAnimation();
                     nightmare.Draw();
+
+                    // Draw current difficulty top-right (Boss 2)
+                    {
+                        std::string diffText = std::string("Difficulty: ") + options.GetDifficultyName();
+                        int fontSize = 20;
+                        int textWidth = MeasureText(diffText.c_str(), fontSize);
+                        int x = Game::ScreenWidth - 10 - textWidth; // 10px margin from right
+                        int y = Game::ScreenHeight - fontSize - 10; // bottom-right, 10px margin from bottom
+                        DrawText(diffText.c_str(), x, y, fontSize, RED);
+                    }
 
                     if (melee.active) {
                         melee.Draw();

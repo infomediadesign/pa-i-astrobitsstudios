@@ -290,6 +290,7 @@ int main() {
                     melee.Reset();
                     player.Reset();
                     golem.Reset();
+                    nightmare.Reset();
                     // Apply difficulty before starting the run
                     applyDifficulty(options, hp, golem);
                     bossAtk1.Init();

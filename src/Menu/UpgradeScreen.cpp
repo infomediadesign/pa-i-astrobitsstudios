@@ -2,7 +2,7 @@
 #include "config.h"
 
 UpgradeScreen::UpgradeScreen() {
-    options = {"HP+10%/ATK-10%", "HP-10%/SPEED+10%", "ATK+10%/SPEED-10%"};
+    options = {"HP+45%/ATK-10%", "Movement+30%/HP-20%", "ATK+50%/Movement-20%"};
     selectedItem = 0;
     choice = -1;
 }

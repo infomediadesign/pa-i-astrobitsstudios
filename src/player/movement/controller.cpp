@@ -216,7 +216,6 @@ void controller::Dash(const std::vector<Wall>& walls,float dt)
         dashDir.x /= norm;
         dashDir.y /= norm;
     }
-    float dashDistance = 125;
     float step = 5;
 
     int stepsCount = static_cast<int>(dashDistance / step);
@@ -257,6 +256,7 @@ bool controller::Collides(const Rectangle& box, const std::vector<Wall>& walls)
 void controller::Reset() {
     pos = {10, 100};
     speed = 260; //minimum 200 aber das wäre sehr langsam. langsamer würde ich auf keinen fall empfehlen
+    dashDistance = 125;
     frames=0;
     frameCount=0;
     frameSpeed = 8;

@@ -12,6 +12,7 @@ struct controller
     Texture2D texture;
     Vector2 pos;
     float speed;
+    float dashDistance;
     int frames;
     Rectangle plcollision;
     Rectangle size;

@@ -370,41 +370,37 @@ int main() {
                 runTimer.Stop();
                 upgradeScreen.Update();
                 if (upgradeScreen.GetChoice() == 0) {
+                    // Apply difficulty when returning from upgrade screen (new run)
+                    applyDifficulty(options, hp, golem);
                     Upgrades.Upgrade1(hp,melee);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
                     //bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
-                    applyDifficulty(options, hp, golem);
-                    // Apply difficulty when returning from upgrade screen (new run)
-                    applyDifficulty(options, hp, golem);
                     // Position player top-left for Boss2
-                    player.Reset();
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
+                    applyDifficulty(options, hp, golem);
                     Upgrades.Upgrade2(hp,player);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
                     // bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
-                    applyDifficulty(options, hp, golem);
                     // Position player top-left for Boss2
-                    player.Reset();
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 2) {
+                    applyDifficulty(options, hp, golem);
                     Upgrades.Upgrade3(melee,player);
                     upgradeScreen.ResetChoice();
                     golem.Reset();
                     //bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
-                    applyDifficulty(options, hp, golem);
                     // Position player top-left for Boss2
-                    player.Reset();
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
@@ -529,10 +525,6 @@ int main() {
                     if (attackCD.Ready())
                         DrawText("Ready", 20, 20, 10, GREEN);
                     else DrawText(TextFormat("Cooldown %.2f", attackCD.Remaining()), 20, 20, 10, GREEN);
-
-                    DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
-                    DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
-                    DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
 
                     if (CheckCollisionRecs(player.GetCollision(), golem.GetRect()) && golem.isAlive()) {
                         hp.TakeDamage(10);

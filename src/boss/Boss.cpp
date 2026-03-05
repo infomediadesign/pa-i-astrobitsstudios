@@ -63,5 +63,7 @@ void Boss::onDeath() {
 }
 
 void Boss::setMaxHealth(int health) {
-    this->maxHealth = health;
+    this->maxHealth = (float)health;
+    // Ensure current health aligns with the new maximum so the healthbar displays correctly
+    this->health = this->maxHealth;
 }

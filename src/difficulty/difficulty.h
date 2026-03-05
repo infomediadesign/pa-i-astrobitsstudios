@@ -10,10 +10,15 @@
 
 class difficulty {
     public:
+
+    difficulty();
+
     void setDifficultyEasy(Player &player, Boss &boss);
     void setDifficultyNormal(Player &player, Boss &boss);
     void setDifficultyHard(Player &player, Boss &boss);
 
+
+    void Draw();
 };
 
 

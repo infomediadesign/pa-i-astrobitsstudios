@@ -1,7 +1,7 @@
-#include "boss_Angriff.h"
+#include "Golem_Angriff.h"
 #include "config.h"
 
-static void StopAllAttacks(BossAngriff &b) {
+static void StopAllAttacks(Golem_Angriff &b) {
     if (b.ringAttack.IsActive()) b.ringAttack.Init();
     if (b.swingAttack.IsActive()) b.swingAttack.Reset();
     if (b.meteorAttack.IsActive()) b.meteorAttack.Reset();
@@ -12,11 +12,11 @@ static void StopAllAttacks(BossAngriff &b) {
     if (b.slamAttack.IsActive()) b.slamAttack.Init();
 }
 
-bool BossAngriff::AnyAttackActive() {
+bool Golem_Angriff::AnyAttackActive() {
     return ringAttack.IsActive() || swingAttack.IsActive() || meteorAttack.IsActive() || jumpAttack.isActive() || slamAttack.IsActive();
 }
 
-void BossAngriff::Init() {
+void Golem_Angriff::Init() {
     mode = MODE_RING1_TELE;
     modeTimer = 0.0f;
     bossHP = 1.0f;
@@ -38,20 +38,20 @@ void BossAngriff::Init() {
     lastPlayerPos = {(float) Game::ScreenWidth / 2, (float) Game::ScreenHeight / 2};
 }
 
-void BossAngriff::SetBossHP(float hp, float maxHp) {
+void Golem_Angriff::SetBossHP(float hp, float maxHp) {
     bossHP = hp;
     bossMaxHP = (maxHp <= 0.001f) ? 1.0f : maxHp;
 }
 
-bool BossAngriff::IsEnraged() const { return (bossHP / bossMaxHP) <= enragedPct; }
-float BossAngriff::DamageMultiplier() const { return IsEnraged() ? 1.25f : 1.0f; }
-float BossAngriff::SpeedMultiplier() const { return IsEnraged() ? 1.30f : 1.0f; }
+bool Golem_Angriff::IsEnraged() const { return (bossHP / bossMaxHP) <= enragedPct; }
+float Golem_Angriff::DamageMultiplier() const { return IsEnraged() ? 1.25f : 1.0f; }
+float Golem_Angriff::SpeedMultiplier() const { return IsEnraged() ? 1.30f : 1.0f; }
 
-float BossAngriff::ModifyIncomingBossDamage(float rawDamage) const {
+float Golem_Angriff::ModifyIncomingBossDamage(float rawDamage) const {
     return (mode == MODE_METEOR_STORM) ? 1.0f : rawDamage;
 }
 
-void BossAngriff::ForceStartMode(Mode newMode, Vector2 bossPos, Vector2 playerPos)
+void Golem_Angriff::ForceStartMode(Mode newMode, Vector2 bossPos, Vector2 playerPos)
 {
     //  Alle laufenden Angriffe sofort einstellen.
     StopAllAttacks(*this);
@@ -104,23 +104,23 @@ void BossAngriff::ForceStartMode(Mode newMode, Vector2 bossPos, Vector2 playerPo
     }
 }
 
-void BossAngriff::StartRingTele(Vector2 bossPos, float teleInner, float teleOuter) {
+void Golem_Angriff::StartRingTele(Vector2 bossPos, float teleInner, float teleOuter) {
     StopAllAttacks(*this);
     ringAttack.StartTele(bossPos, teleInner, teleOuter);
 }
 
-void BossAngriff::StartRing1Burst(Vector2 bossPos) {
+void Golem_Angriff::StartRing1Burst(Vector2 bossPos) {
     StopAllAttacks(*this);
     ringAttack.StartBurst(bossPos, ring1InnerStart, ring1OuterStart, ring1InnerEnd, ring1OuterEnd, ring1BurstDuration,
                           false);
 }
 
-void BossAngriff::StartSwing(Vector2 bossPos, Vector2 playerPos) {
+void Golem_Angriff::StartSwing(Vector2 bossPos, Vector2 playerPos) {
     StopAllAttacks(*this);
     swingAttack.Start(bossPos, playerPos);
 }
 
-void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
+void Golem_Angriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
                          GolemController &boss) {
     this->lastPlayerPos = playerPos;
     dmgTimer -= dt;
@@ -232,7 +232,7 @@ void BossAngriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle
     }
 }
 
-void BossAngriff::Draw(Vector2 bossPos) const {
+void Golem_Angriff::Draw(Vector2 bossPos) const {
     if (ringAttack.IsActive()) ringAttack.Draw(bossPos);
     if (swingAttack.IsActive()) swingAttack.Draw(bossPos);
     if (meteorAttack.IsActive()) meteorAttack.Draw(bossPos);
@@ -248,7 +248,7 @@ void BossAngriff::Draw(Vector2 bossPos) const {
     }
 }
 
-float BossAngriff::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect) {
+float Golem_Angriff::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect) {
     if (dmgTimer > 0.0f) return 0.0f;
     float mult = DamageMultiplier();
 
@@ -274,7 +274,7 @@ float BossAngriff::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect) 
     return 0.0f;
 }
 
-void BossAngriff::TryTriggerMeteorStorm() {
+void Golem_Angriff::TryTriggerMeteorStorm() {
     float pct = bossHP / bossMaxHP;
     if (!meteorStormTriggered && pct <= meteorTriggerPct) {
         meteorStormTriggered = true;
@@ -286,7 +286,7 @@ void BossAngriff::TryTriggerMeteorStorm() {
     }
 }
 
-void BossAngriff::UpdateMeteorStorm(float dt) {
+void Golem_Angriff::UpdateMeteorStorm(float dt) {
     meteorAttack.Update(dt, {0, 0}, lastPlayerPos);
     if (!meteorAttack.IsActive()) {
         meteorStormActive = false;

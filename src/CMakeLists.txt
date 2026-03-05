@@ -32,8 +32,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Menu/highscore.h
         enviroment/background.cpp
         enviroment/background.h
-        boss/golem/boss_Angriff.cpp
-        boss/golem/boss_Angriff.h
+        boss/golem/Golem_Angriff.cpp
+        boss/golem/Golem_Angriff.h
         boss/golem/AttackMeteor/AttackMeteor.cpp
         boss/golem/AttackSwing/AttackSwing.cpp
         boss/golem/AttackRing/AttackRing.cpp
@@ -50,6 +50,12 @@ add_executable(${PROJECT_NAME} main.cpp
         SFX/Music.hpp
         player/PlayerUpgrades/Upgrades.cpp
         player/PlayerUpgrades/Upgrades.h
+        boss/Nightmare/nightmare_Angriff.cpp
+        boss/Nightmare/nightmare_Angriff.h
+        boss/Nightmare/AttackBigDash/AttackBigDash.cpp
+        boss/Nightmare/AttackBigDash/AttackBigDash.h
+        boss/Nightmare/NightmareController/NightmareController.cpp
+        boss/Nightmare/NightmareController/NightmareController.h
         # boss/Boss.h (Header, zur Übersicht)
 
 )

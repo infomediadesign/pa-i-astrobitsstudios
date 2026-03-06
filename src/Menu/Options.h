@@ -13,6 +13,7 @@
 class Options : public Menu{
 public:
     Options();
+    ~Options() override;
     void Update() override;
     void Draw() override;
 
@@ -36,6 +37,7 @@ private:
     // Difficulty options
     std::vector<std::string> difficulties = {"Easy", "Normal", "Hard"};
     int difficultyIndex = 1; // default: Normal
+    Texture2D optionsBackground;
 };
 
 

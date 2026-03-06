@@ -6,10 +6,20 @@
 #include "config.h"
 
 // ---------------- Constructor ----------------
-pauseMenu::pauseMenu() {
+pauseMenu::pauseMenu() : background{} {
     options = {"Weiter", "Options", "Hauptmenu"};
     choice = -1;
     selectedItem = 0;
+
+    // Load pause menu background (fallback to Main Menu if not available)
+    const char* pausePath = "assets/graphics/backgrounds/pause_menupixel_1_unbeschriftet.png";
+    const char* fallback = "assets/graphics/backgrounds/Main Menu (1).png";
+    background = LoadTexture(pausePath);
+    if (background.id == 0) background = LoadTexture(fallback);
+}
+
+pauseMenu::~pauseMenu() {
+    if (background.id > 0) UnloadTexture(background);
 }
 
 void pauseMenu::Update() {
@@ -31,18 +41,23 @@ void pauseMenu::Open() {
 }
 
 void pauseMenu::Draw() {
-    // 1. Hintergrund abdunkeln
-    DrawRectangle(0, 0, Game::ScreenWidth, Game::ScreenHeight, Fade(BLACK, 0.8f));
+    // Draw background full-screen
+    if (background.id > 0) {
+        DrawTexturePro(background,
+                       Rectangle{0, 0, (float)background.width, (float)background.height},
+                       Rectangle{0, 0, (float)Game::ScreenWidth, (float)Game::ScreenHeight},
+                       Vector2{0,0}, 0.0f, WHITE);
+    }
 
-    // 2. Titel anzeigen
-    DrawText("Pause", Game::ScreenWidth / 2 - MeasureText("Pause", 40) / 2, 150, 40, RED);
 
+    int spacing = 62; // Abstand zwischen Einträgen in Pixel (erhöht von 20 auf 40)
+    int baseY = 160;  // Start-y für erste Option
     // 3. Optionen dynamisch zeichnen
     for (int i = 0; i < options.size(); i++) {
         // Text zentrieren
         int textWidth = MeasureText(options[i].c_str(), 30);
         int xPos = Game::ScreenWidth / 2 - textWidth / 2;
-        int yPos = 300 + (i * 60);
+        int yPos = baseY + (i * spacing);
 
         // Farbe wählen: Rot wenn ausgewählt, Weiß wenn nicht
         Color color = (i == selectedItem) ? RED : WHITE;

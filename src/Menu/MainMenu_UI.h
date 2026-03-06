@@ -7,19 +7,18 @@
 #pragma once
 
 #include "Menu.hpp"
+#include "raylib.h"
 
 class MainMenu : public Menu {
 public:
     MainMenu();
+    ~MainMenu() override;
+
     void Update() override;
     void Draw() override;
 
-    // Hilfsfunktion, um zu wissen, was geklickt wurde
-    int GetChoice() { return choice; }
-    void ResetChoice() { choice = -1; }
-
 private:
-    int choice = -1; // -1 = nichts, 0 = Start, 1 = Exit
+    Texture2D menuBackground; // Hintergrundbild für das Hauptmenü
 };
 
 #endif

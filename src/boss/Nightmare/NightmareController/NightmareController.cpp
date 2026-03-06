@@ -22,8 +22,8 @@ void NightmareController::update(float dt) {
 void NightmareController::Reset() {
     Boss::Reset();
     position = {Game::ScreenWidth / 2.0f, Game::ScreenHeight / 2.0f};
-    health=200;
-    maxHealth=200;
+    health=100;
+    maxHealth=100;
     hitTimer = 0.0f;
     wasHit = false;
     alive = true;

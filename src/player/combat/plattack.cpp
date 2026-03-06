@@ -9,7 +9,7 @@
 #include "config.h"
 
 void plattack::Init() {
-    //texture = LoadTexture("assets/graphics/Player/shot.png");
+    texture = LoadTexture("assets/graphics/Player/Hit.png");
     srcH = {0, 0, (float) texture.width, (float) texture.height};
     Reset();
 }
@@ -80,10 +80,10 @@ void plattack::Draw() {
     if (!active) return;
 
     // Origin ist die Mitte der linken Seite der Textur (das "Heft" des Schwerts)
-   // Vector2 origin = {0, (float) texture.height / 2.0f};
+    Vector2 origin = {0, (float) texture.height / 2.0f};
 
     // DrawTexturePro nutzt dstH.x/y als Drehpunkt
-   // DrawTexturePro(texture, srcH, dstH, origin, (float) rotation, WHITE);
+    DrawTexturePro(texture, srcH, dstH, origin, (float) rotation, WHITE);
 }
 
 void plattack::Reset() {

@@ -151,6 +151,8 @@ int main() {
         {0, (float) Game::ScreenHeight - 50, (float) Game::ScreenWidth, 1} // Unten
     };
     Texture2D background = LoadTexture("assets/graphics/backgrounds/background_mapfinal1.png");
+    // Alternate background for Boss 2
+    Texture2D backgroundBoss2 = LoadTexture("assets/graphics/backgrounds/Background1_Boss_Room.png");
     // Background zoom factor (1.0 = no zoom). Increase to crop & zoom the image so fences align with level bounds.
     // Made mutable so it can be adjusted at runtime for quick tuning (keys: '[' decrease, ']' increase)
     float bgScaleGlobal = 1.25f;
@@ -618,14 +620,29 @@ int main() {
 
                     // Draw the background scaled/zoomed for Boss2
                     {
-                        float srcW = (float)background.width / bgScaleGlobal;
-                        float srcH = (float)background.height / bgScaleGlobal;
-                        float srcX = ((float)background.width - srcW) * 0.5f;
-                        float srcY = ((float)background.height - srcH) * 0.5f;
-                        DrawTexturePro(background,
-                                       Rectangle{srcX, srcY, srcW, srcH},
-                                       Rectangle{0.0f, 0.0f, (float)canvas.texture.width, (float)canvas.texture.height},
-                                       Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                        // Draw backgroundBoss2 in COVER mode: preserve aspect ratio, fill canvas and crop centered
+                        float texW = (float)backgroundBoss2.width;
+                        float texH = (float)backgroundBoss2.height;
+                        float cvsW = (float)canvas.texture.width;
+                        float cvsH = (float)canvas.texture.height;
+                        float texRatio = texW / texH;
+                        float cvsRatio = cvsW / cvsH;
+                        Rectangle srcRec;
+                        if (texRatio > cvsRatio) {
+                            // texture is wider -> crop left/right
+                            float srcH = texH;
+                            float srcW = srcH * cvsRatio;
+                            float srcX = (texW - srcW) * 0.5f;
+                            srcRec = Rectangle{srcX, 0.0f, srcW, srcH};
+                        } else {
+                            // texture is taller -> crop top/bottom
+                            float srcW = texW;
+                            float srcH = srcW / cvsRatio;
+                            float srcY = (texH - srcH) * 0.5f;
+                            srcRec = Rectangle{0.0f, srcY, srcW, srcH};
+                        }
+                        Rectangle destRec = Rectangle{0.0f, 0.0f, cvsW, cvsH};
+                        DrawTexturePro(backgroundBoss2, srcRec, destRec, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
                     }
 
                     DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
@@ -676,7 +693,30 @@ int main() {
                     // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                     // DrawTexture(background, 0, 0, GRAY);
                     // Draw the background scaled/zoomed for Pause/Death view (keeps GRAY tint)
-                    {
+                    // choose background based on which boss was active previously
+                    if (previousState == STATE_BOSS_2) {
+                        // show boss2 background in COVER mode for pause/death preview (tinted GRAY)
+                        float texW = (float)backgroundBoss2.width;
+                        float texH = (float)backgroundBoss2.height;
+                        float cvsW = (float)canvas.texture.width;
+                        float cvsH = (float)canvas.texture.height;
+                        float texRatio = texW / texH;
+                        float cvsRatio = cvsW / cvsH;
+                        Rectangle srcRec;
+                        if (texRatio > cvsRatio) {
+                            float srcH = texH;
+                            float srcW = srcH * cvsRatio;
+                            float srcX = (texW - srcW) * 0.5f;
+                            srcRec = Rectangle{srcX, 0.0f, srcW, srcH};
+                        } else {
+                            float srcW = texW;
+                            float srcH = srcW / cvsRatio;
+                            float srcY = (texH - srcH) * 0.5f;
+                            srcRec = Rectangle{0.0f, srcY, srcW, srcH};
+                        }
+                        Rectangle destRec = Rectangle{0.0f, 0.0f, cvsW, cvsH};
+                        DrawTexturePro(backgroundBoss2, srcRec, destRec, Vector2{0.0f, 0.0f}, 0.0f, GRAY);
+                    } else {
                         float srcW = (float)background.width / bgScaleGlobal;
                         float srcH = (float)background.height / bgScaleGlobal;
                         float srcX = ((float)background.width - srcW) * 0.5f;
@@ -772,6 +812,10 @@ int main() {
         hp.Unload();
         // Unload nightmare boss resources
         nightmare.Unload();
+
+        // Unload background textures
+        UnloadTexture(backgroundBoss2);
+        UnloadTexture(background);
 
         UnloadRenderTexture(canvas);
 

@@ -255,8 +255,8 @@ bool controller::Collides(const Rectangle& box, const std::vector<Wall>& walls)
 }
 void controller::Reset() {
     pos = {10, 100};
-    speed = 260; //minimum 200 aber das wäre sehr langsam. langsamer würde ich auf keinen fall empfehlen
-    dashDistance = 125;
+    speed = 300; //minimum 200 aber das wäre sehr langsam. langsamer würde ich auf keinen fall empfehlen
+    dashDistance = 150;
     frames=0;
     frameCount=0;
     frameSpeed = 8;

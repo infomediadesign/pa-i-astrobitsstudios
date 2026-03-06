@@ -58,6 +58,12 @@ add_executable(${PROJECT_NAME} main.cpp
         boss/Nightmare/NightmareController/NightmareController.h
         SFX/audio_globals.cpp
         SFX/audio_globals.h
+        boss/Nightmare/AttackSwing/AttackSwing.cpp
+        boss/Nightmare/AttackSwing/AttackSwing.h
+        boss/Nightmare/AttackTripleDash/AttackTripleDash.cpp
+        boss/Nightmare/AttackTripleDash/AttackTripleDash.h
+        "boss/Nightmare/AttackFireDash/AttackFireDash.cpp"
+        "boss/Nightmare/AttackFireDash/AttackFireDash.h"
         # boss/Boss.h (Header, zur Übersicht)
 
 )

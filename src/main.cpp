@@ -244,6 +244,8 @@ int main() {
                 // Pause aktivieren
                 if (IsKeyPressed(KEY_ESCAPE)) {
                     runTimer.Stop();
+                    // Remember where we came from so the pause screen can render the correct boss in background
+                    previousState = STATE_BOSS_1;
                     currentState = STATE_PAUSE;
                 }
 
@@ -633,7 +635,19 @@ int main() {
                     // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                     DrawTexture(background, 0, 0, GRAY);
                     player.DrawAnimation();
-                    golem.Draw();
+                    // Draw the boss that was active before pausing
+                    switch (previousState) {
+                        case STATE_BOSS_1:
+                            golem.Draw();
+                            break;
+                        case STATE_BOSS_2:
+                            nightmare.Draw();
+                            break;
+                        default:
+                            // Fallback: draw golem if we don't know which boss was active
+                            golem.Draw();
+                            break;
+                    }
                     hp.Draw(player.GetCollision());
                     DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(), 395, 40, 24, WHITE);
 

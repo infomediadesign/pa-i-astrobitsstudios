@@ -471,6 +471,7 @@ int main() {
                 dashCD.Update(dt);
 
                 player.Animate(dt);
+                runTimer.Start();
                 runTimer.Update(dt);
 
                 Rectangle br = nightmare.GetRect();

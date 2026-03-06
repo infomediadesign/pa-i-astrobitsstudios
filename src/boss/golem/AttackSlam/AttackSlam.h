@@ -32,8 +32,8 @@ public:
     float slamDuration = 0.8f;
     float cooldownDuration = 1.5f;
 
-    float length = 190.0f;
-    float halfWidth = 115.0f;
+    float length = 250.0f;
+    float halfWidth = 130.0f;
 
     float spikeMaxHeight = 22.0f;
     int spikesPerArea = 16;

@@ -44,8 +44,8 @@ void Golem_Angriff::SetBossHP(float hp, float maxHp) {
 }
 
 bool Golem_Angriff::IsEnraged() const { return (bossHP / bossMaxHP) <= enragedPct; }
-float Golem_Angriff::DamageMultiplier() const { return IsEnraged() ? 1.20f : 1.0f; }
-float Golem_Angriff::SpeedMultiplier() const { return IsEnraged() ? 1.12f : 1.0f; }
+float Golem_Angriff::DamageMultiplier() const { return IsEnraged() ? 1.30f : 1.0f; }
+float Golem_Angriff::SpeedMultiplier() const { return IsEnraged() ? 1.50f : 1.0f; }
 
 float Golem_Angriff::ModifyIncomingBossDamage(float rawDamage) const {
     return (mode == MODE_METEOR_STORM) ? 1.0f : rawDamage;

@@ -50,7 +50,7 @@ void pauseMenu::Draw() {
     }
 
 
-    int spacing = 62; // Abstand zwischen Einträgen in Pixel (erhöht von 20 auf 40)
+    int spacing = 65; // Abstand zwischen Einträgen in Pixel (erhöht von 20 auf 40)
     int baseY = 160;  // Start-y für erste Option
     // 3. Optionen dynamisch zeichnen
     for (int i = 0; i < options.size(); i++) {

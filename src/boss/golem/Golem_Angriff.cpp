@@ -122,6 +122,13 @@ void Golem_Angriff::StartSwing(Vector2 bossPos, Vector2 playerPos) {
 
 void Golem_Angriff::Update(float dt, Vector2 bossPos, Vector2 playerPos, Rectangle playerRect, Player &player,
                          GolemController &boss) {
+    bool currentlyEnraged = IsEnraged();
+    if (currentlyEnraged && !wasEnraged) {
+        // Der Boss ist GERADE EBEN wütend geworden
+        StopAllAttacks(*this);
+        mode = MODE_REST_AFTER_SWING; // Schicke ihn kurz in eine Pause oder direkt in die nächste Phase
+        wasEnraged = true; // Merken, dass wir schon im Enrage sind
+    }
     this->lastPlayerPos = playerPos;
     dmgTimer -= dt;
     if (dmgTimer < 0) dmgTimer = 0;

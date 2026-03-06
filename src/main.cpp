@@ -477,7 +477,7 @@ int main() {
                 Vector2 bossPos = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
                 bossAtk2.SetBossHP(nightmare.getHealth(), nightmare.getMaxHealth());
-                //bossAtk2.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, nightmare);
+                bossAtk2.Update(dt, bossPos, player.GetPos(), player.GetCollision(), hp, nightmare);
 
                 float dmg = bossAtk2.CheckDamage(dt, bossPos, player.GetCollision());
                 if (dmg > 0) hp.TakeDamage(static_cast<int>(dmg));

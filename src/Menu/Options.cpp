@@ -9,8 +9,23 @@
 #include <fstream>
 #include <sstream>
 
-Options::Options() {
-    options={"Steuerung","Volume"};
+Options::Options() : optionsBackground{} {
+    // initialize visible option headers
+
+
+    // Try to load a specific options background; fallback to main menu background if not found
+    const char* optPath = "assets/graphics/backgrounds/pause_menupixel_1schng";
+    const char* fallback = "assets/graphics/backgrounds/Main Menu (1).png";
+    // Try the preferred file first
+    optionsBackground = LoadTexture(optPath);
+    if (optionsBackground.id == 0) {
+        // fallback
+        optionsBackground = LoadTexture(fallback);
+    }
+}
+
+Options::~Options() {
+    if (optionsBackground.id > 0) UnloadTexture(optionsBackground);
 }
 
 void Options::Update() {
@@ -55,7 +70,14 @@ void Options::Update() {
 }
 
 void Options::Draw() {
-    DrawText("Optionen", static_cast<int>(Game::ScreenWidth/2.5), 0, 40, BLACK);
+    // Draw the options background if loaded
+    if (optionsBackground.id > 0) {
+        DrawTexturePro(optionsBackground,
+                       Rectangle{0, 0, (float)optionsBackground.width, (float)optionsBackground.height},
+                       Rectangle{0, 0, (float)Game::ScreenWidth, (float)Game::ScreenHeight},
+                       Vector2{0,0}, 0.0f, WHITE);
+    }
+
 
     for (int i = 0; i < static_cast<int>(options.size()); i++) {
         Color c = (i == selectedItem) ? RED : BLACK;
@@ -64,9 +86,7 @@ void Options::Draw() {
     int x = 100;
     int y = (int)(Game::ScreenHeight / 3.0f);
 
-    DrawText("Bewegung  - W/A/S/D", x, y + 45, 25, RED);
-    DrawText("Angriff   - SPACE", x, y + 95, 25, RED);
-    DrawText("Dash    - SHIFT", x, y + 145, 25, RED);
+
     // Difficulty wird jetzt direkt unterhalb der Volume-Leiste gezeichnet (weiter unten im Code)
 
     // Volume UI
@@ -77,7 +97,7 @@ void Options::Draw() {
     int sliderW = 320; // etwas schmaler, damit es rechts gut passt
     int sliderH = 24;
 
-    DrawText("Master Volume", sliderX, sliderY - 30, 20, BLACK);
+
 
 
 
@@ -138,8 +158,8 @@ bool Options::LoadSettings(const std::string &path) {
                 if (d >= 0 && d < static_cast<int>(difficulties.size())) difficultyIndex = d;
             } catch (...) {}
         } else if (key == "masterVolume") {
-            try { masterVolume = std::stof(val); } catch(...){}
-        } else if (key == "muted") {
+            try { masterVolume = std::stof(val); } catch(...){}}
+        else if (key == "muted") {
             muted = (val == "1" || val == "true");
         }
     }

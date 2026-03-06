@@ -550,7 +550,7 @@ int main() {
                         int fontSize = 20;
                         int textWidth = MeasureText(diffText.c_str(), fontSize);
                         int x = Game::ScreenWidth - 10 - textWidth; // 10px margin from right
-                        int y = Game::ScreenHeight - fontSize - 10; // bottom-right, 10px margin from bottom
+                        int y = Game::ScreenHeight - fontSize - 20; // moved 5px up
                         DrawText(diffText.c_str(), x, y, fontSize, RED);
                     }
                     //Hitboxen Zeichnen
@@ -601,7 +601,7 @@ int main() {
                         int fontSize = 20;
                         int textWidth = MeasureText(diffText.c_str(), fontSize);
                         int x = Game::ScreenWidth - 10 - textWidth; // 10px margin from right
-                        int y = Game::ScreenHeight - fontSize - 10; // bottom-right, 10px margin from bottom
+                        int y = Game::ScreenHeight - fontSize - 20; // moved 5px up
                         DrawText(diffText.c_str(), x, y, fontSize, RED);
                     }
 

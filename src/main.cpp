@@ -214,7 +214,6 @@ int main() {
                 } else if (pauseMenu.GetChoice() == 1) {
                     pauseMenu.ResetChoice();
                     pauseMenu.Open();
-                    previousState = STATE_PAUSE;
                     currentState = STATE_OPTIONS;
                 } else if (pauseMenu.GetChoice() == 2) {
                     pauseMenu.ResetChoice();
@@ -279,7 +278,9 @@ int main() {
             }
             case STATE_OPTIONS:
                 // Options menu logic
-                options.Update();
+                if (previousState==STATE_MENU) {
+                    options.Update();
+                }
 
                 if (IsAudioDeviceReady()) {
                     if (bgm.IsLoaded()) {
@@ -310,7 +311,13 @@ int main() {
                 }
 
                 if (IsKeyPressed(KEY_ESCAPE)) {
-                    currentState = previousState;
+                    // Wenn wir aus einem laufenden Spiel (Boss 1 oder 2) kamen,
+                    // gehen wir zurück ins Pausenmenü statt direkt in den Kampf.
+                    if (previousState == STATE_BOSS_1 || previousState == STATE_BOSS_2) {
+                        currentState = STATE_PAUSE;
+                    } else {
+                        currentState = previousState; // Zurück zum Hauptmenü
+                    }
                 }
                 break;
 

@@ -30,6 +30,7 @@ struct Golem_Angriff {
     Mode mode = MODE_RING1_TELE;
     Mode resumeMode = MODE_RING1_TELE;
     float modeTimer = 0.0f;
+    bool wasEnraged = false;
 
     float bossHP = 1.0f;
     float bossMaxHP = 1.0f;

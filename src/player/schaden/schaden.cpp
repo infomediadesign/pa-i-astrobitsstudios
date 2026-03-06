@@ -57,7 +57,7 @@ void Player::TakeDamage(int dmg) {
     // if still invincible, ignore hit
     if (invincibleTimer > 0.0f) return;
     takeDamage = true;
-    hp -= dmg;
+    hp -= static_cast<float>(dmg);
     hp = std::clamp(hp, 0.0f, maxHp);
 
     // start invincibility
@@ -97,20 +97,31 @@ void Player::Draw(Rectangle box) {
 
 }
 
-const void Player::DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp) {
+void Player::DrawHealthBar(int x, int y, int width, int height, float hpVal, float maxHpVal) {
     // background
     DrawRectangle(x, y, width, height, DARKGRAY);
 
     // hp ratio
-    float ratio = (maxHp > 0) ? (float) hp / (float) maxHp : 0.0f;
+    float ratio = (maxHpVal > 0.0f) ? (hpVal / maxHpVal) : 0.0f;
     ratio = std::clamp(ratio, 0.0f, 1.0f);
 
     // current hp bar
-    int currentWidth = (int) (width * ratio);
+    int currentWidth = static_cast<int>(width * ratio);
     DrawRectangle(x, y, currentWidth, height, RED);
 
     // border
     DrawRectangleLines(x, y, width, height, BLACK);
+
+    // Draw numeric hp to the right of the bar (e.g., "75/100")
+    // Use a small padding and center the text vertically relative to the bar
+    const int padding = 8;
+    const int fontSize = 16; // choose readable size
+    int textX = x + width + padding;
+    int textY = y + (height/2) - (fontSize/2);
+    // Ensure the textY is not negative
+    if (textY < 0) textY = y;
+
+    DrawText(TextFormat("%d/%d", static_cast<int>(hpVal), static_cast<int>(maxHpVal)), textX, textY, fontSize, WHITE);
 }
 
 void Player::setInvincibleDuration(float duration) {

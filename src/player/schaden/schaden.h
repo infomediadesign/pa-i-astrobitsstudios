@@ -5,7 +5,7 @@
 
 class Player {
 public:
-    int Gethealth() const { return hp; }
+    float Gethealth() const { return hp; }
 
     // Health
     float hp;
@@ -32,7 +32,7 @@ public:
 
     void setInvincibleDuration(float duration);
 
-    const void DrawHealthBar(int x, int y, int width, int height, int hp, int maxHp);
+    void DrawHealthBar(int x, int y, int width, int height, float hp, float maxHp);
 
     // Resource cleanup
     void Unload();

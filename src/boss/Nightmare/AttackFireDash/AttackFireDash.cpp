@@ -97,19 +97,25 @@ void NM_AttackFireDash::Update(float dt, Vector2 bossPosCenter, Vector2 playerPo
 }
 
 void NM_AttackFireDash::Draw(Vector2 bossPosCenter) const {
-    if (!active) return;
-
-    // 画 trail
+    // 1. 先画所有残留火焰轨迹
     for (const auto &t : trails) {
         float a = std::clamp(t.ttl / trailLife, 0.0f, 1.0f);
+
+        // 火焰主体
         DrawRectangleRec(t.rect, Fade(WHITE, 0.35f * a));
+
+        // 外框让玩家更容易看见
+        DrawRectangleLinesEx(t.rect, 2.0f, Fade(RED, 0.6f * a));
     }
 
-    // 画目标点（调试）
-    DrawCircleV(target, 6.0f, RED);
+    // 2. 如果攻击已经结束，就不要再画 boss dash 本体提示
+    //if (!active) return;
 
-    // dash 本体范围（用于碰撞）
-    DrawCircleV(bossPosCenter, 10.0f, WHITE);
+    // 3. 当前 dash 本体可视化
+    DrawCircleV(bossPosCenter, 10.0f,WHITE);
+
+    // 4. 调试时可显示当前目标点
+    DrawCircleV(target, 6.0f, RED);
 }
 
 float NM_AttackFireDash::CheckDamage(float dt, Vector2 bossPosCenter, Rectangle playerRect) {

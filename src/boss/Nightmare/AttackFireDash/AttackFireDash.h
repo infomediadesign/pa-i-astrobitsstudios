@@ -35,7 +35,7 @@ public:
     float dashDamage = 10.0f;         // dash 本体碰撞伤害
     float trailDamage = 6.0f;         // 踩火伤害
     float trailWidth = 46.0f;
-    float trailLife = 2.2f;           // 火持续时间（秒）
+    float trailLife = 5.2f;           // 火持续时间（秒）
 
 private:
     struct TrailSeg {

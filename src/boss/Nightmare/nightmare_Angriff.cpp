@@ -192,8 +192,7 @@ void nightmare_Angriff::Draw(Vector2 bossPos) const {
     if (const_cast<NM_AttackTripleDash&>(tripleDashAttack).IsActive())
         const_cast<NM_AttackTripleDash&>(tripleDashAttack).Draw(bossPos);
 
-    if (const_cast<NM_AttackFireDash&>(fireDashAttack).IsActive())
-        const_cast<NM_AttackFireDash&>(fireDashAttack).Draw(bossPos);
+    const_cast<NM_AttackFireDash&>(fireDashAttack).Draw(bossPos);
 }
 
 float nightmare_Angriff::CheckDamage(float dt, Vector2 bossPos, Rectangle playerRect) {

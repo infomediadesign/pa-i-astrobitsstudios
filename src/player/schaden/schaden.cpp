@@ -2,6 +2,8 @@
 #include "raylib.h"
 #include <algorithm> // for std::clamp
 #include "config.h"
+#include <cstdio>
+#include "../../SFX/audio_globals.h"
 
 
 void Player::Init() {
@@ -13,6 +15,25 @@ void Player::Init() {
     takeDamage = false;
     takeDamageDuration = 0.2f;
     takeDamageTimer = 0.0f;
+
+    // Load hit sound (adjust path to actual asset)
+    hitSoundLoaded = false;
+    if (IsFileDropped()) {
+        // noop - keep signature
+    }
+    // Try to load a hit SFX if present
+    const char* hitPath = "assets/audio/sfx/player-hit.wav";
+    if (FileExists(hitPath) && IsAudioDeviceReady()) {
+        hitSound = LoadSound(hitPath);
+        hitSoundLoaded = true;
+    }
+}
+
+void Player::Unload() {
+    if (hitSoundLoaded) {
+        UnloadSound(hitSound);
+        hitSoundLoaded = false;
+    }
 }
 
 void Player::Update(float dt) {
@@ -42,6 +63,19 @@ void Player::TakeDamage(int dmg) {
     // start invincibility
     invincibleTimer = invincibleDuration;
     takeDamageTimer = takeDamageDuration;
+
+    // Play hit sound if loaded - force it to be audible by temporarily overriding master volume
+    if (hitSoundLoaded && IsAudioDeviceReady()) {
+        // Save previous global audio state and set a short restore timer so the sound plays audibly
+        g_forcePrevMasterVolume = g_gameMasterVolume;
+        g_forcePrevMuted = g_gameMuted;
+        // Force master volume to full and unmute (main loop will respect this and restore later)
+        SetMasterVolume(1.0f);
+        g_gameMuted = false;
+        PlaySound(hitSound);
+        // request main loop to restore previous state after short duration
+        g_forceAudioTimer = 0.25f; // seconds
+    }
 }
 
 bool Player::IsDead() const {
@@ -82,4 +116,3 @@ const void Player::DrawHealthBar(int x, int y, int width, int height, int hp, in
 void Player::setInvincibleDuration(float duration) {
     invincibleDuration = duration;
 }
-

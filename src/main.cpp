@@ -21,6 +21,7 @@
 #include "Menu/UpgradeScreen.h"
 #include "SFX/Background_Music.h"
 #include "player/PlayerUpgrades/Upgrades.h"
+#include "SFX/audio_globals.h"
 
 #include "difficulty/difficulty.h"
 
@@ -158,17 +159,35 @@ int main() {
 
         // Apply global volume from Options and update music stream
         float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();
-        if (IsAudioDeviceReady()) {
-            SetMasterVolume(currentVolume);
-            if (bgm.IsLoaded()) SetMusicVolume(bgm.GetStream(), currentVolume);
+        // publish globals
+        g_gameMuted = options.IsMuted();
+        g_gameMasterVolume = options.GetMasterVolume();
 
-            if (bgm.IsLoaded()) {
-                if (!bgmStarted) {
-                    bgm.Play();
-                    bgmStarted = true;
-                    TraceLog(LOG_INFO, "Background music started in loop after audio became ready");
+        // If a subsystem requested a short forced audio override, honor it here
+        if (g_forceAudioTimer > 0.0f) {
+            // ensure sound is audible while timer active
+            SetMasterVolume(1.0f);
+            g_gameMuted = false;
+            g_forceAudioTimer -= dt;
+            if (g_forceAudioTimer <= 0.0f) {
+                // restore previous
+                SetMasterVolume(g_forcePrevMasterVolume);
+                g_gameMuted = g_forcePrevMuted;
+                g_forceAudioTimer = 0.0f;
+            }
+        } else {
+            if (IsAudioDeviceReady()) {
+                SetMasterVolume(currentVolume);
+                if (bgm.IsLoaded()) SetMusicVolume(bgm.GetStream(), currentVolume);
+
+                if (bgm.IsLoaded()) {
+                    if (!bgmStarted) {
+                        bgm.Play();
+                        bgmStarted = true;
+                        TraceLog(LOG_INFO, "Background music started in loop after audio became ready");
+                    }
+                    bgm.Update();
                 }
-                bgm.Update();
             }
         }
 
@@ -653,6 +672,8 @@ int main() {
         melee.Unload();
         golem.Unload();
         player.Unload();
+        // Unload player HP resources (sounds etc.)
+        hp.Unload();
         // Unload nightmare boss resources
         nightmare.Unload();
 

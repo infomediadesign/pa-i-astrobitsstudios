@@ -105,7 +105,7 @@ void NM_AttackFireDash::Draw(Vector2 bossPosCenter) const {
         DrawRectangleRec(t.rect, Fade(WHITE, 0.35f * a));
 
         // 外框让玩家更容易看见
-        DrawRectangleLinesEx(t.rect, 2.0f, Fade(RED, 0.6f * a));
+        DrawRectangleLinesEx(t.rect, 2.0f, Fade(WHITE, 0.6f * a));
     }
 
     // 2. 如果攻击已经结束，就不要再画 boss dash 本体提示
@@ -115,7 +115,7 @@ void NM_AttackFireDash::Draw(Vector2 bossPosCenter) const {
     DrawCircleV(bossPosCenter, 10.0f,WHITE);
 
     // 4. 调试时可显示当前目标点
-    DrawCircleV(target, 6.0f, RED);
+    DrawCircleV(target, 6.0f, WHITE);
 }
 
 float NM_AttackFireDash::CheckDamage(float dt, Vector2 bossPosCenter, Rectangle playerRect) {

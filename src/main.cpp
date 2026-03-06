@@ -399,12 +399,12 @@ int main() {
                     //bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
                     applyDifficulty(options, hp, golem);
                     // Apply difficulty when returning from upgrade screen (new run)
-                    applyDifficulty(options, hp, golem);
                     // Position player top-left for Boss2
                     player.Reset();
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
+                    runTimer.Start();
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
@@ -418,6 +418,7 @@ int main() {
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
+                    runTimer.Start();
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 2) {
@@ -431,6 +432,7 @@ int main() {
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
+                    runTimer.Start();
                     currentState = STATE_BOSS_2;
                 }
                 //currentState = STATE_BOSS_2;

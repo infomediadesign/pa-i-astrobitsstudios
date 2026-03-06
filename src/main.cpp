@@ -205,11 +205,12 @@ int main() {
             case STATE_PAUSE:
                 pauseMenu.Update();
 
+
                 // Zurück zum Spiel mit ESC oder Button 0
                 if (IsKeyPressed(KEY_ESCAPE) || pauseMenu.GetChoice() == 0) {
                     pauseMenu.ResetChoice();
                     runTimer.Start();
-                    currentState = STATE_BOSS_1;
+                    currentState = previousState;
                 } else if (pauseMenu.GetChoice() == 1) {
                     pauseMenu.ResetChoice();
                     pauseMenu.Open();

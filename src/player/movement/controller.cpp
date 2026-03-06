@@ -96,10 +96,10 @@ void controller::Update(float dt, const std::vector<Wall>& walls)
 
 void controller::Init()
 {
-    texture =LoadTexture("assets/graphics/Player/Ixirath_Sprites.png");
+    texture =LoadTexture("assets/graphics/Player/Ixirath1.png");
     // load idle texture if available
-    if (FileExists("assets/graphics/Player/p_idle.png")) {
-        idleTexture = LoadTexture("assets/graphics/Player/p_idle.png");
+    if (FileExists("assets/graphics/Player/p_idle1.png")) {
+        idleTexture = LoadTexture("assets/graphics/Player/p_idle1.png");
     } else {
         idleTexture = {};
     }

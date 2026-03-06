@@ -4,24 +4,15 @@
 
 #include "Options.h"
 #include "config.h"
-#include <algorithm>
 #include <raylib.h>
+#include "SFX/audio_globals.h"
 #include <fstream>
 #include <sstream>
 
 Options::Options() : optionsBackground{} {
-    // initialize visible option headers
-
-
     // Try to load a specific options background; fallback to main menu background if not found
-    const char* optPath = "assets/graphics/backgrounds/pause_menupixel_1schng";
-    const char* fallback = "assets/graphics/backgrounds/Main Menu (1).png";
-    // Try the preferred file first
+    const char* optPath = "assets/graphics/backgrounds/Options_neu_neu.png";
     optionsBackground = LoadTexture(optPath);
-    if (optionsBackground.id == 0) {
-        // fallback
-        optionsBackground = LoadTexture(fallback);
-    }
 }
 
 Options::~Options() {
@@ -29,48 +20,17 @@ Options::~Options() {
 }
 
 void Options::Update() {
-    // Simple navigation: if Volume is selected (index 1), A/D adjust volume
-    if (selectedItem == 1) {
-        // hold A/D to change volume
-        // Note: Options::Update doesn't have dt; use IsKeyDown with a fixed small step
-        if (IsKeyDown(KEY_A)) {
-            masterVolume = std::max(0.0f, masterVolume - 0.01f);
-        }
-        if (IsKeyDown(KEY_D)) {
-            masterVolume = std::min(1.0f, masterVolume + 0.01f);
-        }
-        if (IsKeyPressed(KEY_M)) {
-            ToggleMute();
-        }
-    }
-
-    // Difficulty selection via W/S (works whenever Options is active)
-    static int prevDifficultyIndex = -1;
+    // Difficulty selection via W/S remains handled here
     if (IsKeyPressed(KEY_W)) {
         difficultyIndex = (difficultyIndex - 1 + static_cast<int>(difficulties.size())) % static_cast<int>(difficulties.size());
     }
     if (IsKeyPressed(KEY_S)) {
         difficultyIndex = (difficultyIndex + 1) % static_cast<int>(difficulties.size());
     }
-
-    // If difficulty changed, persist settings
-    if (prevDifficultyIndex != difficultyIndex) {
-        prevDifficultyIndex = difficultyIndex;
-        SaveSettings("settings.txt");
-        TraceLog(LOG_INFO, "Options::Update - difficulty changed, saved settings: %d", difficultyIndex);
-    }
-
-    // Simple menu left/right selection (only when not on volume)
-    if (selectedItem != 1 && (IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_RIGHT))) {
-        selectedItem = (selectedItem + 1) % static_cast<int>(options.size());
-    }
-    if (selectedItem != 1 && IsKeyPressed(KEY_LEFT)) {
-        selectedItem = (selectedItem - 1 + static_cast<int>(options.size())) % static_cast<int>(options.size());
-    }
 }
 
 void Options::Draw() {
-    // Draw the options background if loaded
+    // Draw background
     if (optionsBackground.id > 0) {
         DrawTexturePro(optionsBackground,
                        Rectangle{0, 0, (float)optionsBackground.width, (float)optionsBackground.height},
@@ -78,68 +38,58 @@ void Options::Draw() {
                        Vector2{0,0}, 0.0f, WHITE);
     }
 
+    // Simple layout: center column
+    int centerX = Game::ScreenWidth / 2;
+    int startY = static_cast<int>(Game::ScreenHeight / 6.0f);
 
-    for (int i = 0; i < static_cast<int>(options.size()); i++) {
-        Color c = (i == selectedItem) ? RED : BLACK;
-        DrawText(options[i].c_str(), 100 + (i * (Game::ScreenWidth/2)), static_cast<int>(Game::ScreenHeight/6.5), 30, c);
-    }
-    int x = 100;
-    int y = (int)(Game::ScreenHeight / 3.0f);
+    // Volume header
+    DrawText("Volume", centerX - 60, startY, 40, BLACK);
 
-
-    // Difficulty wird jetzt direkt unterhalb der Volume-Leiste gezeichnet (weiter unten im Code)
-
-    // Volume UI
-    // Position slider unter dem "Volume" Header auf der rechten Seite
-    int volHeaderX = 100 + (1 * (Game::ScreenWidth / 2));
-    int sliderX = volHeaderX - 100; // noch weiter links
-    int sliderY = static_cast<int>(Game::ScreenHeight / 6.5) + 100; // noch weiter nach unten
-    int sliderW = 320; // etwas schmaler, damit es rechts gut passt
+    // Slider
+    int sliderW = 135; // noch einmal 5px verkleinert (war 140)
     int sliderH = 24;
-
-
-
-
-
-    // background bar
+    const int sliderXOffset = 210; // um weitere 5px nach links verschoben
+    int sliderX = centerX - sliderW / 2 + sliderXOffset;
+    int sliderY = startY + 70; // 5 px weiter nach unten
     DrawRectangle(sliderX, sliderY, sliderW, sliderH, GRAY);
-    // filled portion
     int filled = static_cast<int>(masterVolume * static_cast<float>(sliderW));
     DrawRectangle(sliderX, sliderY, filled, sliderH, GREEN);
-    // border
-    DrawRectangleLines(sliderX, sliderY, sliderW, sliderH, BLACK);
+    DrawRectangleLines(sliderX, sliderY, sliderW, sliderH, WHITE);
+    if (muted) DrawText("/", sliderX + sliderW + 7, sliderY + 4, 20, RED);
+   // DrawText(TextFormat("%.0f%%", masterVolume * 100.0f), sliderX + sliderW + 50, sliderY, 20, WHITE);
+    DrawText("A/D = vol, M = mute", sliderX, sliderY + sliderH + 5, 14, RED);
+    DrawText("???", sliderX + 35, sliderY + 241, 20, WHITE); // Placeholder for volume percentage (optional)
 
-    // volume percentage
-    DrawText(TextFormat("%.0f%%", masterVolume * 100.0f), sliderX + sliderW + 10, sliderY, 20, BLACK);
+    // Difficulty header + options
 
-    if (muted) {
-        DrawText("(Muted)", sliderX + sliderW + 80, sliderY, 20, RED);
-    }
-
-    // Controls hint directly under the volume bar
-    int controlsY = sliderY + sliderH + 10;
-    DrawText("A/D = vol, M = mute", sliderX, controlsY, 14, RED);
-
-    // Difficulty placed further down under the controls hint
-    int difficultyY = controlsY + 40;
-    DrawText("Difficulty", sliderX, difficultyY, 40, BLACK);
-
-    // Draw difficulty options selectable with W/S
-    int optionStartY = difficultyY + 50;
+    // Draw the three difficulty options centered directly under the volume slider
+    int optionStartY = sliderY + sliderH + 80; // halb so weit wie vorher (140px unter der Leiste)
+    const int optionFontSize = 20;
+    const int optionSpacing = 47; // Abstand zwischen den Options (erhöht von 48 auf 64)
     for (int i = 0; i < static_cast<int>(difficulties.size()); ++i) {
-        Color c = (i == difficultyIndex) ? RED : BLACK;
-        DrawText(difficulties[i].c_str(), sliderX, optionStartY + i * 36, 28, c);
-    }
+        Color c = (i == difficultyIndex) ? RED : WHITE;
+        int textW = MeasureText(difficulties[i].c_str(), optionFontSize);
+        int textX = sliderX + (sliderW / 2) - (textW / 2) - 10; // 10px nach links verschoben
+        DrawText(difficulties[i].c_str(), textX, optionStartY + i * optionSpacing, optionFontSize, c);
+}
 }
 
 void Options::SetMasterVolume(float v) {
     float old = masterVolume;
     masterVolume = (v < 0.0f ? 0.0f : (v > 1.0f ? 1.0f : v));
+    // Apply immediately to global audio (raylib master volume)
+    ::SetMasterVolume(masterVolume);
+    // publish global tracking variable
+    g_gameMasterVolume = masterVolume;
     TraceLog(LOG_INFO, "Options::SetMasterVolume old=%.2f new=%.2f", old, masterVolume);
 }
 
 void Options::ToggleMute() {
     muted = !muted;
+    // publish global muted flag
+    g_gameMuted = muted;
+    // Apply to global master volume: if muted set to 0, otherwise restore masterVolume
+    ::SetMasterVolume(muted ? 0.0f : masterVolume);
     TraceLog(LOG_INFO, "Options::ToggleMute muted=%d", muted);
 }
 
@@ -158,11 +108,15 @@ bool Options::LoadSettings(const std::string &path) {
                 if (d >= 0 && d < static_cast<int>(difficulties.size())) difficultyIndex = d;
             } catch (...) {}
         } else if (key == "masterVolume") {
-            try { masterVolume = std::stof(val); } catch(...){}}
-        else if (key == "muted") {
+            try { masterVolume = std::stof(val); } catch(...){}
+        } else if (key == "muted") {
             muted = (val == "1" || val == "true");
         }
     }
+    // Apply loaded settings to globals so audio starts correctly
+    g_gameMasterVolume = masterVolume;
+    g_gameMuted = muted;
+    ::SetMasterVolume(muted ? 0.0f : masterVolume);
     TraceLog(LOG_INFO, "Options::LoadSettings loaded difficulty=%d volume=%.2f muted=%d", difficultyIndex, masterVolume, muted);
     return true;
 }

@@ -150,7 +150,10 @@ int main() {
         {0, 40, (float) Game::ScreenWidth, 5}, // Oben
         {0, (float) Game::ScreenHeight - 50, (float) Game::ScreenWidth, 1} // Unten
     };
-    Texture2D background = LoadTexture("assets/graphics/backgrounds/Background1_Boss_Room.png");
+    Texture2D background = LoadTexture("assets/graphics/backgrounds/background_mapfinal1.png");
+    // Background zoom factor (1.0 = no zoom). Increase to crop & zoom the image so fences align with level bounds.
+    // Made mutable so it can be adjusted at runtime for quick tuning (keys: '[' decrease, ']' increase)
+    float bgScaleGlobal = 1.25f;
     // Your own initialization code here
     // ...
     // ...
@@ -167,6 +170,13 @@ int main() {
 
 
         // Apply global volume from Options and update music stream
+        // Runtime tweak for background zoom: '[' / ']' to change and see immediate effect
+        if (IsKeyPressed(KEY_RIGHT_BRACKET)) {
+            bgScaleGlobal = std::min(3.0f, bgScaleGlobal + 0.05f);
+        }
+        if (IsKeyPressed(KEY_LEFT_BRACKET)) {
+            bgScaleGlobal = std::max(1.0f, bgScaleGlobal - 0.05f);
+        }
         float currentVolume = options.IsMuted() ? 0.0f : options.GetMasterVolume();
         // publish globals
         g_gameMuted = options.IsMuted();
@@ -545,7 +555,19 @@ int main() {
                     // Rectangle hb = golem.GetDmgBox(); // unused; keep available here if needed for debug
                     Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
-                    DrawTexture(background, 0, 0, WHITE);
+                    // Draw the background scaled/zoomed: use a centered smaller source rect so the texture appears larger
+                    // Increase bgScale to zoom more (e.g. 1.25f..1.6f). This crops the texture centered.
+                    {
+                        float srcW = (float)background.width / bgScaleGlobal;
+                        float srcH = (float)background.height / bgScaleGlobal;
+                        float srcX = ((float)background.width - srcW) * 0.5f;
+                        float srcY = ((float)background.height - srcH) * 0.5f;
+                        DrawTexturePro(background,
+                                       Rectangle{srcX, srcY, srcW, srcH}, // centered cropped src
+                                       Rectangle{0.0f, 0.0f, (float)canvas.texture.width, (float)canvas.texture.height},  // dest full canvas
+                                       Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                    }
+
                     DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
 
                     bossAtk1.Draw(bossPosForDraw);
@@ -594,7 +616,18 @@ int main() {
                     Rectangle br = nightmare.GetRect();
                     Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
-                    DrawTexture(background, 0, 0, WHITE);
+                    // Draw the background scaled/zoomed for Boss2
+                    {
+                        float srcW = (float)background.width / bgScaleGlobal;
+                        float srcH = (float)background.height / bgScaleGlobal;
+                        float srcX = ((float)background.width - srcW) * 0.5f;
+                        float srcY = ((float)background.height - srcH) * 0.5f;
+                        DrawTexturePro(background,
+                                       Rectangle{srcX, srcY, srcW, srcH},
+                                       Rectangle{0.0f, 0.0f, (float)canvas.texture.width, (float)canvas.texture.height},
+                                       Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                    }
+
                     DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
 
                     // Zeichne bossAtk2 Angriffs-Vorschau
@@ -641,7 +674,19 @@ int main() {
 
                 else if (currentState == STATE_DEATH || currentState == STATE_PAUSE) {
                     // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
-                    DrawTexture(background, 0, 0, GRAY);
+                    // DrawTexture(background, 0, 0, GRAY);
+                    // Draw the background scaled/zoomed for Pause/Death view (keeps GRAY tint)
+                    {
+                        float srcW = (float)background.width / bgScaleGlobal;
+                        float srcH = (float)background.height / bgScaleGlobal;
+                        float srcX = ((float)background.width - srcW) * 0.5f;
+                        float srcY = ((float)background.height - srcH) * 0.5f;
+                        DrawTexturePro(background,
+                                       Rectangle{srcX, srcY, srcW, srcH},
+                                       Rectangle{0.0f, 0.0f, (float)canvas.texture.width, (float)canvas.texture.height},
+                                       Vector2{0.0f, 0.0f}, 0.0f, GRAY);
+                    }
+
                     player.DrawAnimation();
                     // Draw the boss that was active before pausing
                     switch (previousState) {
@@ -693,6 +738,9 @@ int main() {
 
                 // Save settings on exit
                 options.SaveSettings("settings.txt");
+
+                // Draw current background scale for quick tuning
+                DrawText(TextFormat("BG scale: %.2f (use [ and ] to tweak)", bgScaleGlobal), 10, 10, 14, LIGHTGRAY);
 
                 renderScale = std::min(GetScreenHeight() / (float) canvas.texture.height,
                                        // Calculates how big or small the canvas has to be rendered.

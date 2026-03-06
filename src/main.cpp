@@ -49,6 +49,15 @@ static void applyDifficulty(const Options &options, Player &player, GolemControl
     }
 }
 
+static std::string ScoreFileForDifficultyIndex(int idx) {
+    switch (idx) {
+        case 0: return "highscores_easy.csv";
+        case 1: return "highscores_normal.csv";
+        case 2: return "highscores_hard.csv";
+        default: return "highscores_normal.csv";
+    }
+}
+
 int main() {
     Cooldown attackCD(0.6f);
     Cooldown dashCD(2.0f);
@@ -92,8 +101,8 @@ int main() {
     NameInput nameInput;
     UpgradeScreen upgradeScreen;
 
-    const std::string SCORE_FILE = "highscores.csv";
-    board.Load(SCORE_FILE);
+    int runDifficultyIndex = options.GetDifficultyIndex();
+    board.Load(ScoreFileForDifficultyIndex(options.GetDifficultyIndex()));
     Player hp{}; // value-initialize to remove uninitialized warnings
 
     GolemController golem;
@@ -305,6 +314,7 @@ int main() {
             case STATE_MENU:
                 mainMenu.Update();
                 if (mainMenu.GetChoice() == 0) {
+                    runDifficultyIndex = options.GetDifficultyIndex();
                     hp.Init();
                     melee.Reset();
                     player.Reset();
@@ -335,6 +345,7 @@ int main() {
             case STATE_DEATH:
                 deathScreen.Update();
                 if (deathScreen.GetChoice() == 0) {
+                    runDifficultyIndex = options.GetDifficultyIndex();
                     hp.Init();
                     player.Reset();
                     melee.Reset();
@@ -361,8 +372,9 @@ int main() {
                 nameInput.Update();
                 if (IsKeyPressed(KEY_ENTER)) {
                     if (!nameInput.text.empty()) {
+                        const std::string file = ScoreFileForDifficultyIndex(runDifficultyIndex);
                         HighscoreEntry e{nameInput.text, runTimer.elapsedMs};
-                        board.AddAndPersist(SCORE_FILE, e, 10); //
+                        board.AddAndPersist(file, e, 10);
                         currentState = STATE_HIGHSCORES;
                     } else {
                     }
@@ -377,15 +389,26 @@ int main() {
                 }
                 break;
 
-            case STATE_HIGHSCORES:
+            {
+                case STATE_HIGHSCORES:
+                static int lastLoadedIdx = -1;
+                int viewIdx = options.GetDifficultyIndex();
+
+                if (viewIdx != lastLoadedIdx) {
+                    board.Load(ScoreFileForDifficultyIndex(viewIdx));
+                    lastLoadedIdx = viewIdx;
+                }
                 if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER)) {
                     currentState = STATE_MENU;
                 }
                 if (IsKeyPressed(KEY_L)) {
-                    board.Reset("scores.csv");
+                    const std::string file = ScoreFileForDifficultyIndex(options.GetDifficultyIndex());
+                    board.Reset(file);
+                    board.Load(file);
                 }
 
                 break;
+            }
             case STATE_UPGRADES:
                 runTimer.Stop();
                 upgradeScreen.Update();
@@ -631,6 +654,8 @@ int main() {
                     }
                 } else if (currentState == STATE_HIGHSCORES) {
                     ClearBackground(BLACK);
+                    std::string title = "HIGHSCORES - " + options.GetDifficultyName();
+                    DrawText(title.c_str(), 60, 20, 28, RAYWHITE);
                     board.Draw(60, 60);
                     DrawText("ENTER/ESC: Back", 60, 520, 22, GRAY);
                 } else if (currentState == STATE_UPGRADES) {

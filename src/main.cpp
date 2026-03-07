@@ -437,17 +437,19 @@ int main() {
                 runTimer.Stop();
                 upgradeScreen.Update();
                 if (upgradeScreen.GetChoice() == 0) {
+                    hp.Init();
+                    melee.Reset();
+                    player.Reset();
+                    applyDifficulty(options, hp, golem);
                     // Apply upgrade and reset entities so Boss2 run starts like Boss1
                     Upgrades.Upgrade1(hp,melee);
                     upgradeScreen.ResetChoice();
                     // Reset controllers and entities first (same order as Boss1 start)
-                    hp.Init();
-                    melee.Reset();
-                    player.Reset();
+
                     golem.Reset();
                     nightmare.Reset();
                     // Apply difficulty after base init so it can adjust HP/Stats correctly
-                    applyDifficulty(options, hp, golem);
+
                     // Ensure boss2 attack system initialized
                     bossAtk2.Init();
                     // Position player top-left for Boss2 (consistent spawn)
@@ -459,15 +461,17 @@ int main() {
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
-                    Upgrades.Upgrade2(hp,player);
-                    upgradeScreen.ResetChoice();
-                    // Reset for clean Boss2 run (same order as Boss1 start)
                     hp.Init();
                     melee.Reset();
                     player.Reset();
+                    applyDifficulty(options, hp, golem);
+                    Upgrades.Upgrade2(hp,player);
+                    upgradeScreen.ResetChoice();
+                    // Reset for clean Boss2 run (same order as Boss1 start)
+
                     golem.Reset();
                     nightmare.Reset();
-                    applyDifficulty(options, hp, golem);
+
                     bossAtk2.Init();
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
@@ -476,15 +480,17 @@ int main() {
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 2) {
-                    Upgrades.Upgrade3(melee,player);
-                    upgradeScreen.ResetChoice();
-                    // Reset for clean Boss2 run (same order as Boss1 start)
                     hp.Init();
                     melee.Reset();
                     player.Reset();
+                    applyDifficulty(options, hp, golem);
+                    Upgrades.Upgrade3(melee,player);
+                    upgradeScreen.ResetChoice();
+                    // Reset for clean Boss2 run (same order as Boss1 start)
+
                     golem.Reset();
                     nightmare.Reset();
-                    applyDifficulty(options, hp, golem);
+
                     bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };

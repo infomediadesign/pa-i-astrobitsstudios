@@ -67,6 +67,8 @@ int main() {
     // Project name, screen size, fullscreen mode etc. can be specified in the config.h file
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), Game::PROJECT_NAME);
+    // Hide the OS cursor so it doesn't show during gameplay
+    HideCursor();
     InitAudioDevice();
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);

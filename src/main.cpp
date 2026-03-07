@@ -60,7 +60,7 @@ static std::string ScoreFileForDifficultyIndex(int idx) {
 
 int main() {
     Cooldown attackCD(0.6f);
-    Cooldown dashCD(2.0f);
+    Cooldown dashCD(1.8f);
     // Jumpattack is now handled by the boss system; removed standalone cooldown
     //Cooldown jumpAttackCD(1.75f);
     // Raylib initialization

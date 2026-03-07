@@ -437,40 +437,59 @@ int main() {
                 runTimer.Stop();
                 upgradeScreen.Update();
                 if (upgradeScreen.GetChoice() == 0) {
-                    // Apply difficulty when returning from upgrade screen (new run)
-                    applyDifficulty(options, hp, golem);
+                    // Apply upgrade and reset entities so Boss2 run starts like Boss1
                     Upgrades.Upgrade1(hp,melee);
                     upgradeScreen.ResetChoice();
+                    // Reset controllers and entities first (same order as Boss1 start)
+                    hp.Init();
+                    melee.Reset();
+                    player.Reset();
                     golem.Reset();
-                    //bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
-                    // Position player top-left for Boss2
+                    nightmare.Reset();
+                    // Apply difficulty after base init so it can adjust HP/Stats correctly
+                    applyDifficulty(options, hp, golem);
+                    // Ensure boss2 attack system initialized
+                    bossAtk2.Init();
+                    // Position player top-left for Boss2 (consistent spawn)
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
+                    // start run timer
+                    runTimer.Start();
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 1) {
-                    applyDifficulty(options, hp, golem);
                     Upgrades.Upgrade2(hp,player);
                     upgradeScreen.ResetChoice();
+                    // Reset for clean Boss2 run (same order as Boss1 start)
+                    hp.Init();
+                    melee.Reset();
+                    player.Reset();
                     golem.Reset();
-                    // bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
-                    // Position player top-left for Boss2
+                    nightmare.Reset();
+                    applyDifficulty(options, hp, golem);
+                    bossAtk2.Init();
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
+                    runTimer.Start();
                     currentState = STATE_BOSS_2;
                 }
                 if (upgradeScreen.GetChoice() == 2) {
-                    applyDifficulty(options, hp, golem);
                     Upgrades.Upgrade3(melee,player);
                     upgradeScreen.ResetChoice();
+                    // Reset for clean Boss2 run (same order as Boss1 start)
+                    hp.Init();
+                    melee.Reset();
+                    player.Reset();
                     golem.Reset();
+                    nightmare.Reset();
+                    applyDifficulty(options, hp, golem);
                     bossAtk2.Init();                 // Boss2-Angriffssystem zurücksetzen
-                    // Position player top-left for Boss2
                     player.pos = {40.0f, 80.0f};
                     player.plcollision = { player.pos.x, player.pos.y, player.GetSize().width, player.GetSize().height };
                     hp.invincibleTimer = hp.invincibleDuration;
+                    runTimer.Start();
                     currentState = STATE_BOSS_2;
                 }
                 //currentState = STATE_BOSS_2;
@@ -682,13 +701,13 @@ int main() {
                     }
 
                     // Debug: draw hitboxes for melee and nightmare
-                    DrawRectangleRec(melee.hitBox, Fade(RED, 0.6f));
+                    // DrawRectangleRec(melee.hitBox, Fade(RED, 0.6f)); // disabled: remove red translucent rectangle shown during Boss2 attack
                     // DrawRectangleRec(nightmare.GetDmgBox(), Fade(BLUE, 0.6f)); // disabled: remove translucent blue rectangle over boss
-
+/*
                     DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
                     DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
                     DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
-
+*/
                     if (melee.active) {
                         melee.Draw();
                         DrawRectangleRec(melee.hitBox, WHITE);
@@ -706,7 +725,7 @@ int main() {
                     // Zeichne evtl. den Spieler/Boss noch (starr), damit es nicht leer aussieht
                     // DrawTexture(background, 0, 0, GRAY);
                     // Draw the background scaled/zoomed for Pause/Death view (keeps GRAY tint)
-                    // choose background based on which boss was active previously
+                    // choose background based on which boss was active before pausing
                     if (previousState == STATE_BOSS_2) {
                         // show boss2 background in COVER mode for pause/death preview (tinted GRAY)
                         float texW = (float)backgroundBoss2.width;

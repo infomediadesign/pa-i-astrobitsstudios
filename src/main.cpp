@@ -697,7 +697,7 @@ int main() {
 
                     if (melee.active) {
                         melee.Draw();
-                        DrawRectangleRec(melee.hitBox, WHITE);
+                       // DrawRectangleRec(melee.hitBox, WHITE);
                     }
 
                     // Debug: draw hitboxes for melee and nightmare
@@ -708,10 +708,7 @@ int main() {
                     DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
                     DrawText(TextFormat("Der Wert speed ist: %.2f", player.speed),600,200,10,RED);
 */
-                    if (melee.active) {
-                        melee.Draw();
-                        DrawRectangleRec(melee.hitBox, WHITE);
-                    }
+
 
                     hp.Draw(player.GetCollision());
                     DrawText(("Time: " + RunTimer::FormatMinSecMs(runTimer.elapsedMs)).c_str(),

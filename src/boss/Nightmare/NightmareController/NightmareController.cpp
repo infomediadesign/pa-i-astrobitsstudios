@@ -11,7 +11,7 @@ NightmareController::~NightmareController() = default;
 
 void NightmareController::Init() {
     // Stelle sicher, dass der richtige Dateiname geladen wird (kleinschreibung auf Windows ist tolerant, aber sauberer so)
-    texture = LoadTexture("assets/graphics/Boss/image.png");
+    texture = LoadTexture("assets/graphics/Boss/Boss2_Base_Sprite.png");
     Reset();
 }
 

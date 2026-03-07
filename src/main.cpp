@@ -559,17 +559,28 @@ int main() {
                     // Rectangle hb = golem.GetDmgBox(); // unused; keep available here if needed for debug
                     Vector2 bossPosForDraw = {br.x + br.width / 2.0f, br.y + br.height / 2.0f};
 
-                    // Draw the background scaled/zoomed: use a centered smaller source rect so the texture appears larger
-                    // Increase bgScale to zoom more (e.g. 1.25f..1.6f). This crops the texture centered.
+                    // Use the Boss2 background in COVER mode for Boss1 too (preserve aspect ratio, fill canvas and crop centered)
                     {
-                        float srcW = (float)background.width / bgScaleGlobal;
-                        float srcH = (float)background.height / bgScaleGlobal;
-                        float srcX = ((float)background.width - srcW) * 0.5f;
-                        float srcY = ((float)background.height - srcH) * 0.5f;
-                        DrawTexturePro(background,
-                                       Rectangle{srcX, srcY, srcW, srcH}, // centered cropped src
-                                       Rectangle{0.0f, 0.0f, (float)canvas.texture.width, (float)canvas.texture.height},  // dest full canvas
-                                       Vector2{0.0f, 0.0f}, 0.0f, WHITE);
+                        float texW = (float)backgroundBoss2.width;
+                        float texH = (float)backgroundBoss2.height;
+                        float cvsW = (float)canvas.texture.width;
+                        float cvsH = (float)canvas.texture.height;
+                        float texRatio = texW / texH;
+                        float cvsRatio = cvsW / cvsH;
+                        Rectangle srcRec;
+                        if (texRatio > cvsRatio) {
+                            float srcH = texH;
+                            float srcW = srcH * cvsRatio;
+                            float srcX = (texW - srcW) * 0.5f;
+                            srcRec = Rectangle{srcX, 0.0f, srcW, srcH};
+                        } else {
+                            float srcW = texW;
+                            float srcH = srcW / cvsRatio;
+                            float srcY = (texH - srcH) * 0.5f;
+                            srcRec = Rectangle{0.0f, srcY, srcW, srcH};
+                        }
+                        Rectangle destRec = Rectangle{0.0f, 0.0f, cvsW, cvsH};
+                        DrawTexturePro(backgroundBoss2, srcRec, destRec, Vector2{0.0f, 0.0f}, 0.0f, WHITE);
                     }
 
                     DrawRectangle(380, 30, 200, 45, Fade(BLACK, 0.6));
@@ -672,7 +683,7 @@ int main() {
 
                     // Debug: draw hitboxes for melee and nightmare
                     DrawRectangleRec(melee.hitBox, Fade(RED, 0.6f));
-                    DrawRectangleRec(nightmare.GetDmgBox(), Fade(BLUE, 0.6f));
+                    // DrawRectangleRec(nightmare.GetDmgBox(), Fade(BLUE, 0.6f)); // disabled: remove translucent blue rectangle over boss
 
                     DrawText(TextFormat("Der Wert dmg ist: %.2f", melee.damage),200,200,10,RED);
                     DrawText(TextFormat("Der Wert hp ist: %.2f", hp.maxHp),400,200,10,RED);
